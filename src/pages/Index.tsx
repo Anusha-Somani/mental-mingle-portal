@@ -6,7 +6,7 @@ const Index = () => {
     {
       title: "For Teens",
       description: "A safe space to express yourself and find support.",
-      path: "/chat",
+      path: "/resources", // Changed from /chat to /resources
       color: "bg-primary",
     },
     {
