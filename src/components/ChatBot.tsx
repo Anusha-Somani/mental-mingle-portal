@@ -1,28 +1,114 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Send } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const ChatBot = () => {
-  const [messages, setMessages] = useState<Array<{ text: string; isUser: boolean }>>([
-    { text: "Hi! I'm here to listen and help. How are you feeling today?", isUser: false },
-  ]);
+  const [messages, setMessages] = useState<Array<{ text: string; isUser: boolean }>>([]);
   const [input, setInput] = useState("");
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  useEffect(() => {
+    createConversation();
+  }, []);
 
-    setMessages([...messages, { text: input, isUser: true }]);
-    setInput("");
+  const createConversation = async () => {
+    const { data, error } = await supabase
+      .from("conversations")
+      .insert([{}])
+      .select()
+      .single();
 
-    // Simulate bot response
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create conversation",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setConversationId(data.id);
+    
+    // Add initial bot message
+    const { error: messageError } = await supabase
+      .from("chat_messages")
+      .insert([
         {
-          text: "Thank you for sharing. I'm here to support you. Would you like to tell me more about what's on your mind?",
+          message: "Hi! I'm here to listen and help. How are you feeling today?",
+          is_bot: true,
+          conversation_id: data.id,
+        },
+      ]);
+
+    if (!messageError) {
+      setMessages([
+        {
+          text: "Hi! I'm here to listen and help. How are you feeling today?",
           isUser: false,
         },
       ]);
-    }, 1000);
+    }
+  };
+
+  const handleSend = async () => {
+    if (!input.trim() || !conversationId) return;
+
+    // Add user message to UI
+    setMessages((prev) => [...prev, { text: input, isUser: true }]);
+    
+    // Store user message in database
+    const { error: userMessageError } = await supabase
+      .from("chat_messages")
+      .insert([
+        {
+          message: input,
+          is_bot: false,
+          conversation_id: conversationId,
+        },
+      ]);
+
+    if (userMessageError) {
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setInput("");
+
+    try {
+      // Get AI response
+      const response = await fetch("/functions/v1/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          message: input,
+          conversationId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Add bot response to UI
+      setMessages((prev) => [...prev, { text: data.message, isUser: false }]);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to get AI response",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
