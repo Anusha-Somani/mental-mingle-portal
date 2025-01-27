@@ -10,13 +10,25 @@ const ChatBot = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    createConversation();
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = '/auth';
+        return;
+      }
+      createConversation(session.user.id);
+    };
+    
+    checkSession();
   }, []);
 
-  const createConversation = async () => {
+  const createConversation = async (userId: string) => {
     const { data, error } = await supabase
       .from("conversations")
-      .insert([{}])
+      .insert([{
+        user_id: userId,
+        title: "New Conversation"
+      }])
       .select()
       .single();
 
@@ -39,6 +51,7 @@ const ChatBot = () => {
           message: "Hi! I'm here to listen and help. How are you feeling today?",
           is_bot: true,
           conversation_id: data.id,
+          user_id: userId
         },
       ]);
 
@@ -55,6 +68,12 @@ const ChatBot = () => {
   const handleSend = async () => {
     if (!input.trim() || !conversationId) return;
 
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = '/auth';
+      return;
+    }
+
     // Add user message to UI
     setMessages((prev) => [...prev, { text: input, isUser: true }]);
     
@@ -66,6 +85,7 @@ const ChatBot = () => {
           message: input,
           is_bot: false,
           conversation_id: conversationId,
+          user_id: session.user.id
         },
       ]);
 
