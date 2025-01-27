@@ -11,69 +11,53 @@ const ChatBot = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        window.location.href = '/auth';
+    const createInitialConversation = async () => {
+      // Create a new conversation without requiring auth for now
+      const { data, error } = await supabase
+        .from("conversations")
+        .insert([{
+          title: "New Conversation"
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to create conversation",
+          variant: "destructive",
+        });
         return;
       }
-      createConversation(session.user.id);
+
+      setConversationId(data.id);
+      
+      // Add initial bot message
+      const { error: messageError } = await supabase
+        .from("chat_messages")
+        .insert([
+          {
+            message: "Hi! I'm here to listen and help. How are you feeling today?",
+            is_bot: true,
+            conversation_id: data.id
+          },
+        ]);
+
+      if (!messageError) {
+        setMessages([
+          {
+            text: "Hi! I'm here to listen and help. How are you feeling today?",
+            isUser: false,
+          },
+        ]);
+      }
     };
     
-    checkSession();
-  }, []);
-
-  const createConversation = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("conversations")
-      .insert([{
-        user_id: userId,
-        title: "New Conversation"
-      }])
-      .select()
-      .single();
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create conversation",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setConversationId(data.id);
-    
-    // Add initial bot message
-    const { error: messageError } = await supabase
-      .from("chat_messages")
-      .insert([
-        {
-          message: "Hi! I'm here to listen and help. How are you feeling today?",
-          is_bot: true,
-          conversation_id: data.id,
-          user_id: userId
-        },
-      ]);
-
-    if (!messageError) {
-      setMessages([
-        {
-          text: "Hi! I'm here to listen and help. How are you feeling today?",
-          isUser: false,
-        },
-      ]);
-    }
-  };
+    createInitialConversation();
+  }, [toast]);
 
   const handleSend = async () => {
     if (!input.trim() || !conversationId) return;
-
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      window.location.href = '/auth';
-      return;
-    }
 
     // Add user message to UI
     setMessages((prev) => [...prev, { text: input, isUser: true }]);
@@ -86,7 +70,6 @@ const ChatBot = () => {
           message: input,
           is_bot: false,
           conversation_id: conversationId,
-          user_id: session.user.id
         },
       ]);
 
@@ -107,7 +90,6 @@ const ChatBot = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({
           message: input,

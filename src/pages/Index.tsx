@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Heart, Smile, Flower2, Brain } from "lucide-react";
+import { Heart, Smile, Brain } from "lucide-react";
 import Wave from "@/components/Wave";
 
 const Index = () => {
@@ -9,7 +9,7 @@ const Index = () => {
     {
       title: "For Teens",
       description: "A safe space to express yourself and find support when you need it most.",
-      path: "/resources",
+      path: "/chat",
       icon: <Smile className="w-8 h-8 text-primary" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
@@ -17,7 +17,7 @@ const Index = () => {
     {
       title: "For Parents",
       description: "Guidance and resources to better support your teen's mental health journey.",
-      path: "/resources",
+      path: "/chat",
       icon: <Heart className="w-8 h-8 text-secondary" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
@@ -25,7 +25,7 @@ const Index = () => {
     {
       title: "For Educators",
       description: "Tools and insights to create supportive learning environments.",
-      path: "/resources",
+      path: "/chat",
       icon: <Brain className="w-8 h-8 text-accent" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
@@ -73,9 +73,6 @@ const Index = () => {
 
           {/* Call to Action */}
           <div className="max-w-3xl mx-auto bg-white/90 backdrop-blur-sm rounded-2xl p-10 shadow-lg">
-            <div className="flex items-center justify-center mb-6">
-              <Flower2 className="w-12 h-12 text-primary" />
-            </div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-4">
               Start Your Wellness Journey Today
             </h3>
@@ -87,7 +84,7 @@ const Index = () => {
               size="lg"
               className="bg-primary hover:bg-primary/90 text-white font-medium rounded-xl"
             >
-              <Link to="/resources">Get Started</Link>
+              <Link to="/chat">Get Started</Link>
             </Button>
           </div>
         </div>
