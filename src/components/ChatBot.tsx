@@ -85,27 +85,22 @@ const ChatBot = () => {
     setInput("");
 
     try {
-      // Get AI response
-      const response = await fetch("/functions/v1/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      // Get AI response using Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('chat', {
+        body: {
           message: input,
           conversationId,
-        }),
+        },
       });
 
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error);
+      if (error) {
+        throw error;
       }
 
       // Add bot response to UI
       setMessages((prev) => [...prev, { text: data.message, isUser: false }]);
     } catch (error) {
+      console.error('Error getting AI response:', error);
       toast({
         title: "Error",
         description: "Failed to get AI response",
