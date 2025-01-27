@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import ChatMessages from "./chat/ChatMessages";
+import ChatInput from "./chat/ChatInput";
 
 const ChatBot = () => {
   const [messages, setMessages] = useState<Array<{ text: string; isUser: boolean }>>([]);
@@ -133,44 +134,8 @@ const ChatBot = () => {
 
   return (
     <div className="flex flex-col h-[600px] bg-white rounded-lg shadow-lg">
-      <div className="flex-1 p-4 overflow-y-auto">
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`mb-4 ${
-              message.isUser ? "flex justify-end" : "flex justify-start"
-            }`}
-          >
-            <div
-              className={`max-w-[80%] p-3 rounded-lg ${
-                message.isUser
-                  ? "bg-primary text-white"
-                  : "bg-secondary text-secondary-foreground"
-              }`}
-            >
-              {message.text}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="border-t p-4">
-        <div className="flex space-x-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Type your message..."
-            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-          <button
-            onClick={handleSend}
-            className="bg-primary text-white p-2 rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            <Send size={20} />
-          </button>
-        </div>
-      </div>
+      <ChatMessages messages={messages} />
+      <ChatInput input={input} setInput={setInput} handleSend={handleSend} />
     </div>
   );
 };
