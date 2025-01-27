@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Heart, Smile, Flower2, Brain } from "lucide-react";
+import Wave from "@/components/Wave";
 
 const Index = () => {
   const features = [
@@ -10,33 +11,34 @@ const Index = () => {
       description: "A safe space to express yourself and find support when you need it most.",
       path: "/resources",
       icon: <Smile className="w-8 h-8 text-primary" />,
-      color: "bg-primary/10",
-      hoverColor: "hover:bg-primary/20",
+      color: "bg-white/80",
+      hoverColor: "hover:bg-white",
     },
     {
       title: "For Parents",
       description: "Guidance and resources to better support your teen's mental health journey.",
       path: "/resources",
       icon: <Heart className="w-8 h-8 text-secondary" />,
-      color: "bg-secondary/10",
-      hoverColor: "hover:bg-secondary/20",
+      color: "bg-white/80",
+      hoverColor: "hover:bg-white",
     },
     {
       title: "For Educators",
       description: "Tools and insights to create supportive learning environments.",
       path: "/resources",
       icon: <Brain className="w-8 h-8 text-accent" />,
-      color: "bg-accent/10",
-      hoverColor: "hover:bg-accent/20",
+      color: "bg-white/80",
+      hoverColor: "hover:bg-white",
     },
   ];
 
   return (
-    <div className="min-h-screen font-poppins bg-gradient-to-b from-white to-primary/5">
+    <div className="min-h-screen font-poppins relative">
+      <Wave />
       <Navigation />
       
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="pt-20 pb-16 text-center lg:pt-32">
           <div className="animate-fade-in">
             <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 mb-6 leading-tight">
@@ -56,7 +58,7 @@ const Index = () => {
                 to={feature.path}
                 className={`group transform transition-all duration-300 hover:-translate-y-1`}
               >
-                <div className={`rounded-2xl p-8 h-full ${feature.color} ${feature.hoverColor} transition-colors duration-300`}>
+                <div className={`rounded-2xl p-8 h-full backdrop-blur-sm ${feature.color} ${feature.hoverColor} transition-colors duration-300 shadow-lg`}>
                   <div className="mb-6">{feature.icon}</div>
                   <h2 className="text-2xl font-semibold text-gray-900 mb-4">
                     {feature.title}
@@ -70,7 +72,7 @@ const Index = () => {
           </div>
 
           {/* Call to Action */}
-          <div className="max-w-3xl mx-auto bg-white rounded-2xl p-10 shadow-lg border border-gray-100">
+          <div className="max-w-3xl mx-auto bg-white/90 backdrop-blur-sm rounded-2xl p-10 shadow-lg">
             <div className="flex items-center justify-center mb-6">
               <Flower2 className="w-12 h-12 text-primary" />
             </div>
