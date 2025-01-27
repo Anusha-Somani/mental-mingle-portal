@@ -1,78 +1,89 @@
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
+import { Heart, Smile, Flower2, Brain } from "lucide-react";
 
 const Index = () => {
-  const sections = [
+  const features = [
     {
       title: "For Teens",
-      description: "A safe space to express yourself and find support.",
+      description: "A safe space to express yourself and find support when you need it most.",
       path: "/resources",
-      color: "bg-primary",
-      icon: "👋",
+      icon: <Smile className="w-8 h-8 text-primary" />,
+      color: "bg-primary/10",
+      hoverColor: "hover:bg-primary/20",
     },
     {
       title: "For Parents",
-      description: "Guidance on supporting your teen's mental health journey.",
+      description: "Guidance and resources to better support your teen's mental health journey.",
       path: "/resources",
-      color: "bg-secondary",
-      icon: "💝",
+      icon: <Heart className="w-8 h-8 text-secondary" />,
+      color: "bg-secondary/10",
+      hoverColor: "hover:bg-secondary/20",
     },
     {
       title: "For Educators",
-      description: "Resources to help create supportive learning environments.",
+      description: "Tools and insights to create supportive learning environments.",
       path: "/resources",
-      color: "bg-accent",
-      icon: "📚",
+      icon: <Brain className="w-8 h-8 text-accent" />,
+      color: "bg-accent/10",
+      hoverColor: "hover:bg-accent/20",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F8F9FA] to-[#E9ECEF] font-poppins">
+    <div className="min-h-screen font-poppins bg-gradient-to-b from-white to-primary/5">
       <Navigation />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-16 animate-fade-in">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-            Welcome to <span className="text-primary">MindBridge</span>
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Your safe space for mental wellness. Connecting teens, parents, and educators 
-            through understanding and support.
-          </p>
-        </div>
+      
+      {/* Hero Section */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="pt-20 pb-16 text-center lg:pt-32">
+          <div className="animate-fade-in">
+            <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Your Journey to
+              <span className="text-primary block mt-2">Mental Wellbeing</span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed mb-12">
+              A supportive community connecting teens, parents, and educators through understanding and growth.
+            </p>
+          </div>
 
-        <div className="grid md:grid-cols-3 gap-8 animate-fade-in">
-          {sections.map((section) => (
-            <Link
-              key={section.title}
-              to={section.path}
-              className="group transform transition-all duration-300 hover:-translate-y-2"
-            >
-              <div className={`${section.color} rounded-2xl p-8 h-full shadow-lg hover:shadow-xl transition-shadow`}>
-                <div className="text-4xl mb-4">{section.icon}</div>
-                <h2 className="text-2xl font-semibold text-white mb-4">
-                  {section.title}
-                </h2>
-                <p className="text-white/90 leading-relaxed">
-                  {section.description}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
+          {/* Feature Cards */}
+          <div className="grid md:grid-cols-3 gap-8 mb-20">
+            {features.map((feature) => (
+              <Link
+                key={feature.title}
+                to={feature.path}
+                className={`group transform transition-all duration-300 hover:-translate-y-1`}
+              >
+                <div className={`rounded-2xl p-8 h-full ${feature.color} ${feature.hoverColor} transition-colors duration-300`}>
+                  <div className="mb-6">{feature.icon}</div>
+                  <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                    {feature.title}
+                  </h2>
+                  <p className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
 
-        <div className="mt-16 text-center">
-          <div className="max-w-2xl mx-auto bg-white rounded-2xl p-8 shadow-lg">
+          {/* Call to Action */}
+          <div className="max-w-3xl mx-auto bg-white rounded-2xl p-10 shadow-lg border border-gray-100">
+            <div className="flex items-center justify-center mb-6">
+              <Flower2 className="w-12 h-12 text-primary" />
+            </div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-              Start Your Journey Today
+              Start Your Wellness Journey Today
             </h3>
-            <p className="text-gray-600 mb-6">
-              Join our community of support and understanding. Together, we can build 
-              better mental health awareness and support systems.
+            <p className="text-gray-600 mb-8 max-w-xl mx-auto">
+              Join our supportive community and discover tools and resources designed to help you thrive.
             </p>
             <Button
               asChild
-              className="bg-primary hover:bg-primary/90 text-white px-8 py-6 text-lg rounded-xl"
+              size="lg"
+              className="bg-primary hover:bg-primary/90 text-white font-medium rounded-xl"
             >
               <Link to="/resources">Get Started</Link>
             </Button>
