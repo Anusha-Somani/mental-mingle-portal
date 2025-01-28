@@ -1,14 +1,44 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Menu, X, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
-  const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Chat Support", path: "/chat" },
-  ];
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
+
+  const navItems = isAuthenticated
+    ? [
+        { name: "Dashboard", path: "/dashboard" },
+        { name: "Chat Support", path: "/chat" },
+        { name: "Resources", path: "/resources" },
+      ]
+    : [
+        { name: "Home", path: "/" },
+        { name: "Login", path: "/auth" },
+      ];
 
   return (
     <nav className="bg-white/80 backdrop-blur-md shadow-sm font-poppins sticky top-0 z-50">
@@ -22,7 +52,6 @@ const Navigation = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
               <Link
@@ -33,9 +62,18 @@ const Navigation = () => {
                 {item.name}
               </Link>
             ))}
+            {isAuthenticated && (
+              <Button
+                variant="ghost"
+                className="text-gray-600 hover:text-primary"
+                onClick={handleLogout}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            )}
           </div>
 
-          {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -47,7 +85,6 @@ const Navigation = () => {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
       {isOpen && (
         <div className="md:hidden animate-fade-in bg-white border-t border-gray-100">
           <div className="px-2 pt-2 pb-3 space-y-1">
@@ -61,6 +98,19 @@ const Navigation = () => {
                 {item.name}
               </Link>
             ))}
+            {isAuthenticated && (
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-gray-600 hover:text-primary"
+                onClick={() => {
+                  handleLogout();
+                  setIsOpen(false);
+                }}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            )}
           </div>
         </div>
       )}

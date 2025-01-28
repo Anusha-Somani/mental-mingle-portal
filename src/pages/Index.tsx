@@ -9,7 +9,7 @@ const Index = () => {
     {
       title: "For Teens",
       description: "A safe space to express yourself and find support when you need it most.",
-      path: "/chat",
+      path: "/auth",
       icon: <Smile className="w-8 h-8 text-primary" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
@@ -17,7 +17,7 @@ const Index = () => {
     {
       title: "For Parents",
       description: "Guidance and resources to better support your teen's mental health journey.",
-      path: "/chat",
+      path: "/auth",
       icon: <Heart className="w-8 h-8 text-secondary" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
@@ -25,7 +25,7 @@ const Index = () => {
     {
       title: "For Educators",
       description: "Tools and insights to create supportive learning environments.",
-      path: "/chat",
+      path: "/auth",
       icon: <Brain className="w-8 h-8 text-accent" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
@@ -37,7 +37,6 @@ const Index = () => {
       <Wave />
       <Navigation />
       
-      {/* Hero Section */}
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="pt-20 pb-16 text-center lg:pt-32">
           <div className="animate-fade-in">
@@ -50,7 +49,6 @@ const Index = () => {
             </p>
           </div>
 
-          {/* Feature Cards */}
           <div className="grid md:grid-cols-3 gap-8 mb-20">
             {features.map((feature) => (
               <Link
@@ -71,7 +69,6 @@ const Index = () => {
             ))}
           </div>
 
-          {/* Call to Action */}
           <div className="max-w-3xl mx-auto bg-white/90 backdrop-blur-sm rounded-2xl p-10 shadow-lg">
             <h3 className="text-2xl font-semibold text-gray-900 mb-4">
               Start Your Wellness Journey Today
@@ -84,7 +81,7 @@ const Index = () => {
               size="lg"
               className="bg-primary hover:bg-primary/90 text-white font-medium rounded-xl"
             >
-              <Link to="/chat">Get Started</Link>
+              <Link to="/auth">Get Started</Link>
             </Button>
           </div>
         </div>

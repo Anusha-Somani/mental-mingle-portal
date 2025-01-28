@@ -87,6 +87,27 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          updated_at?: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -95,7 +116,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_type: "teen" | "parent" | "educator"
     }
     CompositeTypes: {
       [_ in never]: never
