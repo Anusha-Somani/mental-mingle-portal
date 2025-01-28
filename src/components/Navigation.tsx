@@ -33,7 +33,6 @@ const Navigation = () => {
     ? [
         { name: "Dashboard", path: "/dashboard" },
         { name: "Chat Support", path: "/chat" },
-        { name: "Resources", path: "/resources" },
       ]
     : [
         { name: "Home", path: "/" },
