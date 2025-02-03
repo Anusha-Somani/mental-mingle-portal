@@ -70,19 +70,23 @@ const Dashboard = () => {
       if (!selectedMood) throw new Error("Please select a mood");
       
       const startDate = format(selectedDate, 'yyyy-MM-dd');
-      const { data: existingEntry } = await supabase
+      const endDate = format(new Date(selectedDate).setDate(new Date(selectedDate).getDate() + 1), 'yyyy-MM-dd');
+      
+      const { data: existingEntry, error: checkError } = await supabase
         .from('mood_entries')
         .select('id')
         .eq('user_id', userId)
         .gte('created_at', startDate)
-        .lt('created_at', format(new Date(startDate).setDate(new Date(startDate).getDate() + 1), 'yyyy-MM-dd'))
-        .single();
+        .lt('created_at', endDate)
+        .maybeSingle();
 
+      if (checkError) throw checkError;
+      
       if (existingEntry) {
         throw new Error("You've already logged your mood for this date");
       }
 
-      const { error } = await supabase
+      const { error: insertError } = await supabase
         .from('mood_entries')
         .insert([
           {
@@ -94,7 +98,7 @@ const Dashboard = () => {
           }
         ]);
       
-      if (error) throw error;
+      if (insertError) throw insertError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['moodEntries'] });
