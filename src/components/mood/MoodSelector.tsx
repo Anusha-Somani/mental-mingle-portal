@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Smile, Heart, Meh, Frown, Angry } from "lucide-react";
+import { cn } from "@/lib/utils"; // Add this import
 
 interface MoodOption {
   emoji: React.ReactNode;
