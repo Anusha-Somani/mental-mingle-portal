@@ -32,8 +32,9 @@ const Dashboard = () => {
   const [mood, setMood] = useState(50);
   const [journalEntry, setJournalEntry] = useState("");
   const [userType, setUserType] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Fetch user profile
+  // Fetch user profile and set user ID
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -41,6 +42,8 @@ const Dashboard = () => {
         navigate("/auth");
         return;
       }
+
+      setUserId(session.user.id);
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -87,10 +90,13 @@ const Dashboard = () => {
   // Save mood entry mutation
   const saveMoodMutation = useMutation({
     mutationFn: async () => {
+      if (!userId) throw new Error("User not authenticated");
+      
       const { error } = await supabase
         .from('mood_entries')
         .insert([
           {
+            user_id: userId,
             mood_score: mood,
             emoji_type: getMoodType(),
             journal_entry: journalEntry,
