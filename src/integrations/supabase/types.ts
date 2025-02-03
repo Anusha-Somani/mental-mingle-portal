@@ -9,6 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          achieved_at: string
+          achievement_type: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achieved_at?: string
+          achievement_type: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achieved_at?: string
+          achievement_type?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           conversation_id: string | null
@@ -84,6 +105,39 @@ export type Database = {
           id?: string
           title?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      mood_entries: {
+        Row: {
+          color_theme: string | null
+          created_at: string
+          emoji_type: string
+          id: string
+          journal_entry: string | null
+          mood_score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color_theme?: string | null
+          created_at?: string
+          emoji_type: string
+          id?: string
+          journal_entry?: string | null
+          mood_score: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color_theme?: string | null
+          created_at?: string
+          emoji_type?: string
+          id?: string
+          journal_entry?: string | null
+          mood_score?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
