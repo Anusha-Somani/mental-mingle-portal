@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Heart, Brain, Smile, ArrowRight } from "lucide-react";
@@ -10,7 +9,7 @@ const Index = () => {
       title: "Daily Check-in",
       description: "Track your mood and emotions with our intuitive daily check-in system.",
       path: "/auth",
-      icon: <Smile className="w-8 h-8 text-[#F97316]" />,
+      icon: <Smile className="w-8 h-8 text-success" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
     },
@@ -18,7 +17,7 @@ const Index = () => {
       title: "Guided Activities",
       description: "Access personalized activities to help manage anxiety and stress.",
       path: "/auth",
-      icon: <Heart className="w-8 h-8 text-[#D946EF]" />,
+      icon: <Heart className="w-8 h-8 text-secondary" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
     },
@@ -26,14 +25,14 @@ const Index = () => {
       title: "Mental Wellness",
       description: "Learn techniques for better mental health and emotional balance.",
       path: "/auth",
-      icon: <Brain className="w-8 h-8 text-[#8B5CF6]" />,
+      icon: <Brain className="w-8 h-8 text-accent" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
     },
   ];
 
   return (
-    <div className="min-h-screen font-poppins relative bg-gradient-to-b from-[#F2FCE2] to-[#FEF7CD] overflow-hidden">
+    <div className="min-h-screen font-poppins relative bg-gradient-to-b from-muted to-highlight/20 overflow-hidden">
       <Wave />
       <Navigation />
       
@@ -86,7 +85,7 @@ const Index = () => {
             <Button
               asChild
               size="lg"
-              className="bg-[#D946EF] hover:bg-[#D946EF]/90 text-white font-medium rounded-xl group relative overflow-hidden"
+              className="bg-primary hover:bg-primary/90 text-white font-medium rounded-xl group relative overflow-hidden"
             >
               <Link to="/auth" className="flex items-center gap-2">
                 Get Started

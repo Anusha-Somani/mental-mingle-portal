@@ -46,7 +46,7 @@ const Navigation = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center group">
               <span className="text-primary text-2xl font-bold group-hover:text-primary/90 transition-colors">
-                MindBridge
+                Mevincible
               </span>
             </Link>
           </div>
