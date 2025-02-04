@@ -10,6 +10,7 @@ import MoodEntryCard from "@/components/dashboard/MoodEntryCard";
 import AchievementCard from "@/components/dashboard/AchievementCard";
 import QuoteCard from "@/components/dashboard/QuoteCard";
 import DateDisplay from "@/components/dashboard/DateDisplay";
+import Wave from "@/components/Wave";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -138,16 +139,12 @@ const Dashboard = () => {
   ) || isAfter(selectedDate, today);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1A1F2C] via-[#221F26] to-[#2A1F2C] relative overflow-hidden">
-      {/* Animated background waves */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute bottom-0 left-0 right-0 h-[400px] bg-primary/20 transform animate-wave1" />
-          <div className="absolute bottom-0 left-0 right-0 h-[350px] bg-primary/15 transform animate-wave2" />
-          <div className="absolute bottom-0 left-0 right-0 h-[300px] bg-primary/10 transform animate-wave3" />
-          <div className="absolute bottom-0 left-0 right-0 h-[250px] bg-primary/5 transform animate-wave4" />
-        </div>
-      </div>
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 animate-gradient z-0" />
+      
+      {/* Animated waves */}
+      <Wave />
 
       <Navigation />
       

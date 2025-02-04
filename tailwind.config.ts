@@ -74,6 +74,14 @@ export default {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
         },
+        "gradient": {
+          "0%, 100%": {
+            "background-position": "0% 50%",
+          },
+          "50%": {
+            "background-position": "100% 50%",
+          },
+        },
         wave1: {
           "0%": { transform: "translateX(0)" },
           "50%": { transform: "translateX(-25%)" },
@@ -99,6 +107,7 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.5s ease-out",
+        "gradient": "gradient 15s ease infinite",
         "wave1": "wave1 15s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite",
         "wave2": "wave2 20s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite",
         "wave3": "wave3 25s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite",
