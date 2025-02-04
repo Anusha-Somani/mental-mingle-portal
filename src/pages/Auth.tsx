@@ -23,6 +23,9 @@ const Auth = () => {
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: window.location.origin,
+          },
         });
         if (error) throw error;
         toast({
@@ -34,7 +37,12 @@ const Auth = () => {
           email,
           password,
         });
-        if (error) throw error;
+        if (error) {
+          if (error.message === "Invalid login credentials") {
+            throw new Error("Invalid email or password. Please try again.");
+          }
+          throw error;
+        }
         navigate("/dashboard");
       }
     } catch (error: any) {
@@ -49,11 +57,11 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen relative bg-gray-50">
+    <div className="min-h-screen relative bg-gradient-to-br from-secondary/20 to-primary/20">
       <Wave />
       <div className="relative z-10 flex items-center justify-center min-h-screen">
-        <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg">
-          <h2 className="text-3xl font-bold text-center mb-8">
+        <div className="w-full max-w-md p-8 bg-secondary/30 backdrop-blur-md rounded-2xl shadow-lg border border-secondary/20">
+          <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
             {isSignUp ? "Create Account" : "Welcome Back"}
           </h2>
           <form onSubmit={handleAuth} className="space-y-4">
@@ -62,6 +70,7 @@ const Auth = () => {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="bg-white/50 border-secondary/30 text-gray-800 placeholder:text-gray-600"
               required
             />
             <Input
@@ -69,11 +78,12 @@ const Auth = () => {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="bg-white/50 border-secondary/30 text-gray-800 placeholder:text-gray-600"
               required
             />
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-primary hover:bg-primary/90 text-white"
               disabled={isLoading}
             >
               {isLoading
