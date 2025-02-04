@@ -10,7 +10,8 @@ import MoodEntryCard from "@/components/dashboard/MoodEntryCard";
 import QuoteCard from "@/components/dashboard/QuoteCard";
 import DateDisplay from "@/components/dashboard/DateDisplay";
 import Wave from "@/components/Wave";
-import { Brain } from "lucide-react";
+import { Brain, MessageCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -160,9 +161,33 @@ const Dashboard = () => {
             />
           </motion.div>
           
-          {/* Quote Card - Now positioned below mood meter */}
           <QuoteCard />
         </div>
+
+        {/* Chat Support Button */}
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ 
+            type: "spring",
+            stiffness: 260,
+            damping: 20,
+            delay: 1 
+          }}
+          className="fixed bottom-8 right-8 z-50"
+        >
+          <div className="relative group">
+            <div className="absolute -top-16 right-0 w-48 p-2 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <p className="text-sm text-gray-600">Need someone to talk to? Our AI chat is here to support you 💙</p>
+            </div>
+            <Button
+              onClick={() => navigate("/chat")}
+              className="h-16 w-16 rounded-full bg-primary hover:bg-primary/90 shadow-lg group-hover:scale-110 transition-transform duration-200"
+            >
+              <MessageCircle className="h-8 w-8 text-white" />
+            </Button>
+          </div>
+        </motion.div>
       </motion.main>
     </div>
   );
