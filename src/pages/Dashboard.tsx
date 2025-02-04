@@ -124,6 +124,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#F2FCE2]">
       <Navigation />
+      <Wave />
       
       <motion.main
         initial={{ opacity: 0 }}
