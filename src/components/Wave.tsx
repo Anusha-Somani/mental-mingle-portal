@@ -19,28 +19,28 @@ const Wave = () => {
             xlinkHref="#wave"
             x="48"
             y="0"
-            fill="rgba(42, 157, 143, 0.1)"
+            fill="rgba(124, 197, 251, 0.1)"
             className="animate-wave1"
           />
           <use
             xlinkHref="#wave"
             x="48"
             y="3"
-            fill="rgba(42, 157, 143, 0.07)"
+            fill="rgba(124, 197, 251, 0.07)"
             className="animate-wave2"
           />
           <use
             xlinkHref="#wave"
             x="48"
             y="5"
-            fill="rgba(42, 157, 143, 0.05)"
+            fill="rgba(124, 197, 251, 0.05)"
             className="animate-wave3"
           />
           <use
             xlinkHref="#wave"
             x="48"
             y="7"
-            fill="rgba(42, 157, 143, 0.03)"
+            fill="rgba(124, 197, 251, 0.03)"
             className="animate-wave4"
           />
         </g>

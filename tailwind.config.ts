@@ -28,15 +28,15 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#2A9D8F", // Sea green
+          DEFAULT: "#7CC5FB", // Light blue like in the image
           foreground: "#FFFFFF",
         },
         secondary: {
-          DEFAULT: "#F4A261", // Warm yellow/orange
+          DEFAULT: "#FF8AAE", // Soft pink from the image
           foreground: "#1A1A1A",
         },
         accent: {
-          DEFAULT: "#E9C46A", // Soft yellow
+          DEFAULT: "#FFD93D", // Warm yellow for accents
           foreground: "#1A1A1A",
         },
         destructive: {
@@ -74,44 +74,11 @@ export default {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
         },
-        "gradient": {
-          "0%, 100%": {
-            "background-position": "0% 50%",
-          },
-          "50%": {
-            "background-position": "100% 50%",
-          },
-        },
-        wave1: {
-          "0%": { transform: "translateX(0)" },
-          "50%": { transform: "translateX(-25%)" },
-          "100%": { transform: "translateX(-50%)" },
-        },
-        wave2: {
-          "0%": { transform: "translateX(0)" },
-          "50%": { transform: "translateX(-20%)" },
-          "100%": { transform: "translateX(-40%)" },
-        },
-        wave3: {
-          "0%": { transform: "translateX(0)" },
-          "50%": { transform: "translateX(-15%)" },
-          "100%": { transform: "translateX(-30%)" },
-        },
-        wave4: {
-          "0%": { transform: "translateX(0)" },
-          "50%": { transform: "translateX(-10%)" },
-          "100%": { transform: "translateX(-20%)" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.5s ease-out",
-        "gradient": "gradient 15s ease infinite",
-        "wave1": "wave1 15s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite",
-        "wave2": "wave2 20s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite",
-        "wave3": "wave3 25s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite",
-        "wave4": "wave4 30s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite",
       },
     },
   },

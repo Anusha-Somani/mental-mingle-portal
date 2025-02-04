@@ -1,30 +1,30 @@
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Heart, Smile, Brain } from "lucide-react";
+import { Heart, Brain, Smile, ArrowRight } from "lucide-react";
 import Wave from "@/components/Wave";
 
 const Index = () => {
   const features = [
     {
-      title: "For Teens",
-      description: "A safe space to express yourself and find support when you need it most.",
+      title: "Daily Check-in",
+      description: "Track your mood and emotions with our intuitive daily check-in system.",
       path: "/auth",
       icon: <Smile className="w-8 h-8 text-primary" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
     },
     {
-      title: "For Parents",
-      description: "Guidance and resources to better support your teen's mental health journey.",
+      title: "Guided Activities",
+      description: "Access personalized activities to help manage anxiety and stress.",
       path: "/auth",
       icon: <Heart className="w-8 h-8 text-secondary" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
     },
     {
-      title: "For Educators",
-      description: "Tools and insights to create supportive learning environments.",
+      title: "Mental Wellness",
+      description: "Learn techniques for better mental health and emotional balance.",
       path: "/auth",
       icon: <Brain className="w-8 h-8 text-accent" />,
       color: "bg-white/80",
@@ -33,7 +33,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen font-poppins relative">
+    <div className="min-h-screen font-poppins relative bg-gradient-to-b from-[#7CC5FB]/20 to-white">
       <Wave />
       <Navigation />
       
@@ -45,7 +45,7 @@ const Index = () => {
               <span className="text-primary block mt-2">Mental Wellbeing</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed mb-12">
-              A supportive community connecting teens, parents, and educators through understanding and growth.
+              Take control of your mental health journey with daily check-ins, guided activities, and personalized support.
             </p>
           </div>
 
@@ -54,7 +54,7 @@ const Index = () => {
               <Link
                 key={feature.title}
                 to={feature.path}
-                className={`group transform transition-all duration-300 hover:-translate-y-1`}
+                className="group transform transition-all duration-300 hover:-translate-y-1"
               >
                 <div className={`rounded-2xl p-8 h-full backdrop-blur-sm ${feature.color} ${feature.hoverColor} transition-colors duration-300 shadow-lg`}>
                   <div className="mb-6">{feature.icon}</div>
@@ -79,9 +79,12 @@ const Index = () => {
             <Button
               asChild
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-white font-medium rounded-xl"
+              className="bg-primary hover:bg-primary/90 text-white font-medium rounded-xl group"
             >
-              <Link to="/auth">Get Started</Link>
+              <Link to="/auth" className="flex items-center gap-2">
+                Get Started
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </Button>
           </div>
         </div>
