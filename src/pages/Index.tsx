@@ -20,7 +20,6 @@ const Index = () => {
         if (error) throw error;
         
         if (data.data && data.data.length > 0) {
-          // Only use the first illustration (girl)
           setIllustration(data.data[0].url);
         }
       } catch (error) {
@@ -82,7 +81,7 @@ const Index = () => {
                 <div className="relative max-w-2xl mx-auto">
                   <img 
                     src={illustration || "/placeholder.svg"}
-                    alt="Mindful Teen"
+                    alt="Mental Wellness Illustration"
                     className="w-[80vh] max-w-full h-auto mx-auto object-contain"
                     style={{ mixBlendMode: 'multiply' }}
                   />

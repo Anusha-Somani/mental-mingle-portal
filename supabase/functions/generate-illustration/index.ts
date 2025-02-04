@@ -12,12 +12,16 @@ serve(async (req) => {
   }
 
   try {
-    const prompt = `Create an illustration of a peaceful teenage girl with long flowing hair, 
-      in a minimalist, modern illustration style. She should be wearing a soft yellow sweater 
-      and be surrounded by small green plants and yellow flowers. The background should be completely 
-      transparent. The style should be gentle and supportive, similar to modern vector illustrations 
-      with clean lines and simple shapes. The illustration should convey growth and positivity. 
-      IMPORTANT: The background must be transparent, not white.`;
+    const prompt = `Create a peaceful illustration in a modern, minimalist style with soft, flowing shapes. 
+    Include gentle curves representing a cloud-like formation in soft pink (#FFD9E6), surrounded by delicate 
+    flowers in soft yellow (#FEF7CD) and white daisies. Add small green leaves (#F2FCE2) scattered throughout. 
+    The style should be similar to a hand-drawn illustration with clean lines and organic shapes, 
+    focusing on mental wellness and tranquility. The background must be completely transparent. 
+    The illustration should feel light, airy, and calming, perfect for a mental health and wellness application. 
+    Use only soft, muted colors: pink (#FFD9E6), yellow (#FEF7CD), and sage green (#F2FCE2). 
+    The composition should be balanced and flowing, similar to a modern botanical illustration 
+    but more abstract and peaceful. IMPORTANT: The background must be completely transparent, 
+    not white or any other color.`;
 
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
@@ -36,7 +40,12 @@ serve(async (req) => {
     });
 
     const data = await response.json();
+    console.log('Generated illustration data:', data);
     
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
+
     return new Response(
       JSON.stringify({ data: [{ url: data.data[0].url }] }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
