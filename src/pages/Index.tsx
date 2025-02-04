@@ -38,12 +38,12 @@ const Index = () => {
     generateIllustrations();
   }, []);
 
-  // Auto switch between illustrations
+  // Switch between illustrations every 5 seconds, but without animation
   useEffect(() => {
     if (illustrations.length > 1) {
       const interval = setInterval(() => {
         setActiveIndex((current) => (current === 0 ? 1 : 0));
-      }, 5000); // Switch every 5 seconds
+      }, 5000);
 
       return () => clearInterval(interval);
     }
@@ -84,26 +84,24 @@ const Index = () => {
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="pt-20 pb-16 text-center lg:pt-32">
           <div className="animate-fade-in">
-            <div className="relative mb-8">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-96 h-96 bg-[#4CAF50]/10 rounded-full animate-pulse" />
-              </div>
+            <div className="relative mb-12">
               {isLoading ? (
                 <div className="relative z-10 w-80 h-80 mx-auto flex items-center justify-center">
                   <div className="w-16 h-16 border-4 border-[#4CAF50] border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : (
-                <div className="relative">
+                <div className="relative max-w-2xl mx-auto">
                   {illustrations.map((url, index) => (
                     <img 
                       key={index}
                       src={url || "/placeholder.svg"}
                       alt={`Mindful Teen ${index + 1}`}
-                      className={`relative z-10 w-80 h-80 mx-auto object-contain transition-all duration-500 ${
+                      className={`w-[80vh] max-w-full h-auto mx-auto object-contain transition-opacity duration-300 ${
                         index === activeIndex 
-                          ? "opacity-100 scale-100 animate-float" 
-                          : "opacity-0 scale-95 absolute top-0 left-1/2 transform -translate-x-1/2"
+                          ? "opacity-100" 
+                          : "opacity-0 absolute top-0 left-1/2 transform -translate-x-1/2"
                       }`}
+                      style={{ mixBlendMode: 'multiply' }}
                     />
                   ))}
                 </div>
