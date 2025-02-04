@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Quote } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const quotes = [
   "Every small step counts towards big progress.",
@@ -16,10 +17,19 @@ const quotes = [
 ];
 
 const QuoteCard = () => {
-  const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+  const [quote, setQuote] = useState("");
+
+  useEffect(() => {
+    // Get today's date as string to use as seed
+    const today = new Date().toISOString().split('T')[0];
+    // Use the date string to generate a consistent random number for the day
+    const seed = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const index = seed % quotes.length;
+    setQuote(quotes[index]);
+  }, []);
 
   return (
-    <Card className="bg-gradient-to-br from-secondary/50 to-accent/30 backdrop-blur-sm">
+    <Card className="bg-[#2A2A2A]/50 backdrop-blur-sm border-[#3A3A3A]">
       <CardContent className="pt-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -30,8 +40,8 @@ const QuoteCard = () => {
           <div className="rounded-full bg-primary/10 p-3">
             <Quote className="w-6 h-6 text-primary" />
           </div>
-          <p className="text-lg font-medium text-primary leading-relaxed">
-            "{randomQuote}"
+          <p className="text-lg font-medium text-gray-100 leading-relaxed">
+            "{quote}"
           </p>
         </motion.div>
       </CardContent>

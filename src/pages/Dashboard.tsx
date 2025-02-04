@@ -6,10 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { format, startOfDay, isAfter } from "date-fns";
-import CalendarCard from "@/components/dashboard/CalendarCard";
 import MoodEntryCard from "@/components/dashboard/MoodEntryCard";
 import AchievementCard from "@/components/dashboard/AchievementCard";
 import QuoteCard from "@/components/dashboard/QuoteCard";
+import DateDisplay from "@/components/dashboard/DateDisplay";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -131,13 +131,14 @@ const Dashboard = () => {
   };
 
   const disabledDates = moodEntries.map(entry => new Date(entry.created_at));
+
   const today = startOfDay(new Date());
   const isDateDisabled = disabledDates.some(
     date => format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
   ) || isAfter(selectedDate, today);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FEF7CD] via-[#FFDEE2] to-[#E5DEFF]">
+    <div className="min-h-screen bg-gradient-to-br from-[#1A1F2C] via-[#221F26] to-[#2A1F2C]">
       <Navigation />
       <motion.main
         initial={{ opacity: 0 }}
@@ -145,35 +146,31 @@ const Dashboard = () => {
         transition={{ duration: 0.5 }}
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
       >
+        <DateDisplay date={selectedDate} />
+        
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="grid grid-cols-1 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
         >
-          <div className="lg:col-span-1">
-            <CalendarCard
-              selectedDate={selectedDate}
-              onDateSelect={setSelectedDate}
-              disabledDates={disabledDates}
+          <div className="lg:col-span-2">
+            <MoodEntryCard
+              selectedMood={selectedMood}
+              onMoodSelect={setSelectedMood}
+              journalEntry={journalEntry}
+              setJournalEntry={setJournalEntry}
+              isDateDisabled={isDateDisabled}
+              onSaveMood={() => saveMoodMutation.mutate()}
             />
-            <div className="mt-6">
-              <QuoteCard />
-            </div>
+          </div>
+
+          <div className="lg:col-span-1">
+            <QuoteCard />
           </div>
 
           <div className="lg:col-span-3">
-            <div className="grid grid-cols-1 gap-6">
-              <MoodEntryCard
-                selectedMood={selectedMood}
-                onMoodSelect={setSelectedMood}
-                journalEntry={journalEntry}
-                setJournalEntry={setJournalEntry}
-                isDateDisabled={isDateDisabled}
-                onSaveMood={() => saveMoodMutation.mutate()}
-              />
-              <AchievementCard achievements={achievements} />
-            </div>
+            <AchievementCard achievements={achievements} />
           </div>
         </motion.div>
       </motion.main>
