@@ -42,7 +42,7 @@ const Index = () => {
       title: "Daily Check-in",
       description: "Track your mood and emotions with our intuitive daily check-in system.",
       path: "/auth",
-      icon: <Smile className="w-8 h-8 text-[#4CAF50]" />,
+      icon: <Smile className="w-8 h-8 text-[#F97316]" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
     },
@@ -50,7 +50,7 @@ const Index = () => {
       title: "Guided Activities",
       description: "Access personalized activities to help manage anxiety and stress.",
       path: "/auth",
-      icon: <Heart className="w-8 h-8 text-[#FFD700]" />,
+      icon: <Heart className="w-8 h-8 text-[#D946EF]" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
     },
@@ -58,7 +58,7 @@ const Index = () => {
       title: "Mental Wellness",
       description: "Learn techniques for better mental health and emotional balance.",
       path: "/auth",
-      icon: <Brain className="w-8 h-8 text-[#4CAF50]" />,
+      icon: <Brain className="w-8 h-8 text-[#8B5CF6]" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
     },
@@ -71,18 +71,18 @@ const Index = () => {
       
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="pt-20 pb-16 text-center lg:pt-32">
-          <div className="animate-fade-in">
+          <div>
             <div className="relative mb-12">
               {isLoading ? (
                 <div className="relative z-10 w-80 h-80 mx-auto flex items-center justify-center">
-                  <div className="w-16 h-16 border-4 border-[#4CAF50] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-16 h-16 border-4 border-[#D946EF] border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : (
                 <div className="relative max-w-2xl mx-auto">
                   <img 
                     src={illustration || "/placeholder.svg"}
                     alt="Mental Wellness Illustration"
-                    className="w-[80vh] max-w-full h-auto mx-auto object-contain"
+                    className="w-[90vh] max-w-full h-auto mx-auto object-contain"
                     style={{ mixBlendMode: 'multiply' }}
                   />
                 </div>
@@ -90,7 +90,7 @@ const Index = () => {
             </div>
             <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Your Journey to
-              <span className="block mt-2 bg-gradient-to-r from-[#4CAF50] via-[#FFD700] to-[#4CAF50] bg-clip-text text-transparent animate-gradient-text">
+              <span className="block mt-2 animate-gradient-text">
                 Mental Wellbeing
               </span>
             </h1>
@@ -134,7 +134,7 @@ const Index = () => {
             <Button
               asChild
               size="lg"
-              className="bg-[#4CAF50] hover:bg-[#4CAF50]/90 text-white font-medium rounded-xl group relative overflow-hidden"
+              className="bg-[#D946EF] hover:bg-[#D946EF]/90 text-white font-medium rounded-xl group relative overflow-hidden"
             >
               <Link to="/auth" className="flex items-center gap-2">
                 Get Started

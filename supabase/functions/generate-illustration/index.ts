@@ -12,16 +12,16 @@ serve(async (req) => {
   }
 
   try {
-    const prompt = `Create a peaceful illustration in a modern, minimalist style with soft, flowing shapes. 
-    Include gentle curves representing a cloud-like formation in soft pink (#FFD9E6), surrounded by delicate 
-    flowers in soft yellow (#FEF7CD) and white daisies. Add small green leaves (#F2FCE2) scattered throughout. 
-    The style should be similar to a hand-drawn illustration with clean lines and organic shapes, 
-    focusing on mental wellness and tranquility. The background must be completely transparent. 
-    The illustration should feel light, airy, and calming, perfect for a mental health and wellness application. 
-    Use only soft, muted colors: pink (#FFD9E6), yellow (#FEF7CD), and sage green (#F2FCE2). 
-    The composition should be balanced and flowing, similar to a modern botanical illustration 
-    but more abstract and peaceful. IMPORTANT: The background must be completely transparent, 
-    not white or any other color.`;
+    const prompt = `Create a vibrant and fun illustration of a brain blooming with flowers in a modern, 
+    whimsical style. The brain should be in a soft magenta pink (#D946EF) with gentle curves and a playful, 
+    abstract design. Surround it with bright, cheerful flowers in vivid purple (#8B5CF6), bright orange (#F97316), 
+    and white daisies. Add flowing leaves in a soft green (#F2FCE2) creating movement around the brain. 
+    The style should be modern and clean with organic shapes, focusing on growth and mental wellness. 
+    The background must be completely transparent. The illustration should feel uplifting and energetic, 
+    perfect for a mental health and wellness application. The composition should be balanced and dynamic, 
+    with the brain as the central focus and flowers emerging from it in a natural, flowing pattern. 
+    IMPORTANT: The background must be completely transparent, not white or any other color. 
+    The overall effect should be both professional and playful, suitable for a modern wellness platform.`;
 
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
