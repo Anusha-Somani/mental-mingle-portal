@@ -13,10 +13,10 @@ const DateDisplay = ({ date }: DateDisplayProps) => {
       transition={{ duration: 0.5 }}
       className="text-center mb-8"
     >
-      <h1 className="text-4xl md:text-6xl font-bold text-gray-100 tracking-tight">
+      <h1 className="text-4xl md:text-6xl font-bold text-primary tracking-tight font-poppins">
         {format(date, "EEEE")}
       </h1>
-      <p className="text-xl md:text-2xl text-gray-300 mt-2 font-light">
+      <p className="text-xl md:text-2xl text-secondary mt-2 font-light">
         {format(date, "MMMM d, yyyy")}
       </p>
     </motion.div>

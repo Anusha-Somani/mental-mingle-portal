@@ -138,13 +138,24 @@ const Dashboard = () => {
   ) || isAfter(selectedDate, today);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1A1F2C] via-[#221F26] to-[#2A1F2C]">
+    <div className="min-h-screen bg-gradient-to-br from-[#1A1F2C] via-[#221F26] to-[#2A1F2C] relative overflow-hidden">
+      {/* Animated background waves */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute bottom-0 left-0 right-0 h-[400px] bg-primary/20 transform animate-wave1" />
+          <div className="absolute bottom-0 left-0 right-0 h-[350px] bg-primary/15 transform animate-wave2" />
+          <div className="absolute bottom-0 left-0 right-0 h-[300px] bg-primary/10 transform animate-wave3" />
+          <div className="absolute bottom-0 left-0 right-0 h-[250px] bg-primary/5 transform animate-wave4" />
+        </div>
+      </div>
+
       <Navigation />
+      
       <motion.main
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+        className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
       >
         <DateDisplay date={selectedDate} />
         
@@ -152,7 +163,7 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8"
         >
           <div className="lg:col-span-2">
             <MoodEntryCard

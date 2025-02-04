@@ -29,7 +29,7 @@ const QuoteCard = () => {
   }, []);
 
   return (
-    <Card className="bg-[#2A2A2A]/50 backdrop-blur-sm border-[#3A3A3A]">
+    <Card className="bg-[#2A2A2A]/50 backdrop-blur-sm border-primary/20">
       <CardContent className="pt-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
