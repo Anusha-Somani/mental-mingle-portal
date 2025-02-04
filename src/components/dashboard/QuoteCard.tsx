@@ -2,23 +2,17 @@ import { motion } from "framer-motion";
 
 const QuoteCard = () => {
   const letters = [
-    { text: "W", color: "text-[#FF5733]" }, // Orange-red
-    { text: "E", color: "text-[#FFB6B6]" }, // Light pink
-    { text: "C", color: "text-[#F4A261]" }, // Secondary color (warm yellow)
-    { text: "A", color: "text-[#2A9D8F]" }, // Primary color (sea green)
-    { text: "N", color: "text-[#264653]" }, // Dark blue
-    { text: "D", color: "text-[#89B5B2]" }, // Light blue-green
-    { text: "O", color: "text-[#6B7280]" }, // Gray
-    { text: "H", color: "text-[#264653]" }, // Dark blue
-    { text: "A", color: "text-[#FF5733]" }, // Orange-red
-    { text: "R", color: "text-[#F4A261]" }, // Secondary color
-    { text: "D", color: "text-[#FFB6B6]" }, // Light pink
+    { text: "Y", color: "text-[#FF5733]" }, // Orange-red
+    { text: "O", color: "text-[#FFB6B6]" }, // Light pink
+    { text: "U", color: "text-[#F4A261]" }, // Secondary color (warm yellow)
+    { text: "G", color: "text-[#2A9D8F]" }, // Primary color (sea green)
+    { text: "O", color: "text-[#264653]" }, // Dark blue
+    { text: "T", color: "text-[#89B5B2]" }, // Light blue-green
     { text: "T", color: "text-[#6B7280]" }, // Gray
-    { text: "H", color: "text-[#2A9D8F]" }, // Primary color
-    { text: "I", color: "text-[#264653]" }, // Dark blue
-    { text: "N", color: "text-[#89B5B2]" }, // Light blue-green
-    { text: "G", color: "text-[#FF5733]" }, // Orange-red
+    { text: "H", color: "text-[#264653]" }, // Dark blue
+    { text: "I", color: "text-[#FF5733]" }, // Orange-red
     { text: "S", color: "text-[#F4A261]" }, // Secondary color
+    { text: "!", color: "text-[#FFB6B6]" }, // Light pink
   ];
 
   return (
