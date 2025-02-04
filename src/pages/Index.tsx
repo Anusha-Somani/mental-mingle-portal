@@ -9,25 +9,25 @@ import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [illustrations, setIllustrations] = useState<string[]>([]);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [illustration, setIllustration] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
-    const generateIllustrations = async () => {
+    const generateIllustration = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('generate-illustration');
         
         if (error) throw error;
         
-        if (data.data) {
-          setIllustrations(data.data.map((item: { url: string }) => item.url));
+        if (data.data && data.data.length > 0) {
+          // Only use the first illustration (girl)
+          setIllustration(data.data[0].url);
         }
       } catch (error) {
-        console.error('Error generating illustrations:', error);
+        console.error('Error generating illustration:', error);
         toast({
           title: "Error",
-          description: "Failed to generate illustrations. Using fallback image.",
+          description: "Failed to generate illustration. Using fallback image.",
           variant: "destructive",
         });
       } finally {
@@ -35,19 +35,8 @@ const Index = () => {
       }
     };
 
-    generateIllustrations();
+    generateIllustration();
   }, []);
-
-  // Switch between illustrations every 5 seconds, but without animation
-  useEffect(() => {
-    if (illustrations.length > 1) {
-      const interval = setInterval(() => {
-        setActiveIndex((current) => (current === 0 ? 1 : 0));
-      }, 5000);
-
-      return () => clearInterval(interval);
-    }
-  }, [illustrations.length]);
 
   const features = [
     {
@@ -91,19 +80,12 @@ const Index = () => {
                 </div>
               ) : (
                 <div className="relative max-w-2xl mx-auto">
-                  {illustrations.map((url, index) => (
-                    <img 
-                      key={index}
-                      src={url || "/placeholder.svg"}
-                      alt={`Mindful Teen ${index + 1}`}
-                      className={`w-[80vh] max-w-full h-auto mx-auto object-contain transition-opacity duration-300 ${
-                        index === activeIndex 
-                          ? "opacity-100" 
-                          : "opacity-0 absolute top-0 left-1/2 transform -translate-x-1/2"
-                      }`}
-                      style={{ mixBlendMode: 'multiply' }}
-                    />
-                  ))}
+                  <img 
+                    src={illustration || "/placeholder.svg"}
+                    alt="Mindful Teen"
+                    className="w-[80vh] max-w-full h-auto mx-auto object-contain"
+                    style={{ mixBlendMode: 'multiply' }}
+                  />
                 </div>
               )}
             </div>
