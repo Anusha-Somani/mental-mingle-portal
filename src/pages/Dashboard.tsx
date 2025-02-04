@@ -11,6 +11,7 @@ import AchievementCard from "@/components/dashboard/AchievementCard";
 import QuoteCard from "@/components/dashboard/QuoteCard";
 import DateDisplay from "@/components/dashboard/DateDisplay";
 import Wave from "@/components/Wave";
+import { Settings2 } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -138,14 +139,10 @@ const Dashboard = () => {
     date => format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
   ) || isAfter(selectedDate, today);
 
-  return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 animate-gradient z-0" />
-      
-      {/* Animated waves */}
-      <Wave />
+  const progressPercentage = Math.round((moodEntries.length / 30) * 100);
 
+  return (
+    <div className="min-h-screen relative overflow-hidden bg-[#FDF7F7]">
       <Navigation />
       
       <motion.main
@@ -154,33 +151,92 @@ const Dashboard = () => {
         transition={{ duration: 0.5 }}
         className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
       >
-        <DateDisplay date={selectedDate} />
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8"
-        >
+        {/* Header Section */}
+        <div className="flex justify-between items-center mb-8">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="space-y-2"
+          >
+            <h2 className="text-2xl text-gray-500">Your Daily Growth</h2>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
+              Hello, how are you<br />feeling today?
+            </h1>
+          </motion.div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="p-3 rounded-full bg-white shadow-md"
+          >
+            <Settings2 className="w-6 h-6 text-gray-600" />
+          </motion.button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Mood Entry Section */}
           <div className="lg:col-span-2">
-            <MoodEntryCard
-              selectedMood={selectedMood}
-              onMoodSelect={setSelectedMood}
-              journalEntry={journalEntry}
-              setJournalEntry={setJournalEntry}
-              isDateDisabled={isDateDisabled}
-              onSaveMood={() => saveMoodMutation.mutate()}
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-3xl shadow-lg p-6 mb-6"
+            >
+              <MoodEntryCard
+                selectedMood={selectedMood}
+                onMoodSelect={setSelectedMood}
+                journalEntry={journalEntry}
+                setJournalEntry={setJournalEntry}
+                isDateDisabled={isDateDisabled}
+                onSaveMood={() => saveMoodMutation.mutate()}
+              />
+            </motion.div>
           </div>
 
-          <div className="lg:col-span-1">
-            <QuoteCard />
-          </div>
+          {/* Progress Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white rounded-3xl shadow-lg p-6"
+          >
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Your Progress</h3>
+            <div className="flex items-center justify-center">
+              <div className="relative w-32 h-32">
+                <svg className="w-full h-full" viewBox="0 0 36 36">
+                  <path
+                    d="M18 2.0845
+                      a 15.9155 15.9155 0 0 1 0 31.831
+                      a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#eee"
+                    strokeWidth="3"
+                  />
+                  <path
+                    d="M18 2.0845
+                      a 15.9155 15.9155 0 0 1 0 31.831
+                      a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#2A9D8F"
+                    strokeWidth="3"
+                    strokeDasharray={`${progressPercentage}, 100`}
+                  />
+                  <text x="18" y="20.35" className="text-3xl font-bold" textAnchor="middle" fill="#2A9D8F">
+                    {progressPercentage}%
+                  </text>
+                </svg>
+              </div>
+            </div>
+          </motion.div>
 
+          {/* Achievements Section */}
           <div className="lg:col-span-3">
             <AchievementCard achievements={achievements} />
           </div>
-        </motion.div>
+
+          {/* Quote Section */}
+          <div className="lg:col-span-3">
+            <QuoteCard />
+          </div>
+        </div>
       </motion.main>
     </div>
   );

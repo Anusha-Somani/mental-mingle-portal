@@ -1,44 +1,44 @@
 import { motion } from "framer-motion";
-import { Leaf, Moon, Sun, Droplet, Heart } from "lucide-react";
+import { Smile, Heart, Sun, Cloud, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MoodOption {
   emoji: React.ReactNode;
   label: string;
   value: string;
-  gradient: string;
+  color: string;
 }
 
 const moodOptions: MoodOption[] = [
   { 
-    emoji: <Leaf className="w-8 h-8 text-white stroke-[1.5]" />, 
+    emoji: <Smile className="w-8 h-8" />, 
     label: "Happy", 
     value: "happy",
-    gradient: "bg-gradient-to-r from-[#D3E4FD] to-[#E5DEFF]"
+    color: "bg-[#4CAF50] text-white"
   },
   { 
-    emoji: <Heart className="w-8 h-8 text-white stroke-[1.5]" />, 
+    emoji: <Heart className="w-8 h-8" />, 
     label: "Excited", 
     value: "excited",
-    gradient: "bg-gradient-to-r from-[#FDE1D3] to-[#FFDEE2]"
+    color: "bg-[#FF9800] text-white"
   },
   { 
-    emoji: <Sun className="w-8 h-8 text-white stroke-[1.5]" />, 
+    emoji: <Sun className="w-8 h-8" />, 
     label: "Neutral", 
     value: "neutral",
-    gradient: "bg-gradient-to-r from-[#FEF7CD] to-[#FEC6A1]"
+    color: "bg-[#FFC107] text-white"
   },
   { 
-    emoji: <Moon className="w-8 h-8 text-white stroke-[1.5]" />, 
+    emoji: <Cloud className="w-8 h-8" />, 
     label: "Angry", 
     value: "angry",
-    gradient: "bg-gradient-to-r from-[#E5DEFF] to-[#FFDEE2]"
+    color: "bg-[#F44336] text-white"
   },
   { 
-    emoji: <Droplet className="w-8 h-8 text-white stroke-[1.5]" />, 
+    emoji: <Moon className="w-8 h-8" />, 
     label: "Sad", 
     value: "sad",
-    gradient: "bg-gradient-to-r from-[#F2FCE2] to-[#D3E4FD]"
+    color: "bg-[#2196F3] text-white"
   }
 ];
 
@@ -56,10 +56,10 @@ const MoodSelector = ({ selectedMood, onMoodSelect, disabled = false }: MoodSele
       transition={{ duration: 0.5, delay: 0.2 }}
       className="w-full"
     >
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-        How are you feeling today?
+      <h2 className="text-xl font-semibold text-gray-800 mb-6">
+        Select Mode type
       </h2>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="flex flex-wrap gap-4 justify-center">
         {moodOptions.map((mood, index) => (
           <motion.button
             key={mood.value}
@@ -71,15 +71,14 @@ const MoodSelector = ({ selectedMood, onMoodSelect, disabled = false }: MoodSele
             onClick={() => !disabled && onMoodSelect(mood.value)}
             disabled={disabled}
             className={cn(
-              "p-4 rounded-xl flex flex-col items-center justify-center gap-2 transition-all",
-              mood.gradient,
-              selectedMood === mood.value && "ring-2 ring-white/50 shadow-lg",
+              "w-16 h-16 rounded-full flex items-center justify-center transition-all",
+              mood.color,
+              selectedMood === mood.value && "ring-4 ring-gray-200",
               disabled && "opacity-50 cursor-not-allowed",
-              "shadow-md hover:shadow-lg"
+              "shadow-lg hover:shadow-xl"
             )}
           >
             {mood.emoji}
-            <span className="font-medium text-white">{mood.label}</span>
           </motion.button>
         ))}
       </div>
