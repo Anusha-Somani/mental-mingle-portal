@@ -1,44 +1,44 @@
 import { motion } from "framer-motion";
-import { Smile, Heart, Meh, Frown, Angry } from "lucide-react";
+import { Leaf, Moon, Sun, Droplet, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MoodOption {
   emoji: React.ReactNode;
   label: string;
   value: string;
-  color: string;
+  gradient: string;
 }
 
 const moodOptions: MoodOption[] = [
   { 
-    emoji: <Smile className="w-8 h-8 text-white" />, 
+    emoji: <Leaf className="w-8 h-8 text-white stroke-[1.5]" />, 
     label: "Happy", 
     value: "happy",
-    color: "bg-[#1A1F2C] hover:bg-[#2A2F3C]"
+    gradient: "bg-gradient-to-r from-[#D3E4FD] to-[#E5DEFF]"
   },
   { 
-    emoji: <Heart className="w-8 h-8 text-pink-400" />, 
+    emoji: <Heart className="w-8 h-8 text-white stroke-[1.5]" />, 
     label: "Excited", 
     value: "excited",
-    color: "bg-[#222222] hover:bg-[#2A2A2A]"
+    gradient: "bg-gradient-to-r from-[#FDE1D3] to-[#FFDEE2]"
   },
   { 
-    emoji: <Meh className="w-8 h-8 text-white" />, 
+    emoji: <Sun className="w-8 h-8 text-white stroke-[1.5]" />, 
     label: "Neutral", 
     value: "neutral",
-    color: "bg-[#333333] hover:bg-[#3A3A3A]"
+    gradient: "bg-gradient-to-r from-[#FEF7CD] to-[#FEC6A1]"
   },
   { 
-    emoji: <Angry className="w-8 h-8 text-red-400" />, 
+    emoji: <Moon className="w-8 h-8 text-white stroke-[1.5]" />, 
     label: "Angry", 
     value: "angry",
-    color: "bg-[#403E43] hover:bg-[#4A464B]"
+    gradient: "bg-gradient-to-r from-[#E5DEFF] to-[#FFDEE2]"
   },
   { 
-    emoji: <Frown className="w-8 h-8 text-white" />, 
+    emoji: <Droplet className="w-8 h-8 text-white stroke-[1.5]" />, 
     label: "Sad", 
     value: "sad",
-    color: "bg-[#2A2F3C] hover:bg-[#353A47]"
+    gradient: "bg-gradient-to-r from-[#F2FCE2] to-[#D3E4FD]"
   }
 ];
 
@@ -71,11 +71,11 @@ const MoodSelector = ({ selectedMood, onMoodSelect, disabled = false }: MoodSele
             onClick={() => !disabled && onMoodSelect(mood.value)}
             disabled={disabled}
             className={cn(
-              "p-4 rounded-xl flex flex-col items-center justify-center gap-2 transition-colors",
-              mood.color,
-              selectedMood === mood.value && "ring-2 ring-primary",
+              "p-4 rounded-xl flex flex-col items-center justify-center gap-2 transition-all",
+              mood.gradient,
+              selectedMood === mood.value && "ring-2 ring-white/50 shadow-lg",
               disabled && "opacity-50 cursor-not-allowed",
-              "shadow-lg"
+              "shadow-md hover:shadow-lg"
             )}
           >
             {mood.emoji}
