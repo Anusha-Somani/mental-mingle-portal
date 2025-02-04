@@ -1,51 +1,50 @@
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
-import { Quote } from "lucide-react";
-import { useEffect, useState } from "react";
-
-const quotes = [
-  "Every small step counts towards big progress.",
-  "Your mental health matters more than anything else.",
-  "Take care of your mind, and your mind will take care of you.",
-  "It's okay to take a break and recharge.",
-  "Your feelings are valid and important.",
-  "Growth happens one day at a time.",
-  "Be patient with yourself, you're doing great!",
-  "Your journey is unique, embrace it.",
-  "Small progress is still progress.",
-  "You are stronger than you think."
-];
+import { Brain } from "lucide-react";
 
 const QuoteCard = () => {
-  const [quote, setQuote] = useState("");
-
-  useEffect(() => {
-    // Get today's date as string to use as seed
-    const today = new Date().toISOString().split('T')[0];
-    // Use the date string to generate a consistent random number for the day
-    const seed = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const index = seed % quotes.length;
-    setQuote(quotes[index]);
-  }, []);
-
   return (
-    <Card className="bg-secondary/30 backdrop-blur-sm border-secondary/20">
-      <CardContent className="pt-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="relative bg-[#95B1A0] rounded-3xl p-8 text-center overflow-hidden"
+    >
+      <div className="relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col items-center gap-4 text-center"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="flex justify-center mb-4"
         >
-          <div className="rounded-full bg-primary/10 p-3">
-            <Quote className="w-6 h-6 text-primary" />
-          </div>
-          <p className="text-lg font-medium text-gray-800 leading-relaxed">
-            "{quote}"
-          </p>
+          <Brain className="w-16 h-16 text-[#C4A484]" />
         </motion.div>
-      </CardContent>
-    </Card>
+        <motion.h1
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="text-4xl md:text-6xl font-bold text-white mb-2 font-['Permanent_Marker',cursive]"
+        >
+          MENTAL HEALTH
+        </motion.h1>
+        <motion.h1
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="text-4xl md:text-6xl font-bold text-white font-['Permanent_Marker',cursive]"
+        >
+          MATTERS
+        </motion.h1>
+      </div>
+      {/* Decorative elements */}
+      <div className="absolute top-1/2 left-4 transform -translate-y-1/2">
+        <div className="w-8 h-2 bg-white rounded-full rotate-45 mb-2" />
+        <div className="w-8 h-2 bg-white rounded-full -rotate-45" />
+      </div>
+      <div className="absolute top-1/2 right-4 transform -translate-y-1/2">
+        <div className="w-8 h-2 bg-white rounded-full rotate-45 mb-2" />
+        <div className="w-8 h-2 bg-white rounded-full -rotate-45" />
+      </div>
+    </motion.div>
   );
 };
 

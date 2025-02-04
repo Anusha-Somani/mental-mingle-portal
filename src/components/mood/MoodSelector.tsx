@@ -7,6 +7,7 @@ interface MoodOption {
   label: string;
   value: string;
   color: string;
+  description: string;
 }
 
 const moodOptions: MoodOption[] = [
@@ -14,31 +15,36 @@ const moodOptions: MoodOption[] = [
     emoji: <Smile className="w-8 h-8" />, 
     label: "Happy", 
     value: "happy",
-    color: "bg-[#4CAF50] text-white"
+    color: "bg-[#4CAF50] text-white",
+    description: "Feeling great!"
   },
   { 
     emoji: <Heart className="w-8 h-8" />, 
     label: "Excited", 
     value: "excited",
-    color: "bg-[#FF9800] text-white"
+    color: "bg-[#FF9800] text-white",
+    description: "Full of energy!"
   },
   { 
     emoji: <Sun className="w-8 h-8" />, 
     label: "Neutral", 
     value: "neutral",
-    color: "bg-[#FFC107] text-white"
+    color: "bg-[#FFC107] text-white",
+    description: "Just okay"
   },
   { 
     emoji: <Cloud className="w-8 h-8" />, 
     label: "Angry", 
     value: "angry",
-    color: "bg-[#F44336] text-white"
+    color: "bg-[#F44336] text-white",
+    description: "Feeling frustrated"
   },
   { 
     emoji: <Moon className="w-8 h-8" />, 
     label: "Sad", 
     value: "sad",
-    color: "bg-[#2196F3] text-white"
+    color: "bg-[#2196F3] text-white",
+    description: "Not feeling great"
   }
 ];
 
@@ -56,30 +62,36 @@ const MoodSelector = ({ selectedMood, onMoodSelect, disabled = false }: MoodSele
       transition={{ duration: 0.5, delay: 0.2 }}
       className="w-full"
     >
-      <h2 className="text-xl font-semibold text-gray-800 mb-6">
-        Select Mode type
+      <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">
+        Select your mood
       </h2>
-      <div className="flex flex-wrap gap-4 justify-center">
+      <div className="flex flex-wrap gap-6 justify-center">
         {moodOptions.map((mood, index) => (
-          <motion.button
+          <motion.div
             key={mood.value}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
-            onClick={() => !disabled && onMoodSelect(mood.value)}
-            disabled={disabled}
-            className={cn(
-              "w-16 h-16 rounded-full flex items-center justify-center transition-all",
-              mood.color,
-              selectedMood === mood.value && "ring-4 ring-gray-200",
-              disabled && "opacity-50 cursor-not-allowed",
-              "shadow-lg hover:shadow-xl"
-            )}
+            className="flex flex-col items-center"
           >
-            {mood.emoji}
-          </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => !disabled && onMoodSelect(mood.value)}
+              disabled={disabled}
+              className={cn(
+                "w-16 h-16 rounded-full flex items-center justify-center transition-all mb-2",
+                mood.color,
+                selectedMood === mood.value && "ring-4 ring-gray-200",
+                disabled && "opacity-50 cursor-not-allowed",
+                "shadow-lg hover:shadow-xl"
+              )}
+            >
+              {mood.emoji}
+            </motion.button>
+            <span className="text-sm font-medium text-gray-700">{mood.label}</span>
+            <span className="text-xs text-gray-500">{mood.description}</span>
+          </motion.div>
         ))}
       </div>
     </motion.div>
