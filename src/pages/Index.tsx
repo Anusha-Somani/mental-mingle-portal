@@ -3,40 +3,8 @@ import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Heart, Brain, Smile, ArrowRight } from "lucide-react";
 import Wave from "@/components/Wave";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [illustration, setIllustration] = useState<string>("");
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const generateIllustration = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('generate-illustration');
-        
-        if (error) throw error;
-        
-        if (data.data && data.data.length > 0) {
-          setIllustration(data.data[0].url);
-        }
-      } catch (error) {
-        console.error('Error generating illustration:', error);
-        toast({
-          title: "Error",
-          description: "Failed to generate illustration. Using fallback image.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    generateIllustration();
-  }, []);
-
   const features = [
     {
       title: "Daily Check-in",
@@ -72,22 +40,6 @@ const Index = () => {
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="pt-20 pb-16 text-center lg:pt-32">
           <div>
-            <div className="relative mb-12">
-              {isLoading ? (
-                <div className="relative z-10 w-80 h-80 mx-auto flex items-center justify-center">
-                  <div className="w-16 h-16 border-4 border-[#D946EF] border-t-transparent rounded-full animate-spin" />
-                </div>
-              ) : (
-                <div className="relative max-w-2xl mx-auto">
-                  <img 
-                    src={illustration || "/placeholder.svg"}
-                    alt="Mental Wellness Illustration"
-                    className="w-[90vh] max-w-full h-auto mx-auto object-contain"
-                    style={{ mixBlendMode: 'multiply' }}
-                  />
-                </div>
-              )}
-            </div>
             <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Your Journey to
               <span className="block mt-2 animate-gradient-text">
