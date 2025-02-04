@@ -99,6 +99,33 @@ export type Database = {
         }
         Relationships: []
       }
+      embeddings: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string | null
+          embedding: string | null
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string | null
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string | null
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
       knowledge_base: {
         Row: {
           category: string | null
@@ -304,6 +331,18 @@ export type Database = {
         }
         Returns: {
           id: number
+          content: string
+          similarity: number
+        }[]
+      }
+      match_embeddings: {
+        Args: {
+          query_embedding: string
+          match_threshold: number
+          match_count: number
+        }
+        Returns: {
+          id: string
           content: string
           similarity: number
         }[]
