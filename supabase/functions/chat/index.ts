@@ -17,24 +17,53 @@ serve(async (req) => {
     console.log('Received message:', message);
     console.log('Conversation ID:', conversationId);
 
-    // Get relevant knowledge base entries
+    // Generate embedding for the user's message
+    const embeddingResponse = await fetch('https://api.openai.com/v1/embeddings', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'text-embedding-3-small',
+        input: message,
+      }),
+    });
+
+    if (!embeddingResponse.ok) {
+      const error = await embeddingResponse.json();
+      console.error('OpenAI API error:', error);
+      throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
+    }
+
+    const {
+      data: [{ embedding }],
+    } = await embeddingResponse.json();
+
+    // Search for relevant content in the knowledge base
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
-    const { data: knowledgeBase, error: knowledgeBaseError } = await supabaseClient
-      .from('knowledge_base')
-      .select('content')
-      .limit(5);
+    const { data: relevantContent, error: searchError } = await supabaseClient.rpc(
+      'match_embeddings',
+      {
+        query_embedding: embedding,
+        match_threshold: 0.7,
+        match_count: 5,
+      }
+    );
 
-    if (knowledgeBaseError) {
-      console.error('Error fetching knowledge base:', knowledgeBaseError);
-      throw new Error('Failed to fetch knowledge base');
+    if (searchError) {
+      console.error('Error searching embeddings:', searchError);
+      throw new Error('Failed to search knowledge base');
     }
 
-    const contextPrompt = knowledgeBase?.map(k => k.content).join('\n') || '';
-    console.log('Context prompt prepared');
+    // Prepare context from relevant content
+    const context = relevantContent
+      ?.map((item: any) => item.content)
+      .join('\n\n');
 
     // Generate AI response using OpenAI
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -44,11 +73,11 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini', // Using the recommended smaller model
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `You are a helpful assistant. Use this knowledge base information to inform your responses: ${contextPrompt}`,
+            content: `You are a helpful assistant. Use this knowledge base information to inform your responses: ${context}`,
           },
           { role: 'user', content: message },
         ],
@@ -57,9 +86,9 @@ serve(async (req) => {
     });
 
     if (!openAIResponse.ok) {
-      const errorData = await openAIResponse.json();
-      console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+      const error = await openAIResponse.json();
+      console.error('OpenAI API error:', error);
+      throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
     }
 
     const aiResponse = await openAIResponse.json();
