@@ -22,7 +22,7 @@ const MoodEntryCard = ({
   onSaveMood,
 }: MoodEntryCardProps) => {
   return (
-    <Card className="bg-[#2A2A2A]/50 backdrop-blur-sm border-primary/20">
+    <Card className="bg-secondary/30 backdrop-blur-sm border-secondary/20">
       <CardContent className="pt-6">
         <MoodSelector
           selectedMood={selectedMood}
@@ -40,7 +40,7 @@ const MoodEntryCard = ({
             placeholder={isDateDisabled ? "Mood already logged for this date" : "How are you feeling? (Optional)"}
             value={journalEntry}
             onChange={(e) => setJournalEntry(e.target.value)}
-            className="min-h-[100px] mb-4 bg-[#2A2A2A]/30 border-primary/20 placeholder:text-gray-400"
+            className="min-h-[100px] mb-4 bg-secondary/20 border-secondary/30 placeholder:text-gray-600"
             disabled={isDateDisabled}
           />
           <Button 

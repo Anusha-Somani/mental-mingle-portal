@@ -29,7 +29,7 @@ const QuoteCard = () => {
   }, []);
 
   return (
-    <Card className="bg-[#2A2A2A]/50 backdrop-blur-sm border-primary/20">
+    <Card className="bg-secondary/30 backdrop-blur-sm border-secondary/20">
       <CardContent className="pt-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -40,7 +40,7 @@ const QuoteCard = () => {
           <div className="rounded-full bg-primary/10 p-3">
             <Quote className="w-6 h-6 text-primary" />
           </div>
-          <p className="text-lg font-medium text-gray-100 leading-relaxed">
+          <p className="text-lg font-medium text-gray-800 leading-relaxed">
             "{quote}"
           </p>
         </motion.div>
