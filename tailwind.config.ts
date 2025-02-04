@@ -28,15 +28,15 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#7CC5FB", // Light blue like in the image
+          DEFAULT: "#7CC5FB",
           foreground: "#FFFFFF",
         },
         secondary: {
-          DEFAULT: "#FF8AAE", // Soft pink from the image
+          DEFAULT: "#FF8AAE",
           foreground: "#1A1A1A",
         },
         accent: {
-          DEFAULT: "#FFD93D", // Warm yellow for accents
+          DEFAULT: "#FFD93D",
           foreground: "#1A1A1A",
         },
         destructive: {
@@ -56,11 +56,6 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
       },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -74,11 +69,27 @@ export default {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
         },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        "gradient-text": {
+          "0%, 100%": {
+            "background-size": "200% 200%",
+            "background-position": "left center",
+          },
+          "50%": {
+            "background-size": "200% 200%",
+            "background-position": "right center",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.5s ease-out",
+        "float": "float 6s ease-in-out infinite",
+        "gradient-text": "gradient-text 6s ease infinite",
       },
     },
   },

@@ -13,6 +13,7 @@ const Index = () => {
       icon: <Smile className="w-8 h-8 text-primary" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
+      image: "/lovable-uploads/4db20e19-73ec-49d1-8b8c-b5911094c7a3.png",
     },
     {
       title: "Guided Activities",
@@ -29,20 +30,31 @@ const Index = () => {
       icon: <Brain className="w-8 h-8 text-accent" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
+      image: "/lovable-uploads/0f871006-609a-476e-bc18-7d10b4134ac0.png",
     },
   ];
 
   return (
-    <div className="min-h-screen font-poppins relative bg-gradient-to-b from-[#7CC5FB]/20 to-white">
+    <div className="min-h-screen font-poppins relative bg-gradient-to-b from-[#7CC5FB]/20 to-white overflow-hidden">
       <Wave />
       <Navigation />
       
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="pt-20 pb-16 text-center lg:pt-32">
           <div className="animate-fade-in">
+            <div className="relative mb-8">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-48 h-48 bg-primary/10 rounded-full animate-pulse" />
+              </div>
+              <img 
+                src="/lovable-uploads/4db20e19-73ec-49d1-8b8c-b5911094c7a3.png" 
+                alt="Mindful Teen"
+                className="relative z-10 w-40 h-40 mx-auto object-contain animate-float"
+              />
+            </div>
             <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Your Journey to
-              <span className="text-primary block mt-2">Mental Wellbeing</span>
+              <span className="text-primary block mt-2 animate-gradient-text">Mental Wellbeing</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed mb-12">
               Take control of your mental health journey with daily check-ins, guided activities, and personalized support.
@@ -50,26 +62,47 @@ const Index = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 mb-20">
-            {features.map((feature) => (
+            {features.map((feature, index) => (
               <Link
                 key={feature.title}
                 to={feature.path}
-                className="group transform transition-all duration-300 hover:-translate-y-1"
+                className="group transform transition-all duration-300 hover:-translate-y-2"
               >
-                <div className={`rounded-2xl p-8 h-full backdrop-blur-sm ${feature.color} ${feature.hoverColor} transition-colors duration-300 shadow-lg`}>
-                  <div className="mb-6">{feature.icon}</div>
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-                    {feature.title}
-                  </h2>
-                  <p className="text-gray-600 leading-relaxed">
-                    {feature.description}
-                  </p>
+                <div 
+                  className={`rounded-2xl p-8 h-full backdrop-blur-sm ${feature.color} ${feature.hoverColor} 
+                    transition-all duration-300 shadow-lg hover:shadow-xl relative overflow-hidden`}
+                >
+                  <div className="relative z-10">
+                    <div className="mb-6">{feature.icon}</div>
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                      {feature.title}
+                    </h2>
+                    <p className="text-gray-600 leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </div>
+                  <div className="absolute -bottom-4 -right-4 w-24 h-24 opacity-10 group-hover:opacity-20 transition-opacity">
+                    {feature.image && (
+                      <img 
+                        src={feature.image} 
+                        alt={feature.title}
+                        className="w-full h-full object-contain"
+                      />
+                    )}
+                  </div>
                 </div>
               </Link>
             ))}
           </div>
 
-          <div className="max-w-3xl mx-auto bg-white/90 backdrop-blur-sm rounded-2xl p-10 shadow-lg">
+          <div className="max-w-3xl mx-auto bg-white/90 backdrop-blur-sm rounded-2xl p-10 shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
+              <img 
+                src="/lovable-uploads/0f871006-609a-476e-bc18-7d10b4134ac0.png" 
+                alt="Self Care"
+                className="w-full h-full object-contain"
+              />
+            </div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-4">
               Start Your Wellness Journey Today
             </h3>
@@ -79,7 +112,7 @@ const Index = () => {
             <Button
               asChild
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-white font-medium rounded-xl group"
+              className="bg-primary hover:bg-primary/90 text-white font-medium rounded-xl group relative overflow-hidden"
             >
               <Link to="/auth" className="flex items-center gap-2">
                 Get Started
