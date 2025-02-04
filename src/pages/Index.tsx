@@ -77,7 +77,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen font-poppins relative bg-gradient-to-b from-[#F0F7F4] to-white overflow-hidden">
+    <div className="min-h-screen font-poppins relative bg-gradient-to-b from-[#F2FCE2] to-[#FEF7CD] overflow-hidden">
       <Wave />
       <Navigation />
       
@@ -86,10 +86,10 @@ const Index = () => {
           <div className="animate-fade-in">
             <div className="relative mb-8">
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-64 h-64 bg-[#4CAF50]/10 rounded-full animate-pulse" />
+                <div className="w-96 h-96 bg-[#4CAF50]/10 rounded-full animate-pulse" />
               </div>
               {isLoading ? (
-                <div className="relative z-10 w-56 h-56 mx-auto flex items-center justify-center">
+                <div className="relative z-10 w-80 h-80 mx-auto flex items-center justify-center">
                   <div className="w-16 h-16 border-4 border-[#4CAF50] border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : (
@@ -99,7 +99,7 @@ const Index = () => {
                       key={index}
                       src={url || "/placeholder.svg"}
                       alt={`Mindful Teen ${index + 1}`}
-                      className={`relative z-10 w-56 h-56 mx-auto object-contain transition-all duration-500 ${
+                      className={`relative z-10 w-80 h-80 mx-auto object-contain transition-all duration-500 ${
                         index === activeIndex 
                           ? "opacity-100 scale-100 animate-float" 
                           : "opacity-0 scale-95 absolute top-0 left-1/2 transform -translate-x-1/2"
