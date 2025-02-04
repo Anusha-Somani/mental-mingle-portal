@@ -132,11 +132,6 @@ const Dashboard = () => {
         transition={{ duration: 0.5 }}
         className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
       >
-        {/* Mental Health Quote Section */}
-        <div className="mb-12">
-          <QuoteCard />
-        </div>
-
         {/* Greeting Section */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -164,6 +159,9 @@ const Dashboard = () => {
               onSaveMood={() => saveMoodMutation.mutate()}
             />
           </motion.div>
+          
+          {/* Quote Card - Now positioned below mood meter */}
+          <QuoteCard />
         </div>
       </motion.main>
     </div>
