@@ -9,24 +9,25 @@ import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [illustration, setIllustration] = useState<string | null>(null);
+  const [illustrations, setIllustrations] = useState<string[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
-    const generateIllustration = async () => {
+    const generateIllustrations = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('generate-illustration');
         
         if (error) throw error;
         
-        if (data.data && data.data[0].url) {
-          setIllustration(data.data[0].url);
+        if (data.data) {
+          setIllustrations(data.data.map((item: { url: string }) => item.url));
         }
       } catch (error) {
-        console.error('Error generating illustration:', error);
+        console.error('Error generating illustrations:', error);
         toast({
           title: "Error",
-          description: "Failed to generate illustration. Using fallback image.",
+          description: "Failed to generate illustrations. Using fallback image.",
           variant: "destructive",
         });
       } finally {
@@ -34,15 +35,26 @@ const Index = () => {
       }
     };
 
-    generateIllustration();
+    generateIllustrations();
   }, []);
+
+  // Auto switch between illustrations
+  useEffect(() => {
+    if (illustrations.length > 1) {
+      const interval = setInterval(() => {
+        setActiveIndex((current) => (current === 0 ? 1 : 0));
+      }, 5000); // Switch every 5 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [illustrations.length]);
 
   const features = [
     {
       title: "Daily Check-in",
       description: "Track your mood and emotions with our intuitive daily check-in system.",
       path: "/auth",
-      icon: <Smile className="w-8 h-8 text-primary" />,
+      icon: <Smile className="w-8 h-8 text-[#4CAF50]" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
     },
@@ -50,7 +62,7 @@ const Index = () => {
       title: "Guided Activities",
       description: "Access personalized activities to help manage anxiety and stress.",
       path: "/auth",
-      icon: <Heart className="w-8 h-8 text-secondary" />,
+      icon: <Heart className="w-8 h-8 text-[#FFD700]" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
     },
@@ -58,14 +70,14 @@ const Index = () => {
       title: "Mental Wellness",
       description: "Learn techniques for better mental health and emotional balance.",
       path: "/auth",
-      icon: <Brain className="w-8 h-8 text-accent" />,
+      icon: <Brain className="w-8 h-8 text-[#4CAF50]" />,
       color: "bg-white/80",
       hoverColor: "hover:bg-white",
     },
   ];
 
   return (
-    <div className="min-h-screen font-poppins relative bg-gradient-to-b from-[#7CC5FB]/20 to-white overflow-hidden">
+    <div className="min-h-screen font-poppins relative bg-gradient-to-b from-[#F0F7F4] to-white overflow-hidden">
       <Wave />
       <Navigation />
       
@@ -74,23 +86,34 @@ const Index = () => {
           <div className="animate-fade-in">
             <div className="relative mb-8">
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-48 h-48 bg-primary/10 rounded-full animate-pulse" />
+                <div className="w-64 h-64 bg-[#4CAF50]/10 rounded-full animate-pulse" />
               </div>
               {isLoading ? (
-                <div className="relative z-10 w-40 h-40 mx-auto flex items-center justify-center">
-                  <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                <div className="relative z-10 w-56 h-56 mx-auto flex items-center justify-center">
+                  <div className="w-16 h-16 border-4 border-[#4CAF50] border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : (
-                <img 
-                  src={illustration || "/placeholder.svg"}
-                  alt="Mindful Teen"
-                  className="relative z-10 w-40 h-40 mx-auto object-contain animate-float"
-                />
+                <div className="relative">
+                  {illustrations.map((url, index) => (
+                    <img 
+                      key={index}
+                      src={url || "/placeholder.svg"}
+                      alt={`Mindful Teen ${index + 1}`}
+                      className={`relative z-10 w-56 h-56 mx-auto object-contain transition-all duration-500 ${
+                        index === activeIndex 
+                          ? "opacity-100 scale-100 animate-float" 
+                          : "opacity-0 scale-95 absolute top-0 left-1/2 transform -translate-x-1/2"
+                      }`}
+                    />
+                  ))}
+                </div>
               )}
             </div>
             <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Your Journey to
-              <span className="text-primary block mt-2 animate-gradient-text">Mental Wellbeing</span>
+              <span className="block mt-2 bg-gradient-to-r from-[#4CAF50] via-[#FFD700] to-[#4CAF50] bg-clip-text text-transparent animate-gradient-text">
+                Mental Wellbeing
+              </span>
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed mb-12">
               Take control of your mental health journey with daily check-ins, guided activities, and personalized support.
@@ -132,7 +155,7 @@ const Index = () => {
             <Button
               asChild
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-white font-medium rounded-xl group relative overflow-hidden"
+              className="bg-[#4CAF50] hover:bg-[#4CAF50]/90 text-white font-medium rounded-xl group relative overflow-hidden"
             >
               <Link to="/auth" className="flex items-center gap-2">
                 Get Started
