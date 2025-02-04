@@ -11,34 +11,34 @@ interface MoodOption {
 
 const moodOptions: MoodOption[] = [
   { 
-    emoji: <Smile className="w-8 h-8" />, 
+    emoji: <Smile className="w-8 h-8 text-white" />, 
     label: "Happy", 
     value: "happy",
-    color: "bg-primary/10 hover:bg-primary/20"
+    color: "bg-[#1A1F2C] hover:bg-[#2A2F3C]"
   },
   { 
-    emoji: <Heart className="w-8 h-8 text-secondary" />, 
+    emoji: <Heart className="w-8 h-8 text-pink-400" />, 
     label: "Excited", 
     value: "excited",
-    color: "bg-secondary/10 hover:bg-secondary/20"
+    color: "bg-[#222222] hover:bg-[#2A2A2A]"
   },
   { 
-    emoji: <Meh className="w-8 h-8" />, 
+    emoji: <Meh className="w-8 h-8 text-white" />, 
     label: "Neutral", 
     value: "neutral",
-    color: "bg-accent/10 hover:bg-accent/20"
+    color: "bg-[#333333] hover:bg-[#3A3A3A]"
   },
   { 
-    emoji: <Angry className="w-8 h-8 text-destructive" />, 
+    emoji: <Angry className="w-8 h-8 text-red-400" />, 
     label: "Angry", 
     value: "angry",
-    color: "bg-destructive/10 hover:bg-destructive/20"
+    color: "bg-[#403E43] hover:bg-[#4A464B]"
   },
   { 
-    emoji: <Frown className="w-8 h-8 text-muted-foreground" />, 
+    emoji: <Frown className="w-8 h-8 text-white" />, 
     label: "Sad", 
     value: "sad",
-    color: "bg-muted hover:bg-muted/80"
+    color: "bg-[#2A2F3C] hover:bg-[#353A47]"
   }
 ];
 
@@ -56,7 +56,7 @@ const MoodSelector = ({ selectedMood, onMoodSelect, disabled = false }: MoodSele
       transition={{ duration: 0.5, delay: 0.2 }}
       className="w-full"
     >
-      <h2 className="text-2xl font-semibold text-primary mb-4">
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
         How are you feeling today?
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -74,11 +74,12 @@ const MoodSelector = ({ selectedMood, onMoodSelect, disabled = false }: MoodSele
               "p-4 rounded-xl flex flex-col items-center justify-center gap-2 transition-colors",
               mood.color,
               selectedMood === mood.value && "ring-2 ring-primary",
-              disabled && "opacity-50 cursor-not-allowed"
+              disabled && "opacity-50 cursor-not-allowed",
+              "shadow-lg"
             )}
           >
             {mood.emoji}
-            <span className="font-medium">{mood.label}</span>
+            <span className="font-medium text-white">{mood.label}</span>
           </motion.button>
         ))}
       </div>
