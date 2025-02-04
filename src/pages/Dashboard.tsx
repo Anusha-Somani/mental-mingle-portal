@@ -9,6 +9,7 @@ import { format, startOfDay, isAfter } from "date-fns";
 import CalendarCard from "@/components/dashboard/CalendarCard";
 import MoodEntryCard from "@/components/dashboard/MoodEntryCard";
 import AchievementCard from "@/components/dashboard/AchievementCard";
+import QuoteCard from "@/components/dashboard/QuoteCard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -136,36 +137,44 @@ const Dashboard = () => {
   ) || isAfter(selectedDate, today);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-[#FEF7CD] via-[#FFDEE2] to-[#E5DEFF]">
       <Navigation />
       <motion.main
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 lg:grid-cols-4 gap-6"
         >
-          <CalendarCard
-            selectedDate={selectedDate}
-            onDateSelect={setSelectedDate}
-            disabledDates={disabledDates}
-          />
+          <div className="lg:col-span-1">
+            <CalendarCard
+              selectedDate={selectedDate}
+              onDateSelect={setSelectedDate}
+              disabledDates={disabledDates}
+            />
+            <div className="mt-6">
+              <QuoteCard />
+            </div>
+          </div>
 
-          <MoodEntryCard
-            selectedMood={selectedMood}
-            onMoodSelect={setSelectedMood}
-            journalEntry={journalEntry}
-            setJournalEntry={setJournalEntry}
-            isDateDisabled={isDateDisabled}
-            onSaveMood={() => saveMoodMutation.mutate()}
-          />
-
-          <AchievementCard achievements={achievements} />
+          <div className="lg:col-span-3">
+            <div className="grid grid-cols-1 gap-6">
+              <MoodEntryCard
+                selectedMood={selectedMood}
+                onMoodSelect={setSelectedMood}
+                journalEntry={journalEntry}
+                setJournalEntry={setJournalEntry}
+                isDateDisabled={isDateDisabled}
+                onSaveMood={() => saveMoodMutation.mutate()}
+              />
+              <AchievementCard achievements={achievements} />
+            </div>
+          </div>
         </motion.div>
       </motion.main>
     </div>
