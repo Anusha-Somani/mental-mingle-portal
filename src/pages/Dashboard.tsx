@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -5,7 +6,7 @@ import Navigation from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { format, startOfDay, isAfter } from "date-fns";
+import { format, startOfDay, endOfDay } from "date-fns"; // Changed isAfter to endOfDay
 import MoodEntryCard from "@/components/dashboard/MoodEntryCard";
 import QuoteCard from "@/components/dashboard/QuoteCard";
 import DateDisplay from "@/components/dashboard/DateDisplay";
@@ -58,8 +59,8 @@ const Dashboard = () => {
       if (!userId) throw new Error("User not authenticated");
       if (!selectedMood) throw new Error("Please select a mood");
       
-      const startDate = format(selectedDate, 'yyyy-MM-dd');
-      const endDate = format(new Date(selectedDate).setDate(new Date(selectedDate).getDate() + 1), 'yyyy-MM-dd');
+      const startDate = format(startOfDay(selectedDate), 'yyyy-MM-dd');
+      const endDate = format(endOfDay(selectedDate), 'yyyy-MM-dd');
       
       const { data: existingEntry, error: checkError } = await supabase
         .from('mood_entries')
@@ -121,10 +122,10 @@ const Dashboard = () => {
   };
 
   const disabledDates = moodEntries.map(entry => new Date(entry.created_at));
-  const today = startOfDay(new Date());
+  const today = endOfDay(new Date()); // Changed to endOfDay
   const isDateDisabled = disabledDates.some(
     date => format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
-  ) || isAfter(selectedDate, today);
+  );
 
   return (
     <div className="min-h-screen relative overflow-hidden galaxy-bg">
@@ -142,7 +143,7 @@ const Dashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl md:text-5xl font-bold text-[#D6BCFA]">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#D6BCFA] font-playfair">
             Hello, how are you feeling today?
           </h1>
         </motion.div>
@@ -186,7 +187,7 @@ const Dashboard = () => {
             </div>
             <Button
               onClick={() => navigate("/chat")}
-              className="h-16 w-16 rounded-full bg-[#8B5CF6] hover:bg-[#8B5CF6]/80 shadow-lg group-hover:scale-110 transition-transform duration-200"
+              className="h-16 w-16 rounded-full bg-[#FC68B3] hover:bg-[#FC68B3]/80 shadow-lg group-hover:scale-110 transition-transform duration-200"
             >
               <MessageCircle className="h-8 w-8 text-white" />
             </Button>

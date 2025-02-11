@@ -28,7 +28,7 @@ const MoodEntryCard = ({
   onFactorSelect,
 }: MoodEntryCardProps) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-poppins">
       <MoodSelector
         selectedMood={selectedMood}
         onMoodSelect={onMoodSelect}
@@ -57,12 +57,12 @@ const MoodEntryCard = ({
           placeholder={isDateDisabled ? "Mood already logged for this date" : "How are you feeling? (Optional)"}
           value={journalEntry}
           onChange={(e) => setJournalEntry(e.target.value)}
-          className="min-h-[100px] rounded-xl border-gray-200 bg-gray-50 placeholder:text-gray-400 text-gray-700 resize-none"
+          className="min-h-[100px] rounded-xl bg-white/10 text-[#E5DEFF] placeholder:text-[#D6BCFA]/70 resize-none border-[#D6BCFA]/30"
           disabled={isDateDisabled}
         />
         <Button 
           onClick={onSaveMood}
-          className="w-full bg-primary hover:bg-primary/90 text-white font-medium rounded-xl py-3"
+          className="w-full bg-[#FF8A48] hover:bg-[#FF8A48]/80 text-white font-medium rounded-xl py-3"
           disabled={isDateDisabled || !selectedMood}
         >
           <motion.span
