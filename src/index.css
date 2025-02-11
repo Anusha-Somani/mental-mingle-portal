@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
 @tailwind base;
@@ -169,19 +170,19 @@
 }
 
 .animate-wave1 {
-  animation: wave1 21s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+  animation: wave1 45s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
 }
 
 .animate-wave2 {
-  animation: wave2 15s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+  animation: wave2 35s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
 }
 
 .animate-wave3 {
-  animation: wave3 9s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+  animation: wave3 25s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
 }
 
 .animate-wave4 {
-  animation: wave4 6s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+  animation: wave4 15s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
 }
 
 .waves-container {
