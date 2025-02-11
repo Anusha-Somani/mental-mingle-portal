@@ -12,24 +12,24 @@ const Index = () => {
       description: "Track your mood and emotions with our intuitive daily check-in system.",
       path: "/auth",
       icon: <Smile className="w-8 h-8 text-[#3DFDFF]" />,
-      color: "glass",
-      hoverColor: "hover:bg-white/20",
+      color: "bg-white/20",
+      hoverColor: "hover:bg-white/30",
     },
     {
       title: "Guided Activities",
       description: "Access personalized activities to help manage anxiety and stress.",
       path: "/auth",
       icon: <Heart className="w-8 h-8 text-[#FC68B3]" />,
-      color: "glass",
-      hoverColor: "hover:bg-white/20",
+      color: "bg-white/20",
+      hoverColor: "hover:bg-white/30",
     },
     {
       title: "Mental Wellness",
       description: "Learn techniques for better mental health and emotional balance.",
       path: "/auth",
       icon: <Brain className="w-8 h-8 text-[#FF8A48]" />,
-      color: "glass",
-      hoverColor: "hover:bg-white/20",
+      color: "bg-white/20",
+      hoverColor: "hover:bg-white/30",
     },
   ];
 
@@ -46,13 +46,13 @@ const Index = () => {
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="pt-20 pb-16 text-center lg:pt-32">
           <div>
-            <h1 className="text-4xl sm:text-6xl font-bold text-[#1A1F2C] mb-6 leading-tight drop-shadow-lg">
+            <h1 className="text-4xl sm:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
               Your Journey to
-              <span className="block mt-2 gradient-text">
+              <span className="block mt-2 text-white font-bold">
                 Mental Wellbeing
               </span>
             </h1>
-            <p className="text-xl text-[#1A1F2C] max-w-2xl mx-auto leading-relaxed mb-12 drop-shadow">
+            <p className="text-xl text-white max-w-2xl mx-auto leading-relaxed mb-12 drop-shadow-lg">
               Take control of your mental health journey with daily check-ins, guided activities, and personalized support.
             </p>
           </div>
@@ -65,15 +65,15 @@ const Index = () => {
                 className="group transform transition-all duration-300 hover:-translate-y-2"
               >
                 <div 
-                  className={`rounded-2xl p-8 h-full ${feature.color} ${feature.hoverColor} 
-                    transition-all duration-300 shadow-lg hover:shadow-xl relative overflow-hidden`}
+                  className={`rounded-2xl p-8 h-full ${feature.color} backdrop-blur-md border border-white/20
+                    ${feature.hoverColor} transition-all duration-300 shadow-xl hover:shadow-2xl relative overflow-hidden`}
                 >
                   <div className="relative z-10">
                     <div className="mb-6">{feature.icon}</div>
-                    <h2 className="text-2xl font-semibold text-[#1A1F2C] mb-4">
+                    <h2 className="text-2xl font-semibold text-white mb-4 drop-shadow-lg">
                       {feature.title}
                     </h2>
-                    <p className="text-[#403E43] leading-relaxed">
+                    <p className="text-white/90 leading-relaxed drop-shadow">
                       {feature.description}
                     </p>
                   </div>
@@ -82,11 +82,11 @@ const Index = () => {
             ))}
           </div>
 
-          <div className="max-w-3xl mx-auto glass rounded-2xl p-10 shadow-lg">
-            <h3 className="text-2xl font-semibold text-[#1A1F2C] mb-4">
+          <div className="max-w-3xl mx-auto bg-white/20 backdrop-blur-md rounded-2xl p-10 shadow-xl border border-white/20">
+            <h3 className="text-2xl font-semibold text-white mb-4 drop-shadow-lg">
               Start Your Wellness Journey Today
             </h3>
-            <p className="text-[#403E43] mb-8 max-w-xl mx-auto">
+            <p className="text-white/90 mb-8 max-w-xl mx-auto drop-shadow">
               Join our supportive community and discover tools and resources designed to help you thrive.
             </p>
             <Button
