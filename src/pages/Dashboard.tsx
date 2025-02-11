@@ -6,12 +6,13 @@ import Navigation from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { format, startOfDay, endOfDay } from "date-fns"; // Changed isAfter to endOfDay
+import { format, startOfDay, endOfDay } from "date-fns";
 import MoodEntryCard from "@/components/dashboard/MoodEntryCard";
 import QuoteCard from "@/components/dashboard/QuoteCard";
 import DateDisplay from "@/components/dashboard/DateDisplay";
 import JournalSection from "@/components/journal/JournalSection";
 import StarryBackground from "@/components/StarryBackground";
+import Wave from "@/components/Wave";
 import { Brain, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -130,6 +131,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen relative overflow-hidden galaxy-bg">
       <StarryBackground />
+      <Wave />
       <Navigation />
       
       <motion.main
