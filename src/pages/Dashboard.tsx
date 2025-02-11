@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +10,7 @@ import { format, startOfDay, isAfter } from "date-fns";
 import MoodEntryCard from "@/components/dashboard/MoodEntryCard";
 import QuoteCard from "@/components/dashboard/QuoteCard";
 import DateDisplay from "@/components/dashboard/DateDisplay";
+import JournalSection from "@/components/journal/JournalSection";
 import Wave from "@/components/Wave";
 import { Brain, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +23,7 @@ const Dashboard = () => {
   const [journalEntry, setJournalEntry] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [userId, setUserId] = useState<string | null>(null);
+  const [selectedFactors, setSelectedFactors] = useState<string[]>([]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -81,6 +84,7 @@ const Dashboard = () => {
             emoji_type: selectedMood,
             mood_score: getMoodScore(selectedMood),
             journal_entry: journalEntry,
+            contributing_factors: selectedFactors,
             created_at: selectedDate.toISOString(),
           }
         ]);
@@ -95,6 +99,7 @@ const Dashboard = () => {
       });
       setJournalEntry("");
       setSelectedMood("");
+      setSelectedFactors([]);
     },
     onError: (error: Error) => {
       toast({
@@ -145,7 +150,7 @@ const Dashboard = () => {
         </motion.div>
 
         {/* Mood Entry Section */}
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-2xl mx-auto space-y-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -158,9 +163,12 @@ const Dashboard = () => {
               setJournalEntry={setJournalEntry}
               isDateDisabled={isDateDisabled}
               onSaveMood={() => saveMoodMutation.mutate()}
+              selectedFactors={selectedFactors}
+              onFactorSelect={setSelectedFactors}
             />
           </motion.div>
           
+          <JournalSection />
           <QuoteCard />
         </div>
 

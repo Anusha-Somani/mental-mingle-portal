@@ -1,8 +1,10 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import MoodSelector from "@/components/mood/MoodSelector";
+import ContributingFactors from "@/components/mood/ContributingFactors";
 
 interface MoodEntryCardProps {
   selectedMood: string;
@@ -11,6 +13,8 @@ interface MoodEntryCardProps {
   setJournalEntry: (entry: string) => void;
   isDateDisabled: boolean;
   onSaveMood: () => void;
+  selectedFactors: string[];
+  onFactorSelect: (factors: string[]) => void;
 }
 
 const MoodEntryCard = ({
@@ -20,6 +24,8 @@ const MoodEntryCard = ({
   setJournalEntry,
   isDateDisabled,
   onSaveMood,
+  selectedFactors,
+  onFactorSelect,
 }: MoodEntryCardProps) => {
   return (
     <div className="space-y-6">
@@ -28,6 +34,18 @@ const MoodEntryCard = ({
         onMoodSelect={onMoodSelect}
         disabled={isDateDisabled}
       />
+      
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <ContributingFactors
+          selectedFactors={selectedFactors}
+          onFactorSelect={onFactorSelect}
+          disabled={isDateDisabled}
+        />
+      </motion.div>
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}

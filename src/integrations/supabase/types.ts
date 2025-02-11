@@ -126,6 +126,54 @@ export type Database = {
         }
         Relationships: []
       }
+      journal_entries: {
+        Row: {
+          created_at: string
+          entry_text: string
+          id: string
+          prompt_text: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_text: string
+          id?: string
+          prompt_text: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_text?: string
+          id?: string
+          prompt_text?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      journal_prompts: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          prompt_text: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          prompt_text: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          prompt_text?: string
+        }
+        Relationships: []
+      }
       knowledge_base: {
         Row: {
           category: string | null
@@ -156,6 +204,7 @@ export type Database = {
       mood_entries: {
         Row: {
           color_theme: string | null
+          contributing_factors: string[] | null
           created_at: string
           emoji_type: string
           id: string
@@ -166,6 +215,7 @@ export type Database = {
         }
         Insert: {
           color_theme?: string | null
+          contributing_factors?: string[] | null
           created_at?: string
           emoji_type: string
           id?: string
@@ -176,6 +226,7 @@ export type Database = {
         }
         Update: {
           color_theme?: string | null
+          contributing_factors?: string[] | null
           created_at?: string
           emoji_type?: string
           id?: string
