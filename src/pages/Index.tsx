@@ -46,13 +46,13 @@ const Index = () => {
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="pt-20 pb-16 text-center lg:pt-32">
           <div>
-            <h1 className="text-4xl sm:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
+            <h1 className="text-4xl sm:text-6xl font-bold text-[#1A1F2C] mb-6 leading-tight drop-shadow-lg">
               Your Journey to
-              <span className="block mt-2 text-white font-bold">
+              <span className="block mt-2 text-[#1A1F2C] font-bold">
                 Mental Wellbeing
               </span>
             </h1>
-            <p className="text-xl text-white max-w-2xl mx-auto leading-relaxed mb-12 drop-shadow-lg">
+            <p className="text-xl text-[#1A1F2C] max-w-2xl mx-auto leading-relaxed mb-12 drop-shadow-lg">
               Take control of your mental health journey with daily check-ins, guided activities, and personalized support.
             </p>
           </div>
@@ -70,10 +70,10 @@ const Index = () => {
                 >
                   <div className="relative z-10">
                     <div className="mb-6">{feature.icon}</div>
-                    <h2 className="text-2xl font-semibold text-white mb-4 drop-shadow-lg">
+                    <h2 className="text-2xl font-semibold text-[#1A1F2C] mb-4 drop-shadow-lg">
                       {feature.title}
                     </h2>
-                    <p className="text-white/90 leading-relaxed drop-shadow">
+                    <p className="text-[#1A1F2C]/90 leading-relaxed drop-shadow">
                       {feature.description}
                     </p>
                   </div>
@@ -83,10 +83,10 @@ const Index = () => {
           </div>
 
           <div className="max-w-3xl mx-auto bg-white/20 backdrop-blur-md rounded-2xl p-10 shadow-xl border border-white/20">
-            <h3 className="text-2xl font-semibold text-white mb-4 drop-shadow-lg">
+            <h3 className="text-2xl font-semibold text-[#1A1F2C] mb-4 drop-shadow-lg">
               Start Your Wellness Journey Today
             </h3>
-            <p className="text-white/90 mb-8 max-w-xl mx-auto drop-shadow">
+            <p className="text-[#1A1F2C]/90 mb-8 max-w-xl mx-auto drop-shadow">
               Join our supportive community and discover tools and resources designed to help you thrive.
             </p>
             <Button
@@ -107,3 +107,4 @@ const Index = () => {
 };
 
 export default Index;
+
