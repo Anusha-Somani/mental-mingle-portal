@@ -92,30 +92,30 @@ const JournalSection = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-3xl shadow-lg p-6 space-y-6"
+      className="glass rounded-3xl shadow-lg p-6 space-y-6 text-white"
     >
       <div className="flex items-center gap-3 justify-center">
-        <BookOpen className="w-6 h-6 text-primary" />
-        <h2 className="text-2xl font-semibold text-gray-800">Journal Your Thoughts Away</h2>
+        <BookOpen className="w-6 h-6 text-[#D6BCFA]" />
+        <h2 className="text-2xl font-semibold text-[#D6BCFA]">Journal Your Thoughts Away</h2>
       </div>
 
       {selectedPrompt && (
         <div className="space-y-4">
-          <div className="bg-primary/10 p-4 rounded-xl">
-            <p className="text-gray-700 text-lg">{selectedPrompt.prompt_text}</p>
+          <div className="bg-[#2C1A4D]/50 p-4 rounded-xl border border-[#8B5CF6]/30">
+            <p className="text-[#E5DEFF] text-lg">{selectedPrompt.prompt_text}</p>
           </div>
 
           <Textarea
             value={journalEntry}
             onChange={(e) => setJournalEntry(e.target.value)}
             placeholder="Start writing your thoughts here..."
-            className="min-h-[200px] text-gray-700"
+            className="min-h-[200px] bg-[#1A1F2C]/50 border-[#8B5CF6]/30 text-white placeholder:text-[#D6BCFA]/60"
           />
 
           <Button
             onClick={saveJournalEntry}
             disabled={!journalEntry.trim()}
-            className="w-full bg-primary hover:bg-primary/90"
+            className="w-full bg-[#8B5CF6] hover:bg-[#8B5CF6]/80 text-white"
           >
             <PenLine className="w-4 h-4 mr-2" />
             Save Journal Entry

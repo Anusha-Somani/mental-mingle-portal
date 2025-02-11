@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +10,7 @@ import MoodEntryCard from "@/components/dashboard/MoodEntryCard";
 import QuoteCard from "@/components/dashboard/QuoteCard";
 import DateDisplay from "@/components/dashboard/DateDisplay";
 import JournalSection from "@/components/journal/JournalSection";
-import Wave from "@/components/Wave";
+import StarryBackground from "@/components/StarryBackground";
 import { Brain, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -128,9 +127,9 @@ const Dashboard = () => {
   ) || isAfter(selectedDate, today);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#F2FCE2]">
+    <div className="min-h-screen relative overflow-hidden galaxy-bg">
+      <StarryBackground />
       <Navigation />
-      <Wave />
       
       <motion.main
         initial={{ opacity: 0 }}
@@ -138,23 +137,21 @@ const Dashboard = () => {
         transition={{ duration: 0.5 }}
         className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
       >
-        {/* Greeting Section */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl md:text-5xl font-bold text-primary">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#D6BCFA]">
             Hello, how are you feeling today?
           </h1>
         </motion.div>
 
-        {/* Mood Entry Section */}
         <div className="max-w-2xl mx-auto space-y-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-3xl shadow-lg p-6 mb-6"
+            className="glass rounded-3xl shadow-lg p-6 mb-6"
           >
             <MoodEntryCard
               selectedMood={selectedMood}
@@ -172,7 +169,6 @@ const Dashboard = () => {
           <QuoteCard />
         </div>
 
-        {/* Chat Support Button */}
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -185,12 +181,12 @@ const Dashboard = () => {
           className="fixed bottom-8 right-8 z-50"
         >
           <div className="relative group">
-            <div className="absolute -top-16 right-0 w-48 p-2 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <p className="text-sm text-gray-600">Need someone to talk to? Our AI chat is here to support you 💙</p>
+            <div className="absolute -top-16 right-0 w-48 p-2 glass rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <p className="text-sm text-[#E5DEFF]">Need someone to talk to? Our AI chat is here to support you 💫</p>
             </div>
             <Button
               onClick={() => navigate("/chat")}
-              className="h-16 w-16 rounded-full bg-primary hover:bg-primary/90 shadow-lg group-hover:scale-110 transition-transform duration-200"
+              className="h-16 w-16 rounded-full bg-[#8B5CF6] hover:bg-[#8B5CF6]/80 shadow-lg group-hover:scale-110 transition-transform duration-200"
             >
               <MessageCircle className="h-8 w-8 text-white" />
             </Button>
