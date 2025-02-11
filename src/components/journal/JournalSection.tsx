@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { BookOpen, PenLine } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface JournalPrompt {
   id: string;
@@ -17,11 +18,23 @@ const JournalSection = () => {
   const [prompts, setPrompts] = useState<JournalPrompt[]>([]);
   const [selectedPrompt, setSelectedPrompt] = useState<JournalPrompt | null>(null);
   const [journalEntry, setJournalEntry] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUserId(session.user.id);
+    };
+
+    checkAuth();
     loadPrompts();
-  }, []);
+  }, [navigate]);
 
   const loadPrompts = async () => {
     const { data, error } = await supabase
@@ -46,16 +59,15 @@ const JournalSection = () => {
   };
 
   const saveJournalEntry = async () => {
-    if (!selectedPrompt || !journalEntry.trim()) return;
+    if (!selectedPrompt || !journalEntry.trim() || !userId) return;
 
     const { error } = await supabase
       .from('journal_entries')
-      .insert([
-        {
-          prompt_text: selectedPrompt.prompt_text,
-          entry_text: journalEntry,
-        }
-      ]);
+      .insert({
+        prompt_text: selectedPrompt.prompt_text,
+        entry_text: journalEntry,
+        user_id: userId
+      });
 
     if (error) {
       toast({
