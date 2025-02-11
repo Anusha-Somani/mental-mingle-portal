@@ -92,24 +92,24 @@ const JournalSection = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass rounded-3xl shadow-lg p-6 space-y-6 text-white"
+      className="glass rounded-3xl shadow-lg p-6 space-y-6"
     >
       <div className="flex items-center gap-3 justify-center">
-        <BookOpen className="w-6 h-6 text-[#D6BCFA]" />
-        <h2 className="text-2xl font-semibold text-[#D6BCFA]">Journal Your Thoughts Away</h2>
+        <BookOpen className="w-6 h-6 text-[#1A1F2C]" />
+        <h2 className="text-2xl font-semibold text-[#1A1F2C]">Journal Your Thoughts Away</h2>
       </div>
 
       {selectedPrompt && (
         <div className="space-y-4">
           <div className="bg-[#2C1A4D]/50 p-4 rounded-xl border border-[#8B5CF6]/30">
-            <p className="text-[#E5DEFF] text-lg">{selectedPrompt.prompt_text}</p>
+            <p className="text-[#1A1F2C] text-lg">{selectedPrompt.prompt_text}</p>
           </div>
 
           <Textarea
             value={journalEntry}
             onChange={(e) => setJournalEntry(e.target.value)}
             placeholder="Start writing your thoughts here..."
-            className="min-h-[200px] bg-[#1A1F2C]/50 border-[#8B5CF6]/30 text-white placeholder:text-[#D6BCFA]/60"
+            className="min-h-[200px] bg-white/80 border-[#8B5CF6]/30 text-[#1A1F2C] placeholder:text-[#403E43]/70"
           />
 
           <Button

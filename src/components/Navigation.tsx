@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, LogOut } from "lucide-react";
@@ -45,7 +46,7 @@ const Navigation = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center group">
-              <span className="text-primary text-2xl font-bold group-hover:text-primary/90 transition-colors">
+              <span className="text-[#1A1F2C] text-2xl font-bold group-hover:text-[#3DFDFF] transition-colors">
                 Mevincible
               </span>
             </Link>

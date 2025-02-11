@@ -143,7 +143,7 @@ const Dashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl md:text-5xl font-bold text-[#D6BCFA] font-playfair">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#1A1F2C] font-playfair drop-shadow-lg">
             Hello, how are you feeling today?
           </h1>
         </motion.div>

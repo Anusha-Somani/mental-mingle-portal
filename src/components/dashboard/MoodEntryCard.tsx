@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,7 +56,7 @@ const MoodEntryCard = ({
           placeholder={isDateDisabled ? "Mood already logged for this date" : "How are you feeling? (Optional)"}
           value={journalEntry}
           onChange={(e) => setJournalEntry(e.target.value)}
-          className="min-h-[100px] rounded-xl bg-white/10 text-[#E5DEFF] placeholder:text-[#D6BCFA]/70 resize-none border-[#D6BCFA]/30"
+          className="min-h-[100px] rounded-xl bg-white/10 text-[#1A1F2C] placeholder:text-[#403E43]/70 resize-none border-[#D6BCFA]/30"
           disabled={isDateDisabled}
         />
         <Button 
