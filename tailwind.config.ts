@@ -30,15 +30,15 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#FF8A48", // Orange
-          foreground: "#FFFFFF",
+          DEFAULT: "#3DFDFF", // Cyan as primary
+          foreground: "#1A1A1A",
         },
         secondary: {
           DEFAULT: "#FC68B3", // Pink
           foreground: "#1A1A1A",
         },
         accent: {
-          DEFAULT: "#3DFDFF", // Cyan
+          DEFAULT: "#FF8A48", // Orange
           foreground: "#1A1A1A",
         },
         highlight: {
@@ -105,3 +105,4 @@ export default {
   },
   plugins: [require("tailwindcss-animate")],
 } satisfies Config;
+

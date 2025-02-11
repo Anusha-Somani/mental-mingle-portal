@@ -68,7 +68,7 @@
 
 /* Gen Z Background */
 .galaxy-bg {
-  background: linear-gradient(135deg, #FF8A48 0%, #FC68B3 50%, #3DFDFF 100%);
+  background: linear-gradient(135deg, #3DFDFF 0%, #FC68B3 50%, #FF8A48 100%);
   position: relative;
   overflow: hidden;
 }
@@ -90,7 +90,7 @@
 .blob-1 {
   width: 300px;
   height: 300px;
-  background: #FF8A48;
+  background: #3DFDFF;
   top: -150px;
   left: -150px;
 }
@@ -107,7 +107,7 @@
 .blob-3 {
   width: 200px;
   height: 200px;
-  background: #3DFDFF;
+  background: #FF8A48;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -116,10 +116,10 @@
 
 /* Glass Effect */
 .glass {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px 0 rgba(252, 104, 179, 0.2);
+  border: 1px solid rgba(61, 253, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(61, 253, 255, 0.2);
 }
 
 /* Fun Emoji Animation */
@@ -135,7 +135,7 @@
 
 /* Gradient Text */
 .gradient-text {
-  background: linear-gradient(90deg, #FF8A48, #FC68B3, #3DFDFF);
+  background: linear-gradient(90deg, #3DFDFF, #FC68B3, #FF8A48);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -147,3 +147,4 @@
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
