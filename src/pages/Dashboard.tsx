@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,14 +9,11 @@ import { motion } from "framer-motion";
 import { format, startOfDay, endOfDay } from "date-fns";
 import MoodEntryCard from "@/components/dashboard/MoodEntryCard";
 import QuoteCard from "@/components/dashboard/QuoteCard";
-import DateDisplay from "@/components/dashboard/DateDisplay";
+import ResourcesPreview from "@/components/dashboard/ResourcesPreview";
+import ChatButton from "@/components/dashboard/ChatButton";
 import JournalSection from "@/components/journal/JournalSection";
 import StarryBackground from "@/components/StarryBackground";
 import Wave from "@/components/Wave";
-import { Brain, MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Heart, Puzzle, Music, Video } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -173,69 +171,8 @@ const Dashboard = () => {
           <QuoteCard />
         </div>
 
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ 
-            type: "spring",
-            stiffness: 260,
-            damping: 20,
-            delay: 1 
-          }}
-          className="fixed bottom-8 left-8 z-50"
-        >
-          <div className="relative group">
-            <div className="absolute -top-16 left-0 w-48 p-2 glass rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <p className="text-sm text-[#E5DEFF]">Need someone to talk to? Our AI chat is here to support you 💫</p>
-            </div>
-            <Button
-              onClick={() => navigate("/chat")}
-              className="h-20 w-20 rounded-full bg-[#0EA5E9] hover:bg-[#0EA5E9]/80 shadow-lg group-hover:scale-110 transition-transform duration-200"
-            >
-              <MessageCircle className="h-10 w-10 text-white" />
-            </Button>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-8"
-        >
-          <Card className="bg-gradient-to-r from-[#E5DEFF] to-[#D3E4FD] p-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Heart className="w-6 h-6 text-[#FC68B3]" />
-                Discover Resources
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-[#1A1F2C] mb-4">
-                Explore our collection of calming activities, helpful videos, and interactive games designed to support your well-being journey.
-              </p>
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="text-center">
-                  <Puzzle className="w-8 h-8 mx-auto mb-2 text-[#FC68B3]" />
-                  <span className="text-sm">Puzzles</span>
-                </div>
-                <div className="text-center">
-                  <Music className="w-8 h-8 mx-auto mb-2 text-[#FF8A48]" />
-                  <span className="text-sm">Music</span>
-                </div>
-                <div className="text-center">
-                  <Video className="w-8 h-8 mx-auto mb-2 text-[#3DFDFF]" />
-                  <span className="text-sm">Videos</span>
-                </div>
-              </div>
-              <Button
-                onClick={() => navigate("/resources")}
-                className="w-full bg-[#FC68B3] hover:bg-[#FC68B3]/80"
-              >
-                Explore Resources
-              </Button>
-            </CardContent>
-          </Card>
-        </motion.div>
+        <ResourcesPreview />
+        <ChatButton />
       </motion.main>
     </div>
   );
