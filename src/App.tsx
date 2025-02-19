@@ -7,9 +7,9 @@ import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
 import Chat from "@/pages/Chat";
 import Resources from "@/pages/Resources";
+import Puzzle from "@/pages/Puzzle";
 import "./App.css";
 
-// Create a client with default options
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -29,7 +29,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/resources" element={<Resources />} />
-          {/* Catch all route - redirect to home */}
+          <Route path="/puzzle" element={<Puzzle />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Toaster />

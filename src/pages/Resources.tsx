@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,7 @@ const Resources = () => {
       type: "VIDEO",
       duration: "2 MIN",
       views: "1.2k views",
-      thumbnail: "public/lovable-uploads/7baf2020-67af-4825-9d09-9dc26bbc2423.png",
+      thumbnail: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
       category: "wellness"
     },
     {
@@ -25,7 +24,7 @@ const Resources = () => {
       type: "GAME",
       duration: "5 MIN",
       views: "856 plays",
-      thumbnail: "placeholder.svg",
+      thumbnail: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=80",
       category: "games"
     },
     {
@@ -33,7 +32,7 @@ const Resources = () => {
       type: "AUDIO",
       duration: "15 MIN",
       views: "2.3k plays",
-      thumbnail: "placeholder.svg",
+      thumbnail: "https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?w=800&q=80",
       category: "music"
     }
   ];
@@ -138,6 +137,7 @@ const Resources = () => {
                 <p className="mb-4">Take a break with our daily mindfulness puzzle</p>
                 <Button 
                   className="w-full bg-[#FC68B3] hover:bg-[#FC68B3]/80"
+                  onClick={() => window.location.href = '/puzzle'}
                 >
                   Start Puzzle
                 </Button>
