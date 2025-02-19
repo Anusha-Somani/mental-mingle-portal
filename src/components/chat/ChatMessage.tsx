@@ -1,13 +1,15 @@
 
 import { FC } from "react";
 import { User, CircuitBoard } from "lucide-react";
+import { format } from "date-fns";
 
 interface ChatMessageProps {
   text: string;
   isUser: boolean;
+  timestamp?: Date;
 }
 
-const ChatMessage: FC<ChatMessageProps> = ({ text, isUser }) => {
+const ChatMessage: FC<ChatMessageProps> = ({ text, isUser, timestamp }) => {
   // Function to process text and convert *text* to bold
   const processText = (content: string) => {
     const parts = content.split(/(\*[^*]+\*)/g);
@@ -33,7 +35,7 @@ const ChatMessage: FC<ChatMessageProps> = ({ text, isUser }) => {
           <CircuitBoard className="h-6 w-6 text-[#6B7280]" />
         )}
         <span className="text-xs text-[#6B7280] mt-1">
-          {isUser ? "You" : "Mevincible"}
+          {isUser ? "You" : "MindVincible"}
         </span>
       </div>
 
@@ -47,6 +49,12 @@ const ChatMessage: FC<ChatMessageProps> = ({ text, isUser }) => {
         <div className="text-[#1A1F2C] text-sm">
           {processText(text)}
         </div>
+        
+        {timestamp && (
+          <div className="text-[0.65rem] text-gray-500 mt-1">
+            {format(timestamp, 'h:mm a')}
+          </div>
+        )}
         
         {/* Chat bubble triangle */}
         <div
