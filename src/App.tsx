@@ -6,6 +6,7 @@ import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
 import Chat from "@/pages/Chat";
+import Resources from "@/pages/Resources";
 import "./App.css";
 
 // Create a client with default options
@@ -27,6 +28,7 @@ function App() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/resources" element={<Resources />} />
           {/* Catch all route - redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
