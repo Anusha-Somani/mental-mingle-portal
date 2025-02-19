@@ -1,6 +1,6 @@
 
 import { FC } from "react";
-import { User, Bot } from "lucide-react";
+import { User, CircuitBoard } from "lucide-react";
 
 interface ChatMessageProps {
   text: string;
@@ -30,7 +30,7 @@ const ChatMessage: FC<ChatMessageProps> = ({ text, isUser }) => {
         {isUser ? (
           <User className="h-6 w-6 text-[#6B7280]" />
         ) : (
-          <Bot className="h-6 w-6 text-[#6B7280]" />
+          <CircuitBoard className="h-6 w-6 text-[#6B7280]" />
         )}
         <span className="text-xs text-[#6B7280] mt-1">
           {isUser ? "You" : "Mevincible"}
@@ -40,8 +40,8 @@ const ChatMessage: FC<ChatMessageProps> = ({ text, isUser }) => {
       <div
         className={`relative max-w-[80%] p-4 ${
           isUser
-            ? "bg-[#D6BCFA] rounded-t-lg rounded-bl-lg rounded-br-sm"
-            : "bg-[#E5DEFF] rounded-t-lg rounded-br-lg rounded-bl-sm"
+            ? "bg-[#3DFDFF]/80 rounded-t-lg rounded-bl-lg rounded-br-sm"
+            : "bg-[#FF8A48]/30 rounded-t-lg rounded-br-lg rounded-bl-sm"
         }`}
       >
         <div className="text-[#1A1F2C] text-sm">
@@ -52,15 +52,15 @@ const ChatMessage: FC<ChatMessageProps> = ({ text, isUser }) => {
         <div
           className={`absolute bottom-0 ${
             isUser 
-              ? "right-0 border-l-[#D6BCFA]" 
-              : "left-0 border-r-[#E5DEFF]"
+              ? "right-0 border-l-[#3DFDFF]" 
+              : "left-0 border-r-[#FF8A48]"
           } w-4 h-4 transform ${
             isUser
               ? "translate-x-1/2 translate-y-1/2 rotate-45"
               : "-translate-x-1/2 translate-y-1/2 rotate-45"
           }`}
           style={{
-            backgroundColor: isUser ? "#D6BCFA" : "#E5DEFF",
+            backgroundColor: isUser ? "rgba(61, 253, 255, 0.8)" : "rgba(255, 138, 72, 0.3)",
           }}
         />
       </div>
