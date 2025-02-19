@@ -1,3 +1,4 @@
+
 import { FC } from "react";
 
 interface ChatMessageProps {
@@ -15,8 +16,8 @@ const ChatMessage: FC<ChatMessageProps> = ({ text, isUser }) => {
       <div
         className={`max-w-[80%] p-3 rounded-lg ${
           isUser
-            ? "bg-primary text-white"
-            : "bg-secondary text-secondary-foreground"
+            ? "bg-[#D5D5F1]/80 text-[#1A1F2C]"
+            : "bg-[#E5DEFF]/60 text-[#1A1F2C]"
         }`}
       >
         {text}
