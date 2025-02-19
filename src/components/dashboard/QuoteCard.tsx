@@ -16,6 +16,11 @@ const QuoteCard = () => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
+    // Set initial quote based on the day
+    const today = new Date();
+    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
+    setCurrentQuoteIndex(dayOfYear % quotes.length);
+
     const interval = setInterval(() => {
       setIsVisible(false);
       setTimeout(() => {
