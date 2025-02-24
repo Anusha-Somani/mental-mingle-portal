@@ -1,10 +1,12 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export const useAdminStatus = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -13,29 +15,55 @@ export const useAdminStatus = () => {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-          console.log('No session found');
+          console.log('No session found - user is not logged in');
           setIsAdmin(false);
           return;
         }
 
-        console.log('Checking admin status for user:', session.user.id);
+        console.log('Session found for user:', session.user.id);
+        console.log('Email:', session.user.email);
         
-        const { data: roleData, error } = await supabase
+        // First check if we can even access the user_roles table
+        const { data: testData, error: testError } = await supabase
           .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single();
+          .select('*')
+          .limit(1);
+          
+        console.log('Test query result:', { testData, testError });
 
-        if (error) {
-          console.error('Error fetching user role:', error);
+        // Now try to get the specific user role
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('*')
+          .eq('user_id', session.user.id);
+
+        console.log('Role query result:', { roleData, roleError });
+
+        if (roleError) {
+          console.error('Error fetching user role:', roleError);
+          toast({
+            title: "Error checking admin status",
+            description: roleError.message,
+            variant: "destructive",
+          });
           setIsAdmin(false);
           return;
         }
 
-        console.log('Role data:', roleData);
-        setIsAdmin(roleData?.role === 'admin');
+        if (roleData && roleData.length > 0) {
+          console.log('Found role data:', roleData);
+          setIsAdmin(roleData[0].role === 'admin');
+        } else {
+          console.log('No role found for user');
+          setIsAdmin(false);
+        }
       } catch (error) {
         console.error('Error checking admin status:', error);
+        toast({
+          title: "Error checking admin status",
+          description: "There was a problem checking your admin status. Please try refreshing the page.",
+          variant: "destructive",
+        });
         setIsAdmin(false);
       } finally {
         setLoading(false);
@@ -44,7 +72,6 @@ export const useAdminStatus = () => {
 
     checkAdminStatus();
 
-    // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
       checkAdminStatus();
     });
