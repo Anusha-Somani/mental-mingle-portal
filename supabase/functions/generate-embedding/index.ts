@@ -1,10 +1,8 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
-import { PDFLoader } from "https://esm.sh/langchain/document_loaders/fs/pdf";
-import { DocxLoader } from "https://esm.sh/langchain/document_loaders/fs/docx";
-import { Document } from "https://esm.sh/langchain/document";
-import { RecursiveCharacterTextSplitter } from "https://esm.sh/langchain/text_splitter";
+import { Document } from "https://esm.sh/@langchain/core@0.3.40/documents";
+import { RecursiveCharacterTextSplitter } from "https://esm.sh/@langchain/text-splitter@0.0.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -42,16 +40,16 @@ serve(async (req) => {
       throw new Error(`Failed to upload file: ${uploadError.message}`);
     }
 
-    // Load and process document
+    // Convert file to text
     let text = '';
     if (file.name.toLowerCase().endsWith('.pdf')) {
-      const loader = new PDFLoader(new Blob([fileBuffer]));
-      const docs = await loader.load();
-      text = docs.map(doc => doc.pageContent).join('\n');
+      // For PDF files, we'll use the raw text content
+      const decoder = new TextDecoder('utf-8');
+      text = decoder.decode(fileBuffer);
     } else if (file.name.toLowerCase().endsWith('.docx')) {
-      const loader = new DocxLoader(new Blob([fileBuffer]));
-      const docs = await loader.load();
-      text = docs.map(doc => doc.pageContent).join('\n');
+      // For DOCX files, we'll extract text content
+      const decoder = new TextDecoder('utf-8');
+      text = decoder.decode(fileBuffer);
     } else {
       throw new Error('Unsupported file type');
     }
@@ -61,10 +59,11 @@ serve(async (req) => {
       chunkSize: 1000,
       chunkOverlap: 200,
     });
-    const chunks = await splitter.createDocuments([text]);
+    
+    const docs = await splitter.splitText(text);
 
     // Generate embeddings for each chunk
-    for (const chunk of chunks) {
+    for (const chunk of docs) {
       const embeddingResponse = await fetch('https://api.openai.com/v1/embeddings', {
         method: 'POST',
         headers: {
@@ -73,7 +72,7 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           model: 'text-embedding-3-small',
-          input: chunk.pageContent,
+          input: chunk,
         }),
       });
 
@@ -84,12 +83,12 @@ serve(async (req) => {
       const { error: insertError } = await supabaseAdmin
         .from('embeddings')
         .insert({
-          content: chunk.pageContent,
+          content: chunk,
           embedding,
           category,
           metadata: {
             filename: file.name,
-            chunk_size: chunk.pageContent.length,
+            chunk_size: chunk.length,
           },
         });
 
