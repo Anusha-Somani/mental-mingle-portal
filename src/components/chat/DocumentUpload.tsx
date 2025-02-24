@@ -26,12 +26,25 @@ const DocumentUpload = () => {
     setIsUploading(true);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Authentication required');
+      }
+
       const formData = new FormData();
       formData.append('file', file);
 
-      const { data: { url } } = await supabase.functions.invoke('generate-embedding', {
+      const { data, error } = await supabase.functions.invoke('generate-embedding', {
         body: formData,
       });
+
+      if (error) {
+        // Check if it's an unauthorized error
+        if (error.message?.includes('policy') || error.message?.includes('permission')) {
+          throw new Error('You do not have permission to upload documents');
+        }
+        throw error;
+      }
 
       toast({
         title: "Document uploaded successfully",
@@ -41,7 +54,7 @@ const DocumentUpload = () => {
       console.error('Upload error:', error);
       toast({
         title: "Upload failed",
-        description: "There was an error uploading your document. Please try again.",
+        description: error.message || "There was an error uploading your document. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -53,7 +66,7 @@ const DocumentUpload = () => {
     <div className="p-4 border border-gray-200 rounded-lg bg-white/50 backdrop-blur-sm">
       <div className="flex items-center gap-2 mb-4">
         <AlertCircle className="h-5 w-5 text-[#FF8A48]" />
-        <h3 className="text-sm font-medium text-[#1A1F2C]">Train Your Chatbot</h3>
+        <h3 className="text-sm font-medium text-[#1A1F2C]">Train Your Chatbot (Admin Only)</h3>
       </div>
       
       <p className="text-sm text-gray-600 mb-4">

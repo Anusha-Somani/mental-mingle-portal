@@ -306,6 +306,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -371,6 +392,12 @@ export type Database = {
           "": unknown
         }
         Returns: unknown
+      }
+      is_admin: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
       }
       ivfflat_bit_support: {
         Args: {
@@ -509,6 +536,7 @@ export type Database = {
       }
     }
     Enums: {
+      user_role: "admin" | "user"
       user_type: "teen" | "parent" | "educator"
     }
     CompositeTypes: {

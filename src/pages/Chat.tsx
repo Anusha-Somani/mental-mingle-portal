@@ -3,8 +3,11 @@ import Navigation from "@/components/Navigation";
 import ChatBot from "@/components/ChatBot";
 import Wave from "@/components/Wave";
 import DocumentUpload from "@/components/chat/DocumentUpload";
+import { useAdminStatus } from "@/hooks/use-admin-status";
 
 const Chat = () => {
+  const { isAdmin, loading } = useAdminStatus();
+
   return (
     <div className="min-h-screen galaxy-bg">
       <Wave />
@@ -19,7 +22,7 @@ const Chat = () => {
           </p>
         </div>
         <div className="grid gap-6 animate-fade-in">
-          <DocumentUpload />
+          {isAdmin && <DocumentUpload />}
           <ChatBot />
         </div>
       </main>
