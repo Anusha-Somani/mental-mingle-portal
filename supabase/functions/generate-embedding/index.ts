@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 import { Document } from "https://esm.sh/@langchain/core@0.3.40/documents";
-import { RecursiveCharacterTextSplitter } from "https://esm.sh/@langchain/text-splitter@0.0.1";
+import { RecursiveCharacterTextSplitter } from "https://esm.sh/langchain/dist/text_splitter";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -60,10 +60,10 @@ serve(async (req) => {
       chunkOverlap: 200,
     });
     
-    const docs = await splitter.splitText(text);
+    const chunks = await splitter.splitText(text);
 
     // Generate embeddings for each chunk
-    for (const chunk of docs) {
+    for (const chunk of chunks) {
       const embeddingResponse = await fetch('https://api.openai.com/v1/embeddings', {
         method: 'POST',
         headers: {
