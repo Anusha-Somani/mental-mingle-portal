@@ -1,11 +1,24 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
+import { Resend } from "npm:resend@2.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const supabaseAdmin = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+);
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+interface TriggerWord {
+  word: string;
+  severity: number;
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,59 +26,78 @@ serve(async (req) => {
   }
 
   try {
-    const { message, conversationId } = await req.json();
+    const { message, conversationId, userId } = await req.json();
     console.log('Received message:', message);
-    console.log('Conversation ID:', conversationId);
 
-    // Generate embedding for the user's message
-    const embeddingResponse = await fetch('https://api.openai.com/v1/embeddings', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'text-embedding-3-small',
-        input: message,
-      }),
-    });
+    // Get all trigger words from the database
+    const { data: triggerWords, error: triggerError } = await supabaseAdmin
+      .from('trigger_words')
+      .select('word, severity');
 
-    if (!embeddingResponse.ok) {
-      const error = await embeddingResponse.json();
-      console.error('OpenAI API error:', error);
-      throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
+    if (triggerError) {
+      console.error('Error fetching trigger words:', triggerError);
+      throw new Error('Failed to fetch trigger words');
     }
 
-    const {
-      data: [{ embedding }],
-    } = await embeddingResponse.json();
-
-    // Search for relevant content in the knowledge base
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    // Check if message contains any trigger words
+    const foundTriggers = (triggerWords as TriggerWord[]).filter(tw => 
+      message.toLowerCase().includes(tw.word.toLowerCase())
     );
 
-    const { data: relevantContent, error: searchError } = await supabaseClient.rpc(
-      'match_embeddings',
-      {
-        query_embedding: embedding,
-        match_threshold: 0.7,
-        match_count: 5,
+    if (foundTriggers.length > 0) {
+      console.log('Found trigger words:', foundTriggers);
+
+      // Get user details
+      const { data: userData, error: userError } = await supabaseAdmin
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (userError) {
+        console.error('Error fetching user data:', userError);
+        throw new Error('Failed to fetch user data');
       }
-    );
 
-    if (searchError) {
-      console.error('Error searching embeddings:', searchError);
-      throw new Error('Failed to search knowledge base');
+      // Get active counselors
+      const { data: counselors, error: counselorError } = await supabaseAdmin
+        .from('counselors')
+        .select('*')
+        .eq('is_active', true);
+
+      if (counselorError) {
+        console.error('Error fetching counselors:', counselorError);
+        throw new Error('Failed to fetch counselors');
+      }
+
+      // Send notification to each counselor
+      for (const counselor of counselors) {
+        try {
+          await resend.emails.send({
+            from: "MindVincible Alert <alerts@yourdomain.com>",
+            to: [counselor.email],
+            subject: "Urgent: Student Support Required",
+            html: `
+              <h1>Student Support Alert</h1>
+              <p>A student has used concerning language in their chat that requires immediate attention.</p>
+              <h2>Details:</h2>
+              <ul>
+                <li><strong>Trigger Words Detected:</strong> ${foundTriggers.map(t => t.word).join(', ')}</li>
+                <li><strong>Severity Level:</strong> ${Math.max(...foundTriggers.map(t => t.severity))}</li>
+                <li><strong>Message:</strong> "${message}"</li>
+                <li><strong>Conversation ID:</strong> ${conversationId}</li>
+              </ul>
+              <p>Please review this conversation and take appropriate action according to your protocols.</p>
+            `,
+          });
+          console.log(`Notification sent to counselor: ${counselor.email}`);
+        } catch (emailError) {
+          console.error(`Failed to send email to ${counselor.email}:`, emailError);
+        }
+      }
     }
 
-    // Prepare context from relevant content
-    const context = relevantContent
-      ?.map((item: any) => item.content)
-      .join('\n\n');
-
-    // Generate AI response using OpenAI
+    // Generate AI response
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -77,53 +109,26 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a helpful assistant. Use this knowledge base information to inform your responses: ${context}`,
+            content: 'You are a supportive and empathetic AI assistant. If users express thoughts of self-harm or severe distress, acknowledge their feelings and encourage them to seek help from their school counselor or a mental health professional. Provide the suicide prevention hotline number (988) when appropriate.'
           },
-          { role: 'user', content: message },
+          { role: 'user', content: message }
         ],
-        max_tokens: 500,
       }),
     });
 
-    if (!openAIResponse.ok) {
-      const error = await openAIResponse.json();
-      console.error('OpenAI API error:', error);
-      throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
-    }
-
     const aiResponse = await openAIResponse.json();
-    console.log('Received AI response');
-
     const botMessage = aiResponse.choices[0].message.content;
-
-    // Store the bot's response in the database
-    const { error: insertError } = await supabaseClient
-      .from('chat_messages')
-      .insert([
-        {
-          message: botMessage,
-          is_bot: true,
-          conversation_id: conversationId,
-        },
-      ]);
-
-    if (insertError) {
-      console.error('Error storing bot message:', insertError);
-      throw new Error('Failed to store bot message');
-    }
 
     return new Response(
       JSON.stringify({ message: botMessage }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
+
   } catch (error) {
     console.error('Error in chat function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
