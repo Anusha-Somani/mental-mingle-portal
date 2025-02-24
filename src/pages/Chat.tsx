@@ -2,6 +2,7 @@
 import Navigation from "@/components/Navigation";
 import ChatBot from "@/components/ChatBot";
 import Wave from "@/components/Wave";
+import DocumentUpload from "@/components/chat/DocumentUpload";
 
 const Chat = () => {
   return (
@@ -17,7 +18,8 @@ const Chat = () => {
             A safe space to share your thoughts and feelings. Our AI companion is here to listen and support you.
           </p>
         </div>
-        <div className="animate-fade-in">
+        <div className="grid gap-6 animate-fade-in">
+          <DocumentUpload />
           <ChatBot />
         </div>
       </main>
