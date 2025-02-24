@@ -81,6 +81,33 @@ export type Database = {
         }
         Relationships: []
       }
+      counselors: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean | null
+          name: string
+          school_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          school_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          school_id?: string | null
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           content: string | null
@@ -255,6 +282,27 @@ export type Database = {
           id?: string
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
+        }
+        Relationships: []
+      }
+      trigger_words: {
+        Row: {
+          created_at: string
+          id: string
+          severity: number
+          word: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          severity?: number
+          word: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          severity?: number
+          word?: string
         }
         Relationships: []
       }
