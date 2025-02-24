@@ -3,6 +3,7 @@ import Navigation from "@/components/Navigation";
 import ChatBot from "@/components/ChatBot";
 import Wave from "@/components/Wave";
 import DocumentUpload from "@/components/chat/DocumentUpload";
+import DocumentManager from "@/components/chat/DocumentManager";
 import { useAdminStatus } from "@/hooks/use-admin-status";
 
 const Chat = () => {
@@ -22,7 +23,12 @@ const Chat = () => {
           </p>
         </div>
         <div className="grid gap-6 animate-fade-in">
-          {isAdmin && <DocumentUpload />}
+          {isAdmin && (
+            <>
+              <DocumentUpload />
+              <DocumentManager />
+            </>
+          )}
           <ChatBot />
         </div>
       </main>

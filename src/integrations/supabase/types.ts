@@ -329,7 +329,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_document_view: {
+        Row: {
+          category: string | null
+          content: string | null
+          created_at: string | null
+          id: string | null
+          metadata: Json | null
+        }
+        Insert: {
+          category?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          metadata?: Json | null
+        }
+        Update: {
+          category?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       binary_quantize:
