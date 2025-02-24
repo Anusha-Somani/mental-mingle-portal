@@ -5,6 +5,7 @@ import Wave from "@/components/Wave";
 import DocumentUpload from "@/components/chat/DocumentUpload";
 import DocumentManager from "@/components/chat/DocumentManager";
 import { useAdminStatus } from "@/hooks/use-admin-status";
+import { Loader2 } from "lucide-react";
 
 const Chat = () => {
   const { isAdmin, loading } = useAdminStatus();
@@ -23,13 +24,21 @@ const Chat = () => {
           </p>
         </div>
         <div className="grid gap-6 animate-fade-in">
-          {isAdmin && (
+          {loading ? (
+            <div className="flex items-center justify-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-[#FF8A48]" />
+            </div>
+          ) : (
             <>
-              <DocumentUpload />
-              <DocumentManager />
+              {isAdmin && (
+                <>
+                  <DocumentUpload />
+                  <DocumentManager />
+                </>
+              )}
+              <ChatBot />
             </>
           )}
-          <ChatBot />
         </div>
       </main>
     </div>

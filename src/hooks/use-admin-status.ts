@@ -9,12 +9,17 @@ export const useAdminStatus = () => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       try {
+        setLoading(true);
         const { data: { session } } = await supabase.auth.getSession();
+        
         if (!session) {
+          console.log('No session found');
           setIsAdmin(false);
           return;
         }
 
+        console.log('Checking admin status for user:', session.user.id);
+        
         const { data: roleData, error } = await supabase
           .from('user_roles')
           .select('role')
@@ -27,6 +32,7 @@ export const useAdminStatus = () => {
           return;
         }
 
+        console.log('Role data:', roleData);
         setIsAdmin(roleData?.role === 'admin');
       } catch (error) {
         console.error('Error checking admin status:', error);
@@ -37,6 +43,15 @@ export const useAdminStatus = () => {
     };
 
     checkAdminStatus();
+
+    // Subscribe to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      checkAdminStatus();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return { isAdmin, loading };
