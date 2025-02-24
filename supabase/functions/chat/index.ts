@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
@@ -29,7 +28,38 @@ serve(async (req) => {
     const { message, conversationId, userId } = await req.json();
     console.log('Received message:', message);
 
-    // Get all trigger words from the database
+    // First, get relevant context from our embeddings
+    const embeddingResponse = await fetch('https://api.openai.com/v1/embeddings', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'text-embedding-3-small',
+        input: message,
+      }),
+    });
+
+    const embeddingData = await embeddingResponse.json();
+    const embedding = embeddingData.data[0].embedding;
+
+    // Query for similar content
+    const { data: similarContent } = await supabaseAdmin.rpc(
+      'match_embeddings',
+      {
+        query_embedding: embedding,
+        match_threshold: 0.7,
+        match_count: 5,
+      }
+    );
+
+    // Prepare context from similar content
+    const context = similarContent
+      ? similarContent.map(item => item.content).join('\n\n')
+      : '';
+
+    // Check trigger words
     const { data: triggerWords, error: triggerError } = await supabaseAdmin
       .from('trigger_words')
       .select('word, severity');
@@ -39,65 +69,72 @@ serve(async (req) => {
       throw new Error('Failed to fetch trigger words');
     }
 
-    // Check if message contains any trigger words
-    const foundTriggers = (triggerWords as TriggerWord[]).filter(tw => 
-      message.toLowerCase().includes(tw.word.toLowerCase())
-    );
+    let maxSeverity = 0;
+    if (triggerWords) {
+      for (const { word, severity } of triggerWords) {
+        if (message.toLowerCase().includes(word.toLowerCase())) {
+          maxSeverity = Math.max(maxSeverity, severity);
+        }
+      }
+    }
 
-    if (foundTriggers.length > 0) {
-      console.log('Found trigger words:', foundTriggers);
+    if (maxSeverity >= 7) {
+      const { data: conversation, error: conversationError } = await supabaseAdmin
+        .from('conversations')
+        .select('title')
+        .eq('id', conversationId)
+        .single();
 
-      // Get user details
-      const { data: userData, error: userError } = await supabaseAdmin
+      if (conversationError) {
+        console.error('Error fetching conversation:', conversationError);
+        throw new Error('Failed to fetch conversation');
+      }
+
+      const { data: user, error: userError } = await supabaseAdmin
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
       if (userError) {
-        console.error('Error fetching user data:', userError);
-        throw new Error('Failed to fetch user data');
+        console.error('Error fetching user:', userError);
+        throw new Error('Failed to fetch user');
       }
 
-      // Get active counselors
-      const { data: counselors, error: counselorError } = await supabaseAdmin
+      const { data: counselorEmails, error: counselorError } = await supabaseAdmin
         .from('counselors')
-        .select('*')
-        .eq('is_active', true);
+        .select('email')
+        .eq('school_id', '79a49af4-5419-4551-8a7a-544041301493');
 
       if (counselorError) {
         console.error('Error fetching counselors:', counselorError);
         throw new Error('Failed to fetch counselors');
       }
 
-      // Send notification to each counselor
-      for (const counselor of counselors) {
-        try {
-          await resend.emails.send({
-            from: "MindVincible Alert <alerts@yourdomain.com>",
-            to: [counselor.email],
-            subject: "Urgent: Student Support Required",
-            html: `
-              <h1>Student Support Alert</h1>
-              <p>A student has used concerning language in their chat that requires immediate attention.</p>
-              <h2>Details:</h2>
-              <ul>
-                <li><strong>Trigger Words Detected:</strong> ${foundTriggers.map(t => t.word).join(', ')}</li>
-                <li><strong>Severity Level:</strong> ${Math.max(...foundTriggers.map(t => t.severity))}</li>
-                <li><strong>Message:</strong> "${message}"</li>
-                <li><strong>Conversation ID:</strong> ${conversationId}</li>
-              </ul>
-              <p>Please review this conversation and take appropriate action according to your protocols.</p>
-            `,
-          });
-          console.log(`Notification sent to counselor: ${counselor.email}`);
-        } catch (emailError) {
-          console.error(`Failed to send email to ${counselor.email}:`, emailError);
+      if (counselorEmails && counselorEmails.length > 0) {
+        for (const counselor of counselorEmails) {
+          try {
+            await resend.emails.send({
+              from: "Mindvincible <onboarding@resend.dev>",
+              to: [counselor.email],
+              subject: "High Severity Alert",
+              html: `
+                <p>A user has triggered a high severity alert.</p>
+                <p>Conversation: ${conversation?.title}</p>
+                <p>User ID: ${userId}</p>
+                <p>User Type: ${user?.user_type}</p>
+                <p>Message: ${message}</p>
+              `,
+            });
+            console.log(`Email sent to ${counselor.email}`);
+          } catch (resendError) {
+            console.error("Error sending email:", resendError);
+          }
         }
       }
     }
 
-    // Generate AI response
+    // Generate AI response with context
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -109,7 +146,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a supportive and empathetic AI assistant. If users express thoughts of self-harm or severe distress, acknowledge their feelings and encourage them to seek help from their school counselor or a mental health professional. Provide the suicide prevention hotline number (988) when appropriate.'
+            content: `You are a supportive and empathetic AI assistant. Use the following context to inform your responses, but maintain a natural conversational tone. If users express thoughts of self-harm or severe distress, acknowledge their feelings and encourage them to seek help from their school counselor or a mental health professional. Provide the suicide prevention hotline number (988) when appropriate.\n\nContext:\n${context}`
           },
           { role: 'user', content: message }
         ],
