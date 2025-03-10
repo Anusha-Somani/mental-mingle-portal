@@ -1,14 +1,29 @@
+
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { FileText, Video, Puzzle, Music, Heart, BookOpen, Timer } from "lucide-react";
+import { 
+  FileText, 
+  Video, 
+  Puzzle, 
+  Music, 
+  Heart, 
+  BookOpen, 
+  Timer, 
+  ShieldAlert, 
+  Book, 
+  MessageCircle, 
+  Star, 
+  Users 
+} from "lucide-react";
 import StarryBackground from "@/components/StarryBackground";
 import Wave from "@/components/Wave";
 
 const Resources = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedNeedCategory, setSelectedNeedCategory] = useState<string | null>(null);
 
   const recommendedContent = [
     {
@@ -44,13 +59,60 @@ const Resources = () => {
     { icon: BookOpen, label: "Articles", color: "#F5DF4D" }
   ];
 
+  const needCategories = [
+    { icon: ShieldAlert, label: "Bullying", color: "#3DFDFF", description: "Get support for dealing with bullying situations" },
+    { icon: Book, label: "Academic Pressure", color: "#FC68B3", description: "Manage stress from school and studies" },
+    { icon: MessageCircle, label: "Self Awareness", color: "#FF8A48", description: "Learn to express and understand your feelings" },
+    { icon: Star, label: "Confidence Building", color: "#F5DF4D", description: "Develop self-esteem and believe in yourself" },
+    { icon: Users, label: "Peer Pressure", color: "#2AC20E", description: "Navigate social situations and make your own choices" }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#3DFDFF]/10 to-[#FC68B3]/10">
       <Navigation />
       
       <main className="container mx-auto px-4 py-8">
+        {/* What do you need help with section */}
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold text-[#1A1F2C] mb-6 text-center">
+            What do you need help with today?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {needCategories.map((category, index) => (
+              <motion.button
+                key={index}
+                onClick={() => setSelectedNeedCategory(category.label)}
+                className={`p-6 rounded-xl text-center transition-all flex flex-col items-center h-full ${
+                  selectedNeedCategory === category.label
+                    ? 'bg-white shadow-lg scale-105'
+                    : 'bg-white/50 hover:bg-white hover:shadow-md'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <div 
+                  className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+                  style={{ backgroundColor: `${category.color}20` }}
+                >
+                  <category.icon 
+                    className="w-8 h-8"
+                    style={{ color: category.color }}
+                  />
+                </div>
+                <span className="font-semibold text-[#1A1F2C] mb-2">
+                  {category.label}
+                </span>
+                <p className="text-sm text-gray-600">{category.description}</p>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+
         {/* Mood-based recommendation */}
-        <div className="mb-8">
+        <div className="mb-12">
           <h2 className="text-2xl font-bold text-[#1A1F2C] mb-4">
             Recommended for you today
           </h2>
@@ -91,7 +153,7 @@ const Resources = () => {
         </div>
 
         {/* Categories */}
-        <div className="mb-8">
+        <div className="mb-12">
           <h2 className="text-2xl font-bold text-[#1A1F2C] mb-4">
             Explore Categories
           </h2>
