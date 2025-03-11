@@ -5,10 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
 
-// Import the components correctly
-import dynamic from 'next/dynamic';
-const MindfulTetris = dynamic(() => import('@/components/games/MindfulTetris'), { ssr: false });
-const BreathingGuide = dynamic(() => import('@/components/games/BreathingGuide'), { ssr: false });
+import MindfulTetris from '@/components/games/MindfulTetris';
+import BreathingGuide from '@/components/games/BreathingGuide';
 
 const TetrisGame = () => {
   const { toast } = useToast();
@@ -20,12 +18,10 @@ const TetrisGame = () => {
   const [muted, setMuted] = useState<boolean>(false);
   const [showBreathingGuide, setShowBreathingGuide] = useState<boolean>(false);
 
-  // Advance level based on lines cleared
   useEffect(() => {
     setLevel(Math.floor(lines / 10) + 1);
   }, [lines]);
 
-  // Show breathing guide after game over
   useEffect(() => {
     if (gameOver) {
       const timer = setTimeout(() => {
@@ -79,36 +75,25 @@ const TetrisGame = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Game area */}
             <div className="md:flex-1">
               {showBreathingGuide ? (
                 <div className="h-full">
-                  {/* Pass props properly with type assertion */}
-                  <BreathingGuide onFinish={handleBreathingFinish} />
+                  <BreathingGuide />
                 </div>
               ) : (
                 <Card className="h-full bg-white/80 backdrop-blur-sm overflow-hidden">
                   <CardContent className="p-0 flex justify-center">
-                    {/* Pass props properly with type assertion */}
-                    <MindfulTetris 
-                      isPlaying={isPlaying}
-                      level={level}
-                      muted={muted}
-                      onScoreChange={setScore}
-                      onLinesChange={setLines}
-                      onGameOver={handleGameOver}
-                    />
+                    <MindfulTetris />
                   </CardContent>
                 </Card>
               )}
             </div>
             
-            {/* Controls and info */}
             <div className="md:w-72 flex flex-col gap-4">
               <Card className="bg-white/80 backdrop-blur-sm">
                 <CardContent className="p-6">
                   <h1 className="text-2xl font-bold text-center mb-6 text-[#1A1F2C]">
-                    Mindful Blocks Game
+                    MindVincible Blocks
                   </h1>
                   
                   <div className="space-y-4 mb-6">
