@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -20,21 +21,39 @@ import {
   CheckCircle2,
   Award
 } from "lucide-react";
-import StarryBackground from "@/components/StarryBackground";
-import Wave from "@/components/Wave";
-import BullyingGameModule from "@/components/resources/BullyingGameModule";
 import { supabase } from "@/integrations/supabase/client";
+import CategoryContent from "@/components/resources/CategoryContent";
 
 const Resources = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedNeedCategory, setSelectedNeedCategory] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [userProgress, setUserProgress] = useState<{
+    completedModules: number[];
+    level: number;
+  }>({
+    completedModules: [],
+    level: 1
+  });
 
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user?.id) {
         setUserId(session.user.id);
+        
+        // Load user progress
+        const { data, error } = await supabase
+          .from('user_progress')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        if (!error && data) {
+          setUserProgress({
+            completedModules: data.completed_modules || [],
+            level: data.level || 1
+          });
+        }
       }
     };
     
@@ -76,27 +95,61 @@ const Resources = () => {
   ];
 
   const needCategories = [
-    { icon: ShieldAlert, label: "Bullying", color: "#3DFDFF", description: "Get support for dealing with bullying situations" },
-    { icon: Book, label: "Academic Pressure", color: "#FC68B3", description: "Manage stress from school and studies" },
-    { icon: MessageCircle, label: "Self Awareness", color: "#FF8A48", description: "Learn to express and understand your feelings" },
-    { icon: Star, label: "Confidence Building", color: "#F5DF4D", description: "Develop self-esteem and believe in yourself" },
-    { icon: Users, label: "Peer Pressure", color: "#2AC20E", description: "Navigate social situations and make your own choices" }
+    { 
+      icon: ShieldAlert, 
+      label: "Bullying", 
+      color: "#3DFDFF", 
+      description: "Get support for dealing with bullying situations",
+      modules: [1, 2, 3, 4, 5] 
+    },
+    { 
+      icon: Book, 
+      label: "Academic Pressure", 
+      color: "#FC68B3", 
+      description: "Manage stress from school and studies",
+      modules: [101, 102, 103, 104]
+    },
+    { 
+      icon: MessageCircle, 
+      label: "Self Awareness", 
+      color: "#FF8A48", 
+      description: "Learn to express and understand your feelings",
+      modules: [201, 202, 203, 204]
+    },
+    { 
+      icon: Star, 
+      label: "Confidence Building", 
+      color: "#F5DF4D", 
+      description: "Develop self-esteem and believe in yourself",
+      modules: [301, 302, 303, 304]
+    },
+    { 
+      icon: Users, 
+      label: "Peer Pressure", 
+      color: "#2AC20E", 
+      description: "Navigate social situations and make your own choices",
+      modules: [401, 402, 403, 404]
+    }
   ];
 
-  const renderSelectedCategoryContent = () => {
-    switch (selectedNeedCategory) {
-      case "Bullying":
-        return <BullyingGameModule userId={userId} />;
-      case "Academic Pressure":
-        return (
-          <div className="bg-white rounded-xl p-6 shadow-md">
-            <h3 className="text-xl font-bold mb-4">Academic Pressure Resources</h3>
-            <p>Resources for academic pressure coming soon...</p>
-          </div>
-        );
-      default:
-        return null;
-    }
+  // Check if category has completed modules
+  const getCategoryProgress = (modules: number[]) => {
+    const completedCount = modules.filter(id => 
+      userProgress.completedModules.includes(id)
+    ).length;
+    
+    return {
+      completed: completedCount,
+      total: modules.length,
+      percentage: Math.round((completedCount / modules.length) * 100)
+    };
+  };
+
+  // Render selected category content
+  const renderCategoryContent = () => {
+    if (!selectedCategory) return null;
+    
+    return <CategoryContent category={selectedCategory} userId={userId} />;
   };
 
   return (
@@ -112,9 +165,9 @@ const Resources = () => {
             {needCategories.map((category, index) => (
               <motion.button
                 key={index}
-                onClick={() => setSelectedNeedCategory(category.label)}
+                onClick={() => setSelectedCategory(category.label)}
                 className={`p-6 rounded-xl text-center transition-all flex flex-col items-center h-full ${
-                  selectedNeedCategory === category.label
+                  selectedCategory === category.label
                     ? 'bg-white shadow-lg scale-105'
                     : 'bg-white/50 hover:bg-white hover:shadow-md'
                 }`}
@@ -136,19 +189,50 @@ const Resources = () => {
                 <span className="font-semibold text-[#1A1F2C] mb-2">
                   {category.label}
                 </span>
-                <p className="text-sm text-gray-600">{category.description}</p>
+                <p className="text-sm text-gray-600 mb-2">{category.description}</p>
+                
+                {userId && (
+                  <div className="w-full mt-2">
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>Progress</span>
+                      <span>
+                        {getCategoryProgress(category.modules).completed}/{getCategoryProgress(category.modules).total}
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 rounded-full mt-1">
+                      <div 
+                        className="h-full rounded-full" 
+                        style={{ 
+                          width: `${getCategoryProgress(category.modules).percentage}%`,
+                          backgroundColor: category.color 
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
               </motion.button>
             ))}
           </div>
         </div>
 
-        {selectedNeedCategory && (
+        {selectedCategory && (
           <div className="mb-12 animate-fade-in">
-            {renderSelectedCategoryContent()}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-[#1A1F2C]">
+                {selectedCategory} Resources
+              </h2>
+              <Button 
+                variant="ghost" 
+                onClick={() => setSelectedCategory(null)}
+              >
+                Back to Categories
+              </Button>
+            </div>
+            {renderCategoryContent()}
           </div>
         )}
 
-        {!selectedNeedCategory && (
+        {!selectedCategory && (
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-[#1A1F2C] mb-4">
               Recommended for you today
@@ -190,7 +274,7 @@ const Resources = () => {
           </div>
         )}
 
-        {!selectedNeedCategory && (
+        {!selectedCategory && (
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-[#1A1F2C] mb-4">
               Explore Categories
@@ -199,12 +283,7 @@ const Resources = () => {
               {categories.map((category, index) => (
                 <motion.button
                   key={index}
-                  onClick={() => setSelectedCategory(category.label)}
-                  className={`p-6 rounded-xl text-center transition-all ${
-                    selectedCategory === category.label
-                      ? 'bg-white shadow-lg scale-105'
-                      : 'bg-white/50 hover:bg-white hover:shadow-md'
-                  }`}
+                  className="p-6 rounded-xl text-center transition-all bg-white/50 hover:bg-white hover:shadow-md"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -221,7 +300,7 @@ const Resources = () => {
           </div>
         )}
 
-        {!selectedNeedCategory && (
+        {!selectedCategory && (
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-[#1A1F2C] mb-4">
               Calming Activities

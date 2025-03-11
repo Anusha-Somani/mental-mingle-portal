@@ -306,6 +306,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_progress: {
+        Row: {
+          completed_modules: number[] | null
+          created_at: string | null
+          id: string
+          level: number | null
+          updated_at: string | null
+          user_id: string
+          xp: number | null
+        }
+        Insert: {
+          completed_modules?: number[] | null
+          created_at?: string | null
+          id?: string
+          level?: number | null
+          updated_at?: string | null
+          user_id: string
+          xp?: number | null
+        }
+        Update: {
+          completed_modules?: number[] | null
+          created_at?: string | null
+          id?: string
+          level?: number | null
+          updated_at?: string | null
+          user_id?: string
+          xp?: number | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
