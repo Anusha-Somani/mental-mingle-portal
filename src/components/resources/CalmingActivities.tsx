@@ -1,7 +1,7 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Puzzle, Music, Gamepad2 } from "lucide-react";
+import { Puzzle, Music, Gamepad2, Play } from "lucide-react";
 
 const CalmingActivities = () => {
   return (
@@ -9,7 +9,7 @@ const CalmingActivities = () => {
       <h2 className="text-2xl font-bold text-[#1A1F2C] mb-4">
         Calming Activities
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="p-6 bg-gradient-to-br from-[#3DFDFF]/20 to-[#FC68B3]/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -57,6 +57,24 @@ const CalmingActivities = () => {
             <Button 
               className="w-full bg-[#3DFDFF] hover:bg-[#3DFDFF]/80 text-[#1A1F2C]"
               onClick={() => window.location.href = '/tetris'}
+            >
+              Play Game
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="p-6 bg-gradient-to-br from-[#F5DF4D]/20 to-[#2AC20E]/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Play className="w-6 h-6 text-[#2AC20E]" />
+              Emotion Quest
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4">A board game to explore emotions and build resilience</p>
+            <Button 
+              className="w-full bg-[#2AC20E] hover:bg-[#2AC20E]/80 text-white"
+              onClick={() => window.location.href = '/emotion-quest'}
             >
               Play Game
             </Button>

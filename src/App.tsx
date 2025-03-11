@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -8,6 +9,7 @@ import Chat from "@/pages/Chat";
 import Resources from "@/pages/Resources";
 import Puzzle from "@/pages/Puzzle";
 import TetrisGame from "@/pages/TetrisGame";
+import EmotionQuest from "@/pages/EmotionQuest";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -32,6 +34,7 @@ function App() {
             <Route path="/resources" element={<Resources />} />
             <Route path="/puzzle" element={<Puzzle />} />
             <Route path="/tetris" element={<TetrisGame />} />
+            <Route path="/emotion-quest" element={<EmotionQuest />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
