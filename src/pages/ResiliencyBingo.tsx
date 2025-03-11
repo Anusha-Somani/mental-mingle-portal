@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PersonStanding, Sparkles, Award } from "lucide-react";
@@ -10,6 +9,15 @@ import Navigation from "@/components/Navigation";
 import BingoBoard from "@/components/games/BingoBoard";
 import { supabase } from "@/integrations/supabase/client";
 
+interface BingoProgress {
+  id: string;
+  user_id: string;
+  completed_cells: number[];
+  bingo_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
 const ResiliencyBingo = () => {
   const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
@@ -19,29 +27,30 @@ const ResiliencyBingo = () => {
   const [completedActivities, setCompletedActivities] = useState<number[]>([]);
   const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null);
   
-  // Check authentication status
   useEffect(() => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session?.user) {
         setUserId(data.session.user.id);
         
-        // Since we don't have the bingo_progress table in Supabase types yet,
-        // let's manually handle the data fetching and type it
-        const { data: progressData, error } = await supabase
-          .from('user_progress')
-          .select('*')
-          .eq('user_id', data.session.user.id)
-          .single();
-          
-        if (progressData) {
-          // If user has existing progress in user_progress, we can use that
-          // In a real implementation, you'd want to migrate this to the new table
-          setCompletedActivities(progressData.completed_modules || []);
-        } else {
-          // Default empty state
-          setCompletedActivities([]);
-          setBingoCount(0);
+        try {
+          const { data: bingoData, error: bingoError } = await supabase
+            .from('user_progress')
+            .select('*')
+            .eq('user_id', data.session.user.id)
+            .single();
+            
+          if (bingoData) {
+            setCompletedActivities(bingoData.completed_modules || []);
+            const newBingoCount = checkForBingos(bingoData.completed_modules || []);
+            setBingoCount(newBingoCount);
+            setHasBingo(newBingoCount > 0);
+          } else {
+            setCompletedActivities([]);
+            setBingoCount(0);
+          }
+        } catch (error) {
+          console.error("Error fetching bingo progress:", error);
         }
       }
     };
@@ -51,7 +60,6 @@ const ResiliencyBingo = () => {
 
   const handleActivityCompletion = async (activityId: number) => {
     if (completedActivities.includes(activityId)) {
-      // Already completed
       setSelectedActivityId(activityId);
       return;
     }
@@ -60,7 +68,6 @@ const ResiliencyBingo = () => {
     setCompletedActivities(newCompletedActivities);
     setSelectedActivityId(activityId);
     
-    // Check for new bingos
     const newBingoCount = checkForBingos(newCompletedActivities);
     const hasDifferentBingoCount = newBingoCount > bingoCount;
     
@@ -74,16 +81,13 @@ const ResiliencyBingo = () => {
         description: "You've achieved a bingo! Great job building resilience!",
       });
       
-      // Hide confetti after a few seconds
       setTimeout(() => {
         setShowConfetti(false);
       }, 5000);
     }
     
-    // Save progress if user is logged in
     if (userId) {
       try {
-        // For now, let's use the user_progress table until the types are updated
         await supabase
           .from('user_progress')
           .upsert({
@@ -100,7 +104,6 @@ const ResiliencyBingo = () => {
   const checkForBingos = (completedCells: number[]): number => {
     let bingoCount = 0;
     
-    // Check rows
     for (let row = 0; row < 5; row++) {
       const rowCells = [0, 1, 2, 3, 4].map(col => row * 5 + col);
       if (rowCells.every(cell => completedCells.includes(cell))) {
@@ -108,7 +111,6 @@ const ResiliencyBingo = () => {
       }
     }
     
-    // Check columns
     for (let col = 0; col < 5; col++) {
       const colCells = [0, 1, 2, 3, 4].map(row => row * 5 + col);
       if (colCells.every(cell => completedCells.includes(cell))) {
@@ -116,7 +118,6 @@ const ResiliencyBingo = () => {
       }
     }
     
-    // Check diagonals
     const diagonal1 = [0, 6, 12, 18, 24];
     const diagonal2 = [4, 8, 12, 16, 20];
     
@@ -137,7 +138,6 @@ const ResiliencyBingo = () => {
     setBingoCount(0);
     setSelectedActivityId(null);
     
-    // Reset progress in database if user is logged in
     if (userId) {
       try {
         await supabase
@@ -189,7 +189,6 @@ const ResiliencyBingo = () => {
           </div>
           
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Bingo board */}
             <div className="md:flex-1">
               <BingoBoard 
                 completedActivities={completedActivities}
@@ -217,7 +216,6 @@ const ResiliencyBingo = () => {
               </div>
             </div>
             
-            {/* Activity details */}
             <div className="md:w-80">
               <Card className="bg-white/80 backdrop-blur-sm sticky top-4">
                 <CardContent className="p-6">

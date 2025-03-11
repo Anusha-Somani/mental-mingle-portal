@@ -30,6 +30,33 @@ export type Database = {
         }
         Relationships: []
       }
+      bingo_progress: {
+        Row: {
+          bingo_count: number | null
+          completed_cells: number[] | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bingo_count?: number | null
+          completed_cells?: number[] | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bingo_count?: number | null
+          completed_cells?: number[] | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           conversation_id: string | null

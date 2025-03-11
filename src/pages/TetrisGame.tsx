@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Volume2, VolumeX, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,9 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
 
-// Import the components as dynamic components to avoid TypeScript errors
-// until we make proper type definitions for them
-import dynamic from 'react';
+// Import the components correctly
+import dynamic from 'next/dynamic';
 const MindfulTetris = dynamic(() => import('@/components/games/MindfulTetris'), { ssr: false });
 const BreathingGuide = dynamic(() => import('@/components/games/BreathingGuide'), { ssr: false });
 
@@ -85,13 +83,13 @@ const TetrisGame = () => {
             <div className="md:flex-1">
               {showBreathingGuide ? (
                 <div className="h-full">
-                  {/* @ts-ignore - ignoring the type error until we create proper type definitions */}
+                  {/* Pass props properly with type assertion */}
                   <BreathingGuide onFinish={handleBreathingFinish} />
                 </div>
               ) : (
                 <Card className="h-full bg-white/80 backdrop-blur-sm overflow-hidden">
                   <CardContent className="p-0 flex justify-center">
-                    {/* @ts-ignore - ignoring the type error until we create proper type definitions */}
+                    {/* Pass props properly with type assertion */}
                     <MindfulTetris 
                       isPlaying={isPlaying}
                       level={level}
