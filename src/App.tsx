@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -8,6 +7,7 @@ import Dashboard from "@/pages/Dashboard";
 import Chat from "@/pages/Chat";
 import Resources from "@/pages/Resources";
 import Puzzle from "@/pages/Puzzle";
+import TetrisGame from "@/pages/TetrisGame";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -23,15 +23,18 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/puzzle" element={<Puzzle />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <div>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/puzzle" element={<Puzzle />} />
+            <Route path="/tetris" element={<TetrisGame />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
         <Toaster />
       </Router>
     </QueryClientProvider>
