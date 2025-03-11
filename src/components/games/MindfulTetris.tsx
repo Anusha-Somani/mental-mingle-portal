@@ -1,435 +1,420 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { motion } from "framer-motion";
 
-// Game board dimensions
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Heart, RefreshCw, PauseCircle, PlayCircle, Wind } from "lucide-react";
+import BreathingGuide from "./BreathingGuide";
+
+// Tetris constants
 const BOARD_WIDTH = 10;
 const BOARD_HEIGHT = 20;
-const BLOCK_SIZE = 30;
+const BLOCK_SIZE = 24;
 
-// Tetromino shapes and colors from MindVincible's palette
+// Tetromino shapes
 const TETROMINOES = [
   {
     shape: [
       [1, 1],
       [1, 1]
     ],
-    color: "#F5DF4D" // Yellow
+    color: "#FF8A48"
   },
   {
     shape: [
       [0, 2, 0],
       [2, 2, 2]
     ],
-    color: "#FF8A48" // Orange
+    color: "#FC68B3"
   },
   {
     shape: [
       [0, 3, 3],
       [3, 3, 0]
     ],
-    color: "#FC68B3" // Pink
+    color: "#3DFDFF"
   },
   {
     shape: [
       [4, 4, 0],
       [0, 4, 4]
     ],
-    color: "#2AC20E" // Green
+    color: "#F5DF4D"
   },
   {
     shape: [
-      [5, 0, 0],
-      [5, 5, 5]
+      [5, 5, 5, 5]
     ],
-    color: "#3DFDFF" // Cyan
+    color: "#D5D5F1"
   },
   {
     shape: [
       [0, 0, 6],
       [6, 6, 6]
     ],
-    color: "#D5D5F1" // Purple
+    color: "#2AC20E"
   },
   {
     shape: [
-      [7, 7, 7, 7]
+      [7, 0, 0],
+      [7, 7, 7]
     ],
-    color: "#FF8A48" // Orange
+    color: "#6B7FD7"
   }
 ];
 
-interface MindfulTetrisProps {
-  isPlaying: boolean;
-  level: number;
-  muted: boolean;
-  onScoreChange: (score: number) => void;
-  onLinesChange: (lines: number) => void;
-  onGameOver: () => void;
-}
+// Mindful prompts that appear as player plays
+const MINDFUL_PROMPTS = [
+  "Notice your breathing - is it fast or slow?",
+  "How do your shoulders feel right now?",
+  "Pay attention to the colors as they fall",
+  "Can you feel your feet on the floor?",
+  "Take a deep breath between moves",
+  "Notice any thoughts without judging them",
+  "Bring awareness to how your hands feel",
+  "Are you holding tension anywhere?",
+  "Stay present with each piece as it falls",
+  "Observe any feelings of frustration without reacting",
+  "Feel the weight of your body in your chair",
+  "Notice the sounds around you",
+  "Are you rushing? Try slowing down",
+  "Bring gentle awareness to your jaw - is it tense?",
+  "Remember, it's just a game - enjoy the process"
+];
 
-const MindfulTetris: React.FC<MindfulTetrisProps> = ({ 
-  isPlaying, 
-  level, 
-  muted,
-  onScoreChange, 
-  onLinesChange, 
-  onGameOver 
-}) => {
-  // Canvas refs
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
-  
+const MindfulTetris = () => {
   // Game state
-  const [board, setBoard] = useState<number[][]>(
-    Array(BOARD_HEIGHT).fill(0).map(() => Array(BOARD_WIDTH).fill(0))
-  );
-  const [score, setScore] = useState(0);
-  const [lines, setLines] = useState(0);
+  const [board, setBoard] = useState<number[][]>([]);
+  const [currentTetromino, setCurrentTetromino] = useState<{
+    shape: number[][];
+    position: { x: number; y: number };
+    rotation: number;
+    color: string;
+  } | null>(null);
+  const [nextTetromino, setNextTetromino] = useState<{
+    shape: number[][];
+    color: string;
+  } | null>(null);
   const [gameOver, setGameOver] = useState(false);
-  const [currentTetromino, setCurrentTetromino] = useState(TETROMINOES[0]);
-  const [nextTetromino, setNextTetromino] = useState(TETROMINOES[1]);
-  const [position, setPosition] = useState({ x: 3, y: 0 });
-  const [dropSpeed, setDropSpeed] = useState(1000);
+  const [isPaused, setIsPaused] = useState(false);
+  const [score, setScore] = useState(0);
+  const [level, setLevel] = useState(1);
+  const [linesCleared, setLinesCleared] = useState(0);
+  const [showBreathingGuide, setShowBreathingGuide] = useState(false);
+  const [currentPrompt, setCurrentPrompt] = useState("");
+  const [gameStarted, setGameStarted] = useState(false);
   
-  // Audio elements
-  const dropSoundRef = useRef<HTMLAudioElement | null>(null);
-  const clearSoundRef = useRef<HTMLAudioElement | null>(null);
-  const gameOverSoundRef = useRef<HTMLAudioElement | null>(null);
+  // References for game loop
+  const requestRef = useRef<number>();
+  const lastTimeRef = useRef<number>(0);
+  const dropTimeRef = useRef<number>(1000); // Initial drop time in ms
+  const dropCounterRef = useRef<number>(0);
   
-  // Initialize canvas and audio
-  useEffect(() => {
-    if (canvasRef.current) {
-      ctxRef.current = canvasRef.current.getContext('2d');
-      canvasRef.current.width = BOARD_WIDTH * BLOCK_SIZE;
-      canvasRef.current.height = BOARD_HEIGHT * BLOCK_SIZE;
-    }
-    
-    // Initialize sounds
-    dropSoundRef.current = new Audio('/assets/sounds/drop.mp3');
-    clearSoundRef.current = new Audio('/assets/sounds/clear.mp3');
-    gameOverSoundRef.current = new Audio('/assets/sounds/gameover.mp3');
-    
-    return () => {
-      // Clean up audio
-      dropSoundRef.current = null;
-      clearSoundRef.current = null;
-      gameOverSoundRef.current = null;
+  // Initialize the game board
+  const initializeBoard = useCallback(() => {
+    const newBoard = Array(BOARD_HEIGHT)
+      .fill(null)
+      .map(() => Array(BOARD_WIDTH).fill(0));
+    setBoard(newBoard);
+    return newBoard;
+  }, []);
+  
+  // Generate a random tetromino
+  const generateRandomTetromino = useCallback(() => {
+    const randomIndex = Math.floor(Math.random() * TETROMINOES.length);
+    const tetromino = TETROMINOES[randomIndex];
+    return {
+      shape: tetromino.shape,
+      position: { x: Math.floor(BOARD_WIDTH / 2) - 1, y: 0 },
+      rotation: 0,
+      color: tetromino.color
     };
   }, []);
   
-  // Update drop speed based on level
-  useEffect(() => {
-    // Speed up as level increases (1000ms at level 1, ~100ms at level 10)
-    setDropSpeed(Math.max(1000 - ((level - 1) * 100), 100));
-  }, [level]);
-  
-  // Generate a random tetromino
-  const getRandomTetromino = useCallback(() => {
-    const index = Math.floor(Math.random() * TETROMINOES.length);
-    return TETROMINOES[index];
+  // Create the next tetromino preview
+  const generateNextTetromino = useCallback(() => {
+    const randomIndex = Math.floor(Math.random() * TETROMINOES.length);
+    const tetromino = TETROMINOES[randomIndex];
+    return {
+      shape: tetromino.shape,
+      color: tetromino.color
+    };
   }, []);
   
-  // Draw the game board
-  const drawBoard = useCallback(() => {
-    if (!ctxRef.current) return;
-    
-    const ctx = ctxRef.current;
-    ctx.clearRect(0, 0, BOARD_WIDTH * BLOCK_SIZE, BOARD_HEIGHT * BLOCK_SIZE);
-    
-    // Draw board background
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, BOARD_WIDTH * BLOCK_SIZE, BOARD_HEIGHT * BLOCK_SIZE);
-    
-    // Draw the grid
-    ctx.strokeStyle = "#EEEEEE";
-    ctx.lineWidth = 0.5;
-    
-    for (let x = 0; x <= BOARD_WIDTH; x++) {
-      ctx.beginPath();
-      ctx.moveTo(x * BLOCK_SIZE, 0);
-      ctx.lineTo(x * BLOCK_SIZE, BOARD_HEIGHT * BLOCK_SIZE);
-      ctx.stroke();
-    }
-    
-    for (let y = 0; y <= BOARD_HEIGHT; y++) {
-      ctx.beginPath();
-      ctx.moveTo(0, y * BLOCK_SIZE);
-      ctx.lineTo(BOARD_WIDTH * BLOCK_SIZE, y * BLOCK_SIZE);
-      ctx.stroke();
-    }
-    
-    // Draw the fixed blocks on the board
-    for (let y = 0; y < BOARD_HEIGHT; y++) {
-      for (let x = 0; x < BOARD_WIDTH; x++) {
-        if (board[y][x] !== 0) {
-          const blockValue = board[y][x];
-          const tetromino = TETROMINOES.find(t => t.shape.flat().includes(blockValue));
-          
-          if (tetromino) {
-            ctx.fillStyle = tetromino.color;
-            ctx.strokeStyle = "#FFFFFF";
-            ctx.lineWidth = 2;
-            
-            // Draw block with rounded corners
-            ctx.beginPath();
-            ctx.roundRect(
-              x * BLOCK_SIZE + 1, 
-              y * BLOCK_SIZE + 1, 
-              BLOCK_SIZE - 2, 
-              BLOCK_SIZE - 2,
-              [4]
-            );
-            ctx.fill();
-            ctx.stroke();
-            
-            // Add a subtle inner shadow
-            ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-            ctx.fillRect(
-              x * BLOCK_SIZE + BLOCK_SIZE - 8, 
-              y * BLOCK_SIZE + 1, 
-              7, 
-              BLOCK_SIZE - 2
-            );
-            ctx.fillRect(
-              x * BLOCK_SIZE + 1, 
-              y * BLOCK_SIZE + BLOCK_SIZE - 8, 
-              BLOCK_SIZE - 2, 
-              7
-            );
-          }
-        }
-      }
-    }
-    
-    // Draw the current tetromino
-    if (currentTetromino && !gameOver) {
-      ctx.fillStyle = currentTetromino.color;
-      ctx.strokeStyle = "#FFFFFF";
-      ctx.lineWidth = 2;
-      
-      for (let y = 0; y < currentTetromino.shape.length; y++) {
-        for (let x = 0; x < currentTetromino.shape[y].length; x++) {
-          if (currentTetromino.shape[y][x] !== 0) {
-            const posX = (position.x + x) * BLOCK_SIZE;
-            const posY = (position.y + y) * BLOCK_SIZE;
-            
-            // Draw block with rounded corners
-            ctx.beginPath();
-            ctx.roundRect(
-              posX + 1, 
-              posY + 1, 
-              BLOCK_SIZE - 2, 
-              BLOCK_SIZE - 2,
-              [4]
-            );
-            ctx.fill();
-            ctx.stroke();
-            
-            // Add a subtle inner shadow
-            ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-            ctx.fillRect(
-              posX + BLOCK_SIZE - 8, 
-              posY + 1, 
-              7, 
-              BLOCK_SIZE - 2
-            );
-            ctx.fillRect(
-              posX + 1, 
-              posY + BLOCK_SIZE - 8, 
-              BLOCK_SIZE - 2, 
-              7
-            );
-          }
-        }
-      }
-    }
-  }, [board, currentTetromino, position, gameOver]);
+  // Change the mindfulness prompt
+  const changePrompt = useCallback(() => {
+    const randomIndex = Math.floor(Math.random() * MINDFUL_PROMPTS.length);
+    setCurrentPrompt(MINDFUL_PROMPTS[randomIndex]);
+  }, []);
   
-  // Check collision
-  const checkCollision = useCallback((shape: number[][], posX: number, posY: number) => {
+  // Start a new game
+  const startGame = useCallback(() => {
+    initializeBoard();
+    setCurrentTetromino(generateRandomTetromino());
+    setNextTetromino(generateNextTetromino());
+    setGameOver(false);
+    setIsPaused(false);
+    setScore(0);
+    setLevel(1);
+    setLinesCleared(0);
+    changePrompt();
+    dropTimeRef.current = 1000;
+    setGameStarted(true);
+    
+    // Set up prompt change interval
+    const promptInterval = setInterval(() => {
+      if (!isPaused && !gameOver) {
+        changePrompt();
+      }
+    }, 15000); // Change prompt every 15 seconds
+    
+    return () => clearInterval(promptInterval);
+  }, [initializeBoard, generateRandomTetromino, generateNextTetromino, changePrompt, isPaused, gameOver]);
+  
+  // Check if the current move is valid
+  const isValidMove = useCallback(
+    (shape: number[][], position: { x: number; y: number }) => {
+      for (let y = 0; y < shape.length; y++) {
+        for (let x = 0; x < shape[y].length; x++) {
+          if (shape[y][x] !== 0) {
+            const boardX = position.x + x;
+            const boardY = position.y + y;
+            
+            // Check if outside the board or colliding with another piece
+            if (
+              boardX < 0 ||
+              boardX >= BOARD_WIDTH ||
+              boardY >= BOARD_HEIGHT ||
+              (boardY >= 0 && board[boardY][boardX] !== 0)
+            ) {
+              return false;
+            }
+          }
+        }
+      }
+      return true;
+    },
+    [board]
+  );
+  
+  // Rotate a tetromino
+  const rotateTetromino = useCallback(
+    (shape: number[][]) => {
+      // Transpose the matrix
+      const rotated = shape[0].map((_, colIndex) =>
+        shape.map((row) => row[colIndex])
+      );
+      // Reverse each row to get a 90-degree rotation
+      return rotated.map((row) => [...row].reverse());
+    },
+    []
+  );
+  
+  // Merge the current tetromino into the board
+  const mergeTetromino = useCallback(() => {
+    if (!currentTetromino) return;
+    
+    const newBoard = [...board.map((row) => [...row])];
+    const { shape, position, color } = currentTetromino;
+    
     for (let y = 0; y < shape.length; y++) {
       for (let x = 0; x < shape[y].length; x++) {
         if (shape[y][x] !== 0) {
-          const newX = posX + x;
-          const newY = posY + y;
-          
-          // Check boundaries
-          if (newX < 0 || newX >= BOARD_WIDTH || newY >= BOARD_HEIGHT) {
-            return true;
-          }
-          
-          // Check if position is already taken on the board
-          if (newY >= 0 && board[newY][newX] !== 0) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  }, [board]);
-  
-  // Rotate tetromino
-  const rotateTetromino = useCallback(() => {
-    if (gameOver || !currentTetromino) return;
-    
-    const rotated = currentTetromino.shape[0].map((_, i) => 
-      currentTetromino.shape.map(row => row[i]).reverse()
-    );
-    
-    // Check if rotation is valid
-    if (!checkCollision(rotated, position.x, position.y)) {
-      setCurrentTetromino({
-        ...currentTetromino,
-        shape: rotated
-      });
-    }
-  }, [currentTetromino, position, checkCollision, gameOver]);
-  
-  // Move tetromino
-  const moveTetromino = useCallback((direction: "left" | "right" | "down") => {
-    if (gameOver || !currentTetromino) return;
-    
-    let newX = position.x;
-    let newY = position.y;
-    
-    if (direction === "left") newX -= 1;
-    if (direction === "right") newX += 1;
-    if (direction === "down") newY += 1;
-    
-    if (!checkCollision(currentTetromino.shape, newX, newY)) {
-      setPosition({ x: newX, y: newY });
-      return true;
-    }
-    
-    // If can't move down, lock the piece
-    if (direction === "down") {
-      lockTetromino();
-      return false;
-    }
-    
-    return false;
-  }, [position, currentTetromino, checkCollision, gameOver]);
-  
-  // Hard drop tetromino
-  const hardDrop = useCallback(() => {
-    if (gameOver || !currentTetromino) return;
-    
-    let newY = position.y;
-    
-    // Move down until collision
-    while (!checkCollision(currentTetromino.shape, position.x, newY + 1)) {
-      newY += 1;
-    }
-    
-    setPosition({ ...position, y: newY });
-    lockTetromino();
-  }, [position, currentTetromino, checkCollision, gameOver]);
-  
-  // Lock tetromino in place
-  const lockTetromino = useCallback(() => {
-    if (!currentTetromino) return;
-    
-    // Create a new board with the tetromino locked in place
-    const newBoard = [...board];
-    
-    for (let y = 0; y < currentTetromino.shape.length; y++) {
-      for (let x = 0; x < currentTetromino.shape[y].length; x++) {
-        if (currentTetromino.shape[y][x] !== 0) {
           const boardY = position.y + y;
           const boardX = position.x + x;
           
-          // Check if any part of the tetromino is above the top
-          if (boardY < 0) {
-            setGameOver(true);
-            onGameOver();
-            if (!muted && gameOverSoundRef.current) {
-              gameOverSoundRef.current.play();
-            }
-            return;
-          }
-          
-          if (boardY >= 0 && boardY < BOARD_HEIGHT && boardX >= 0 && boardX < BOARD_WIDTH) {
-            newBoard[boardY][boardX] = currentTetromino.shape[y][x];
+          if (boardY >= 0) {
+            newBoard[boardY][boardX] = shape[y][x];
           }
         }
       }
     }
     
-    // Play drop sound
-    if (!muted && dropSoundRef.current) {
-      dropSoundRef.current.play();
+    setBoard(newBoard);
+    
+    // Spawn a new tetromino
+    const newTetromino = {
+      shape: nextTetromino?.shape || generateRandomTetromino().shape,
+      position: { x: Math.floor(BOARD_WIDTH / 2) - 1, y: 0 },
+      rotation: 0,
+      color: nextTetromino?.color || generateRandomTetromino().color
+    };
+    
+    // Check if game is over
+    if (!isValidMove(newTetromino.shape, newTetromino.position)) {
+      setGameOver(true);
+      return;
     }
+    
+    setCurrentTetromino(newTetromino);
+    setNextTetromino(generateNextTetromino());
     
     // Check for completed lines
-    let completedLines = 0;
-    const updatedBoard: number[][] = [];
+    checkForCompleteLines(newBoard);
+  }, [board, currentTetromino, nextTetromino, isValidMove, generateNextTetromino, generateRandomTetromino]);
+  
+  // Check for completed lines and update the score
+  const checkForCompleteLines = useCallback(
+    (boardToCheck: number[][]) => {
+      let newBoard = [...boardToCheck];
+      let completedLines = 0;
+      
+      for (let y = BOARD_HEIGHT - 1; y >= 0; y--) {
+        if (newBoard[y].every((cell) => cell !== 0)) {
+          // Complete line found - clear it and move everything down
+          newBoard.splice(y, 1);
+          newBoard.unshift(Array(BOARD_WIDTH).fill(0));
+          completedLines++;
+          y++; // Check the same row again
+        }
+      }
+      
+      if (completedLines > 0) {
+        // Update score based on lines cleared
+        const points = calculateScore(completedLines);
+        setScore((prevScore) => prevScore + points);
+        setLinesCleared((prev) => {
+          const newLines = prev + completedLines;
+          // Level up every 10 lines
+          if (Math.floor(newLines / 10) > Math.floor(prev / 10)) {
+            setLevel((prevLevel) => {
+              const newLevel = prevLevel + 1;
+              // Increase speed with each level
+              dropTimeRef.current = Math.max(100, 1000 - (newLevel - 1) * 100);
+              return newLevel;
+            });
+          }
+          return newLines;
+        });
+        
+        setBoard(newBoard);
+      }
+    },
+    []
+  );
+  
+  // Calculate score based on lines cleared
+  const calculateScore = useCallback((lines: number) => {
+    const linePoints = [0, 40, 100, 300, 1200]; // Points for 0, 1, 2, 3, 4 lines
+    return linePoints[Math.min(lines, 4)] * level;
+  }, [level]);
+  
+  // Move the current tetromino
+  const moveTetromino = useCallback(
+    (dx: number, dy: number) => {
+      if (!currentTetromino || isPaused || gameOver) return;
+      
+      const newPosition = {
+        x: currentTetromino.position.x + dx,
+        y: currentTetromino.position.y + dy
+      };
+      
+      if (isValidMove(currentTetromino.shape, newPosition)) {
+        setCurrentTetromino({
+          ...currentTetromino,
+          position: newPosition
+        });
+        return true;
+      }
+      
+      // If can't move down, merge with the board
+      if (dy > 0) {
+        mergeTetromino();
+      }
+      
+      return false;
+    },
+    [currentTetromino, isValidMove, mergeTetromino, isPaused, gameOver]
+  );
+  
+  // Rotate the current tetromino
+  const rotateCurrentTetromino = useCallback(() => {
+    if (!currentTetromino || isPaused || gameOver) return;
     
-    for (let y = 0; y < BOARD_HEIGHT; y++) {
-      if (newBoard[y].every(cell => cell !== 0)) {
-        completedLines += 1;
-      } else {
-        updatedBoard.push([...newBoard[y]]);
+    const rotatedShape = rotateTetromino(currentTetromino.shape);
+    
+    // Try to rotate, and if it doesn't fit, try to shift left or right
+    for (let offset = 0; offset <= 2; offset++) {
+      for (let dx of [0, -offset, offset]) {
+        const newPosition = {
+          x: currentTetromino.position.x + dx,
+          y: currentTetromino.position.y
+        };
+        
+        if (isValidMove(rotatedShape, newPosition)) {
+          setCurrentTetromino({
+            ...currentTetromino,
+            shape: rotatedShape,
+            position: newPosition
+          });
+          return;
+        }
       }
     }
+  }, [currentTetromino, rotateTetromino, isValidMove, isPaused, gameOver]);
+  
+  // Hard drop the tetromino
+  const hardDrop = useCallback(() => {
+    if (!currentTetromino || isPaused || gameOver) return;
     
-    // Add empty lines at the top for each completed line
-    for (let i = 0; i < completedLines; i++) {
-      updatedBoard.unshift(Array(BOARD_WIDTH).fill(0));
+    let newY = currentTetromino.position.y;
+    
+    // Find the lowest valid position
+    while (
+      isValidMove(currentTetromino.shape, {
+        x: currentTetromino.position.x,
+        y: newY + 1
+      })
+    ) {
+      newY++;
     }
     
-    // Update score and lines
-    if (completedLines > 0) {
-      // Bonus points for multiple lines at once
-      const linePoints = [0, 100, 300, 500, 800];
-      const newScore = score + linePoints[completedLines] * level;
-      const newLines = lines + completedLines;
-      
-      setScore(newScore);
-      setLines(newLines);
-      onScoreChange(newScore);
-      onLinesChange(newLines);
-      
-      // Play clear sound
-      if (!muted && clearSoundRef.current) {
-        clearSoundRef.current.play();
-      }
-    }
+    setCurrentTetromino({
+      ...currentTetromino,
+      position: { ...currentTetromino.position, y: newY }
+    });
     
-    // Update the board
-    setBoard(updatedBoard);
-    
-    // Set the next tetromino as current
-    setCurrentTetromino(nextTetromino);
-    setNextTetromino(getRandomTetromino());
-    
-    // Reset position
-    setPosition({ x: 3, y: 0 });
-  }, [board, currentTetromino, nextTetromino, position, getRandomTetromino, score, lines, level, onScoreChange, onLinesChange, onGameOver, muted]);
+    mergeTetromino();
+  }, [currentTetromino, isValidMove, mergeTetromino, isPaused, gameOver]);
+  
+  // Toggle pause state
+  const togglePause = useCallback(() => {
+    setIsPaused((prev) => !prev);
+  }, []);
+  
+  // Toggle breathing guide
+  const toggleBreathingGuide = useCallback(() => {
+    setShowBreathingGuide((prev) => !prev);
+  }, []);
   
   // Handle keyboard input
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isPlaying || gameOver) return;
+      if (!gameStarted || gameOver) return;
       
       switch (e.key) {
         case "ArrowLeft":
-          moveTetromino("left");
+          moveTetromino(-1, 0);
           break;
         case "ArrowRight":
-          moveTetromino("right");
+          moveTetromino(1, 0);
           break;
         case "ArrowDown":
-          moveTetromino("down");
+          moveTetromino(0, 1);
           break;
         case "ArrowUp":
-          rotateTetromino();
+          rotateCurrentTetromino();
           break;
-        case " ": // Space
+        case " ":
           hardDrop();
           break;
         case "p":
         case "P":
-          // Toggle pause
+          togglePause();
+          break;
+        case "b":
+        case "B":
+          toggleBreathingGuide();
           break;
         default:
           break;
@@ -437,86 +422,352 @@ const MindfulTetris: React.FC<MindfulTetrisProps> = ({
     };
     
     window.addEventListener("keydown", handleKeyDown);
-    
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isPlaying, gameOver, moveTetromino, rotateTetromino, hardDrop]);
+  }, [
+    gameStarted,
+    gameOver,
+    moveTetromino,
+    rotateCurrentTetromino,
+    hardDrop,
+    togglePause,
+    toggleBreathingGuide
+  ]);
   
   // Game loop
+  const gameLoop = useCallback(
+    (time: number) => {
+      requestRef.current = requestAnimationFrame(gameLoop);
+      
+      if (gameOver || isPaused) return;
+      
+      const deltaTime = time - lastTimeRef.current;
+      dropCounterRef.current += deltaTime;
+      
+      if (dropCounterRef.current > dropTimeRef.current) {
+        moveTetromino(0, 1);
+        dropCounterRef.current = 0;
+      }
+      
+      lastTimeRef.current = time;
+    },
+    [gameOver, isPaused, moveTetromino]
+  );
+  
+  // Start game loop
   useEffect(() => {
-    let dropInterval: number | null = null;
-    
-    if (isPlaying && !gameOver) {
-      // Auto-drop tetromino
-      dropInterval = window.setInterval(() => {
-        moveTetromino("down");
-      }, dropSpeed);
+    if (gameStarted && !gameOver) {
+      lastTimeRef.current = performance.now();
+      requestRef.current = requestAnimationFrame(gameLoop);
     }
     
     return () => {
-      if (dropInterval) clearInterval(dropInterval);
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
     };
-  }, [isPlaying, gameOver, moveTetromino, dropSpeed]);
+  }, [gameStarted, gameOver, gameLoop]);
   
-  // Reset game
+  // Initialize the game on first load
   useEffect(() => {
-    if (!isPlaying && !gameOver) {
-      // Reset game state but keep the score
-      setBoard(Array(BOARD_HEIGHT).fill(0).map(() => Array(BOARD_WIDTH).fill(0)));
-      setCurrentTetromino(getRandomTetromino());
-      setNextTetromino(getRandomTetromino());
-      setPosition({ x: 3, y: 0 });
-      setGameOver(false);
-    }
-  }, [isPlaying, gameOver, getRandomTetromino]);
+    initializeBoard();
+    changePrompt();
+  }, [initializeBoard, changePrompt]);
   
-  // Draw the game
-  useEffect(() => {
-    if (ctxRef.current) {
-      drawBoard();
+  // Render the board with the current tetromino
+  const renderBoard = () => {
+    // Create a copy of the board to render
+    const renderBoard = board.map((row) => [...row]);
+    
+    // Add the current tetromino to the board for rendering
+    if (currentTetromino && !gameOver) {
+      const { shape, position } = currentTetromino;
+      
+      for (let y = 0; y < shape.length; y++) {
+        for (let x = 0; x < shape[y].length; x++) {
+          if (shape[y][x] !== 0) {
+            const boardY = position.y + y;
+            const boardX = position.x + x;
+            
+            if (boardY >= 0 && boardY < BOARD_HEIGHT && boardX >= 0 && boardX < BOARD_WIDTH) {
+              renderBoard[boardY][boardX] = shape[y][x];
+            }
+          }
+        }
+      }
     }
-  }, [board, currentTetromino, nextTetromino, position, gameOver, drawBoard]);
+    
+    return (
+      <div className="border-2 border-gray-200 bg-white/50 backdrop-blur-sm rounded-lg overflow-hidden">
+        {renderBoard.map((row, y) => (
+          <div key={y} className="flex">
+            {row.map((cell, x) => (
+              <div
+                key={`${y}-${x}`}
+                className="border border-transparent"
+                style={{
+                  width: BLOCK_SIZE,
+                  height: BLOCK_SIZE,
+                  backgroundColor: cell
+                    ? TETROMINOES[cell - 1].color
+                    : "transparent"
+                }}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  };
+  
+  // Render the next tetromino preview
+  const renderNextTetromino = () => {
+    if (!nextTetromino) return null;
+    
+    const { shape, color } = nextTetromino;
+    
+    return (
+      <div className="bg-white/50 p-2 rounded-lg">
+        {shape.map((row, y) => (
+          <div key={y} className="flex justify-center">
+            {row.map((cell, x) => (
+              <div
+                key={`next-${y}-${x}`}
+                style={{
+                  width: BLOCK_SIZE - 4,
+                  height: BLOCK_SIZE - 4,
+                  backgroundColor: cell ? color : "transparent",
+                  margin: "2px"
+                }}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  };
+  
+  // Game controls for mobile players
+  const renderMobileControls = () => {
+    return (
+      <div className="grid grid-cols-3 gap-2 mt-4">
+        <Button
+          onClick={() => moveTetromino(-1, 0)}
+          disabled={!gameStarted || gameOver || isPaused}
+          className="bg-[#3DFDFF] hover:bg-[#3DFDFF]/80 text-black"
+        >
+          ←
+        </Button>
+        <div className="grid grid-rows-2 gap-2">
+          <Button
+            onClick={rotateCurrentTetromino}
+            disabled={!gameStarted || gameOver || isPaused}
+            className="bg-[#FF8A48] hover:bg-[#FF8A48]/80 text-white"
+          >
+            ↻
+          </Button>
+          <Button
+            onClick={hardDrop}
+            disabled={!gameStarted || gameOver || isPaused}
+            className="bg-[#FC68B3] hover:bg-[#FC68B3]/80 text-white"
+          >
+            ↓↓
+          </Button>
+        </div>
+        <Button
+          onClick={() => moveTetromino(1, 0)}
+          disabled={!gameStarted || gameOver || isPaused}
+          className="bg-[#3DFDFF] hover:bg-[#3DFDFF]/80 text-black"
+        >
+          →
+        </Button>
+      </div>
+    );
+  };
   
   return (
-    <div className="relative">
-      <canvas 
-        ref={canvasRef} 
-        className="rounded-lg shadow-lg"
-        width={BOARD_WIDTH * BLOCK_SIZE}
-        height={BOARD_HEIGHT * BLOCK_SIZE}
-      />
-      
-      {gameOver && (
-        <motion.div 
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h2 className="text-white text-2xl font-bold mb-2">Game Over</h2>
-          <p className="text-white mb-6">Final Score: {score}</p>
-          <p className="text-white/80 text-center max-w-xs mb-4">
-            Take a moment to breathe deeply before trying again.
-          </p>
-          <Button 
-            onClick={() => {
-              setGameOver(false);
-              setBoard(Array(BOARD_HEIGHT).fill(0).map(() => Array(BOARD_WIDTH).fill(0)));
-              setScore(0);
-              setLines(0);
-              onScoreChange(0);
-              onLinesChange(0);
-              setCurrentTetromino(getRandomTetromino());
-              setNextTetromino(getRandomTetromino());
-              setPosition({ x: 3, y: 0 });
-            }}
-            className="bg-[#FC68B3] hover:bg-[#FC68B3]/80"
+    <div className="p-4 flex flex-col items-center">
+      <div className="max-w-4xl w-full">
+        {/* Game title and controls */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">Mindful Blocks</h2>
+          <div className="flex gap-2">
+            <Button
+              onClick={togglePause}
+              disabled={!gameStarted || gameOver}
+              variant="outline"
+              size="sm"
+              className="flex items-center"
+            >
+              {isPaused ? (
+                <>
+                  <PlayCircle className="mr-1 h-4 w-4" />
+                  Resume
+                </>
+              ) : (
+                <>
+                  <PauseCircle className="mr-1 h-4 w-4" />
+                  Pause
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={toggleBreathingGuide}
+              variant="outline"
+              size="sm"
+              className="flex items-center"
+            >
+              <Wind className="mr-1 h-4 w-4" />
+              Breathing
+            </Button>
+          </div>
+        </div>
+  
+        {/* Main game container */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Game board */}
+          <div className="col-span-2 flex flex-col items-center">
+            {renderBoard()}
+            {/* Mobile controls */}
+            <div className="md:hidden w-full">
+              {renderMobileControls()}
+            </div>
+            
+            {/* Game over or start screen */}
+            {(!gameStarted || gameOver) && (
+              <div className="mt-4 w-full">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-center">
+                      {gameOver ? "Game Over" : "Mindful Blocks"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    {gameOver ? (
+                      <div className="space-y-2">
+                        <p>Final Score: {score}</p>
+                        <p>Lines Cleared: {linesCleared}</p>
+                        <p>Level Reached: {level}</p>
+                      </div>
+                    ) : (
+                      <p>
+                        A relaxing block-stacking game designed to help reduce
+                        anxiety while practicing mindfulness.
+                      </p>
+                    )}
+                    <Button
+                      onClick={startGame}
+                      className="mt-4 bg-[#FC68B3] hover:bg-[#FC68B3]/80"
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      {gameOver ? "Play Again" : "Start Game"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
+  
+          {/* Game info and mindfulness content */}
+          <div className="flex flex-col gap-4">
+            {/* Game stats */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Game Stats</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Score:</span>
+                    <span className="font-bold">{score}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Level:</span>
+                    <span className="font-bold">{level}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Lines:</span>
+                    <span className="font-bold">{linesCleared}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+  
+            {/* Next piece preview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Next Piece</CardTitle>
+              </CardHeader>
+              <CardContent className="flex justify-center">
+                {renderNextTetromino()}
+              </CardContent>
+            </Card>
+  
+            {/* Mindfulness prompt */}
+            <Card className="bg-[#3DFDFF]/10">
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center">
+                  <Heart className="mr-2 h-4 w-4 text-[#FC68B3]" />
+                  Mindfulness Prompt
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm italic">{currentPrompt}</p>
+              </CardContent>
+            </Card>
+  
+            {/* Controls help */}
+            <Card className="hidden md:block">
+              <CardHeader>
+                <CardTitle className="text-sm">Controls</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-xs space-y-1">
+                  <p>← → : Move left/right</p>
+                  <p>↑ : Rotate</p>
+                  <p>↓ : Move down</p>
+                  <p>Space : Hard drop</p>
+                  <p>P : Pause game</p>
+                  <p>B : Breathing guide</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+  
+        {/* Breathing guide modal */}
+        {showBreathingGuide && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+            onClick={() => setShowBreathingGuide(false)}
           >
-            Play Again
-          </Button>
-        </motion.div>
-      )}
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="bg-white rounded-lg p-4 max-w-md w-full m-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold">Breathing Exercise</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowBreathingGuide(false)}
+                >
+                  ✕
+                </Button>
+              </div>
+              <BreathingGuide />
+              <p className="text-sm mt-4 text-center">
+                Follow this breathing pattern to calm your mind and reduce anxiety.
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 };

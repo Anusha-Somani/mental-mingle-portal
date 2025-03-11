@@ -1,926 +1,1084 @@
 
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Avatar } from "@/components/ui/avatar";
-import { 
-  Dice1, Dice2, Dice3, Dice4, Dice5, Dice6, 
-  Heart, Brain, Trophy, Star, Info,
-  Smile, Frown, Meh, Angry, User2, 
-  ArrowRight, X, HelpCircle,
-  Laugh, BookOpen
-} from "lucide-react";
-import EmotionQuestBoard from "@/components/games/EmotionQuestBoard";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Dice1, Dice2, Dice3, Dice4, Dice5, Dice6, User, Trophy } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import EmotionQuestBoard from "./EmotionQuestBoard";
 
-interface Player {
-  id: number;
-  name: string;
-  position: number;
-  avatar: number;
-  resiliencePoints: number;
-  cards: EmotionCard[];
-}
+// Space types
+type SpaceType = "start" | "emotion" | "challenge" | "reflection" | "resource" | "bonus";
 
-interface EmotionCard {
+// Game space definition
+interface Space {
   id: number;
-  type: "joy" | "sadness" | "anger" | "fear" | "disgust" | "surprise";
-  title: string;
+  type: SpaceType;
+  label: string;
   description: string;
-  activity: string;
-  points: number;
+  action?: string;
+  options?: string[];
+  points?: number;
   color: string;
+  position: { x: number; y: number };
 }
 
-interface EmotionQuestGameProps {
-  userId: string | null;
+// Player token
+interface PlayerToken {
+  id: number;
+  position: number;
+  color: string;
+  points: number;
+  name: string;
+  completedChallenges: number[];
 }
 
-const AVATARS = [
-  "👧", "👦", "👩", "👨", "👱‍♀️", "👱", "👴", "👵", 
-  "👲", "👳‍♀️", "👳", "🧕", "👮‍♀️", "👮", "👷‍♀️", "👷"
-];
+// Game states
+type GameState = "setup" | "rolling" | "action" | "completed";
 
-const PLAYER_COLORS = [
-  "#FF8A48", "#3DFDFF", "#FC68B3", "#F5DF4D"
-];
+// Actions for different space types
+interface ActionContent {
+  emotion: {
+    title: string;
+    descriptions: string[];
+    reflections: string[];
+  }[];
+  challenge: {
+    title: string;
+    descriptions: string[];
+    tasks: string[];
+  }[];
+  reflection: {
+    title: string;
+    descriptions: string[];
+    questions: string[];
+  }[];
+  resource: {
+    title: string;
+    descriptions: string[];
+    tips: string[];
+  }[];
+  bonus: {
+    title: string;
+    descriptions: string[];
+    rewards: string[];
+  }[];
+}
 
-const EmotionQuestGame: React.FC<EmotionQuestGameProps> = ({ userId }) => {
-  const [players, setPlayers] = useState<Player[]>([
-    { id: 1, name: "You", position: 0, avatar: 0, resiliencePoints: 0, cards: [] }
-  ]);
-  
-  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
-  const [diceValue, setDiceValue] = useState<number | null>(null);
-  const [isRolling, setIsRolling] = useState(false);
-  const [activeCard, setActiveCard] = useState<EmotionCard | null>(null);
-  const [showCardModal, setShowCardModal] = useState(false);
-  const [showPlayerModal, setShowPlayerModal] = useState(false);
-  const [tempPlayerName, setTempPlayerName] = useState("");
-  const [tempAvatarIndex, setTempAvatarIndex] = useState(0);
-  const [gamePhase, setGamePhase] = useState<"setup" | "playing" | "finished">("setup");
-  const [showTutorial, setShowTutorial] = useState(true);
-  const [tutorialStep, setTutorialStep] = useState(0);
-
-  const { toast } = useToast();
-  const diceRef = useRef<HTMLDivElement>(null);
-
-  // Emotion cards database
-  const emotionCards: EmotionCard[] = [
-    // Joy cards
+// Main game component
+const EmotionQuestGame: React.FC = () => {
+  // State
+  const [gameState, setGameState] = useState<GameState>("setup");
+  const [playerTokens, setPlayerTokens] = useState<PlayerToken[]>([
     {
       id: 1,
-      type: "joy",
-      title: "Express Gratitude",
-      description: "Write 3 things you're grateful for today",
-      activity: "Take a moment to reflect on three things in your life you're grateful for. This can boost positive emotions and help build resilience.",
-      points: 3,
-      color: "#F5DF4D"
+      position: 0,
+      color: "#3DFDFF",
+      points: 0,
+      name: "Player 1",
+      completedChallenges: [],
+    },
+  ]);
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+  const [diceRoll, setDiceRoll] = useState<number | null>(null);
+  const [isRolling, setIsRolling] = useState(false);
+  const [currentSpace, setCurrentSpace] = useState<Space | null>(null);
+  const [actionCompleted, setActionCompleted] = useState(false);
+  const [playerName, setPlayerName] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [gameCompletionMessage, setGameCompletionMessage] = useState("");
+
+  const { toast } = useToast();
+
+  // Board spaces
+  const spaces: Space[] = [
+    {
+      id: 0,
+      type: "start",
+      label: "Start",
+      description: "Begin your emotional journey!",
+      color: "#2AC20E",
+      position: { x: 550, y: 550 },
+    },
+    {
+      id: 1,
+      type: "emotion",
+      label: "Anxiety",
+      description: "Explore feelings of anxiety and worry",
+      points: 5,
+      color: "#FC68B3",
+      position: { x: 450, y: 550 },
     },
     {
       id: 2,
-      type: "joy",
-      title: "Share a Happy Memory",
-      description: "Tell others about a time you felt really happy",
-      activity: "Think of a specific moment when you felt genuine happiness and share the details with another player.",
-      points: 2,
-      color: "#F5DF4D"
+      type: "challenge",
+      label: "Deep Breathing",
+      description: "Complete a breathing exercise",
+      points: 10,
+      color: "#FF8A48",
+      position: { x: 350, y: 550 },
     },
     {
       id: 3,
-      type: "joy",
-      title: "Create a Joy Playlist",
-      description: "Make a playlist of songs that make you feel good",
-      activity: "Think about 5 songs that bring you joy and energize you. Consider creating this playlist in real life!",
-      points: 3,
-      color: "#F5DF4D"
+      type: "reflection",
+      label: "Self-Talk",
+      description: "Reflect on your inner dialogue",
+      points: 5,
+      color: "#3DFDFF",
+      position: { x: 250, y: 550 },
     },
     {
       id: 4,
-      type: "joy",
-      title: "Laugh Out Loud",
-      description: "Share a joke or funny story with the group",
-      activity: "Laughter is great medicine for stress! Share something that makes you laugh with the other players.",
-      points: 2,
-      color: "#F5DF4D"
+      type: "resource",
+      label: "Coping Skills",
+      description: "Learn a new coping skill",
+      points: 5,
+      color: "#F5DF4D",
+      position: { x: 150, y: 550 },
     },
-    
-    // Sadness cards
     {
       id: 5,
-      type: "sadness",
-      title: "Comfort Strategies",
-      description: "List 3 healthy ways to cope when feeling sad",
-      activity: "Think about strategies that help you feel better when you're sad. Examples might include talking to a friend, going for a walk, or listening to music.",
-      points: 3,
-      color: "#3DFDFF"
+      type: "bonus",
+      label: "Self-Care",
+      description: "Bonus points for self-care practice",
+      points: 15,
+      color: "#D5D5F1",
+      position: { x: 50, y: 550 },
     },
     {
       id: 6,
-      type: "sadness",
-      title: "Express Your Feelings",
-      description: "Draw or describe how sadness feels to you",
-      activity: "Sadness is a natural emotion. Take a moment to consider how it feels in your body and mind, and how you might express it constructively.",
-      points: 3,
-      color: "#3DFDFF"
+      type: "emotion",
+      label: "Anger",
+      description: "Explore feelings of anger and frustration",
+      points: 5,
+      color: "#FC68B3",
+      position: { x: 50, y: 450 },
     },
     {
       id: 7,
-      type: "sadness",
-      title: "Support Network",
-      description: "Name 3 people you can talk to when feeling down",
-      activity: "Having people to talk to when you're sad is important. Who are the people in your life you trust with your feelings?",
-      points: 2,
-      color: "#3DFDFF"
+      type: "challenge",
+      label: "Mindfulness",
+      description: "Practice being present in the moment",
+      points: 10,
+      color: "#FF8A48",
+      position: { x: 50, y: 350 },
     },
-    
-    // Anger cards
     {
       id: 8,
-      type: "anger",
-      title: "Anger Management",
-      description: "Practice a calming technique for 30 seconds",
-      activity: "Try deep breathing: Inhale slowly for 4 counts, hold for 4 counts, exhale for 6 counts. Repeat several times.",
-      points: 3,
-      color: "#FC68B3"
+      type: "reflection",
+      label: "Values",
+      description: "Reflect on personal values",
+      points: 5,
+      color: "#3DFDFF",
+      position: { x: 50, y: 250 },
     },
     {
       id: 9,
-      type: "anger",
-      title: "Anger Alternatives",
-      description: "List 3 healthy ways to express anger",
-      activity: "Anger is natural, but how we express it matters. What are some constructive ways to handle anger?",
-      points: 3,
-      color: "#FC68B3"
+      type: "resource",
+      label: "Support System",
+      description: "Identify people who support you",
+      points: 5,
+      color: "#F5DF4D",
+      position: { x: 50, y: 150 },
     },
     {
       id: 10,
-      type: "anger",
-      title: "Identify Triggers",
-      description: "What situations tend to make you angry?",
-      activity: "Recognizing what triggers your anger is the first step to managing it better. Reflect on situations that commonly frustrate you.",
-      points: 2,
-      color: "#FC68B3"
+      type: "bonus",
+      label: "Resilience",
+      description: "Bonus for identifying strengths",
+      points: 15,
+      color: "#D5D5F1",
+      position: { x: 50, y: 50 },
     },
-    
-    // Fear cards
     {
       id: 11,
-      type: "fear",
-      title: "Face Your Fears",
-      description: "Name something that makes you anxious and one small step to address it",
-      activity: "Breaking down fears into small, manageable steps can help us overcome them gradually.",
-      points: 4,
-      color: "#D5D5F1"
+      type: "emotion",
+      label: "Joy",
+      description: "Explore feelings of happiness and joy",
+      points: 5,
+      color: "#FC68B3",
+      position: { x: 150, y: 50 },
     },
     {
       id: 12,
-      type: "fear",
-      title: "Courage Building",
-      description: "Share a time when you did something despite being afraid",
-      activity: "Courage isn't the absence of fear but acting despite it. Reflect on a time you showed courage.",
-      points: 3,
-      color: "#D5D5F1"
+      type: "challenge",
+      label: "Gratitude",
+      description: "Practice expressing gratitude",
+      points: 10,
+      color: "#FF8A48",
+      position: { x: 250, y: 50 },
     },
     {
       id: 13,
-      type: "fear",
-      title: "Reframe Worries",
-      description: "Take a worry and find a more positive/realistic perspective",
-      activity: "Our minds often jump to worst-case scenarios. Practice reframing a worry into a more balanced thought.",
-      points: 3,
-      color: "#D5D5F1"
+      type: "reflection",
+      label: "Goals",
+      description: "Reflect on personal goals",
+      points: 5,
+      color: "#3DFDFF",
+      position: { x: 350, y: 50 },
     },
-    
-    // Surprise cards
     {
       id: 14,
-      type: "surprise",
-      title: "Adaptability Challenge",
-      description: "Describe how you'd handle an unexpected situation",
-      activity: "Life is full of surprises! How would you handle suddenly having to change your plans for something important?",
-      points: 3,
-      color: "#FF8A48"
+      type: "resource",
+      label: "Healthy Habits",
+      description: "Learn about building healthy habits",
+      points: 5,
+      color: "#F5DF4D",
+      position: { x: 450, y: 50 },
     },
     {
       id: 15,
-      type: "surprise",
-      title: "Comfort Zone Stretch",
-      description: "Share one way you could step out of your comfort zone",
-      activity: "Growth happens when we try new things. What's a small step you could take outside your usual routine?",
-      points: 3,
-      color: "#FF8A48"
+      type: "bonus",
+      label: "Confidence",
+      description: "Bonus for building confidence",
+      points: 15,
+      color: "#D5D5F1",
+      position: { x: 550, y: 50 },
     },
     {
       id: 16,
-      type: "surprise",
-      title: "Embracing Change",
-      description: "Reflect on a positive change that was initially difficult",
-      activity: "Sometimes changes that seem hard at first turn out to be good for us. Can you think of an example from your life?",
-      points: 3,
-      color: "#FF8A48"
+      type: "emotion",
+      label: "Sadness",
+      description: "Explore feelings of sadness",
+      points: 5,
+      color: "#FC68B3",
+      position: { x: 550, y: 150 },
     },
-    
-    // Disgust cards
     {
       id: 17,
-      type: "disgust",
-      title: "Boundary Setting",
-      description: "Practice saying no to something you're uncomfortable with",
-      activity: "Setting healthy boundaries is important. Practice a polite but firm way to decline something that doesn't feel right for you.",
-      points: 3,
-      color: "#2AC20E"
+      type: "challenge",
+      label: "Self-Compassion",
+      description: "Practice being kind to yourself",
+      points: 10,
+      color: "#FF8A48",
+      position: { x: 550, y: 250 },
     },
     {
       id: 18,
-      type: "disgust",
-      title: "Values Clarification",
-      description: "Name 3 personal values that are important to you",
-      activity: "Our values guide our decisions. What principles or qualities do you consider most important in life?",
-      points: 2,
-      color: "#2AC20E"
+      type: "reflection",
+      label: "Strengths",
+      description: "Reflect on personal strengths",
+      points: 5,
+      color: "#3DFDFF",
+      position: { x: 550, y: 350 },
     },
     {
       id: 19,
-      type: "disgust",
-      title: "Healthy Choices",
-      description: "Describe a situation where you chose what was right over what was easy",
-      activity: "Sometimes the right choice isn't the easiest one. Reflect on a time you made a tough but good decision.",
-      points: 3,
-      color: "#2AC20E"
+      type: "resource",
+      label: "Communication",
+      description: "Learn effective communication skills",
+      points: 5,
+      color: "#F5DF4D",
+      position: { x: 550, y: 450 },
     },
-    {
-      id: 20,
-      type: "disgust",
-      title: "Mindful Nutrition",
-      description: "Name 3 foods that make your body feel good and energized",
-      activity: "What we eat affects how we feel. What foods help you feel your best?",
-      points: 2,
-      color: "#2AC20E"
-    }
   ];
 
-  // Tutorial content
-  const tutorialSteps = [
-    {
-      title: "Welcome to Emotion Quest!",
-      content: "This game will help you understand and navigate your emotions while building resilience."
-    },
-    {
-      title: "The Game Board",
-      content: "The board represents your emotional journey. Each space corresponds to a different emotion or challenge."
-    },
-    {
-      title: "Taking Your Turn",
-      content: "On your turn, roll the dice and move your token around the board. Land on different emotion spaces to collect cards."
-    },
-    {
-      title: "Emotion Cards",
-      content: "When you land on an emotion space, you'll draw a card that presents an activity or reflection related to that emotion."
-    },
-    {
-      title: "Building Resilience",
-      content: "Complete the activities on the cards to earn resilience points. The more you engage with different emotions, the more resilient you become!"
-    },
-    {
-      title: "Winning the Game",
-      content: "The first player to reach 50 resilience points wins the game, but everyone wins by learning valuable emotional skills!"
-    }
-  ];
-
-  // Board spaces configuration
-  const boardSpaces = [
-    { type: "start", label: "START" },
-    { type: "joy", label: "Joy" },
-    { type: "surprise", label: "Surprise" },
-    { type: "neutral", label: "Take a break" },
-    { type: "sadness", label: "Sadness" },
-    { type: "neutral", label: "Reflect" },
-    { type: "anger", label: "Anger" },
-    { type: "bonus", label: "Bonus Points" },
-    { type: "fear", label: "Fear" },
-    { type: "neutral", label: "Deep breath" },
-    { type: "joy", label: "Joy" },
-    { type: "disgust", label: "Disgust" },
-    { type: "neutral", label: "Share a thought" },
-    { type: "surprise", label: "Surprise" },
-    { type: "anger", label: "Anger" },
-    { type: "neutral", label: "Self-care" },
-    { type: "sadness", label: "Sadness" },
-    { type: "bonus", label: "Bonus Points" },
-    { type: "fear", label: "Fear" },
-    { type: "joy", label: "Joy" },
-    { type: "neutral", label: "Mindfulness" },
-    { type: "disgust", label: "Disgust" },
-    { type: "surprise", label: "Surprise" },
-    { type: "neutral", label: "Gratitude" }
-  ];
-
-  // Set up game with custom players
-  const setupGame = () => {
-    if (players.length === 1 && players[0].name === "You") {
-      setShowPlayerModal(true);
-    } else {
-      setGamePhase("playing");
-      toast({
-        title: "Game Started!",
-        description: `${players[0].name}'s turn to roll the dice!`,
-      });
-    }
+  // Content for different space types
+  const actionContent: ActionContent = {
+    emotion: [
+      {
+        title: "Understanding Anxiety",
+        descriptions: [
+          "Anxiety is a normal emotion that everyone experiences at times.",
+          "It's your body's natural response to stress.",
+        ],
+        reflections: [
+          "When was the last time you felt anxious?",
+          "What physical sensations do you notice when you're anxious?",
+          "What helps you feel calmer when you're anxious?",
+        ],
+      },
+      {
+        title: "Managing Anger",
+        descriptions: [
+          "Anger is a natural emotion that signals when something feels unfair or threatening.",
+          "Learning to express anger appropriately is an important skill.",
+        ],
+        reflections: [
+          "What triggers your anger?",
+          "How do you typically express anger?",
+          "What are healthier ways you could express your feelings when angry?",
+        ],
+      },
+      {
+        title: "Finding Joy",
+        descriptions: [
+          "Joy comes from noticing and appreciating positive experiences.",
+          "Small moments of joy can have a big impact on your wellbeing.",
+        ],
+        reflections: [
+          "What brought you joy today?",
+          "What activities reliably bring you happiness?",
+          "How could you incorporate more joy into your daily routine?",
+        ],
+      },
+      {
+        title: "Processing Sadness",
+        descriptions: [
+          "Sadness is a normal response to loss or disappointment.",
+          "Allowing yourself to feel sad is an important part of emotional health.",
+        ],
+        reflections: [
+          "How do you typically respond when you feel sad?",
+          "Who can you talk to when you're feeling down?",
+          "What self-care activities help when you're feeling sad?",
+        ],
+      },
+    ],
+    challenge: [
+      {
+        title: "Deep Breathing Exercise",
+        descriptions: [
+          "Deep breathing activates your parasympathetic nervous system, which helps reduce stress.",
+        ],
+        tasks: [
+          "Breathe in slowly through your nose for 4 counts.",
+          "Hold your breath for 2 counts.",
+          "Exhale slowly through your mouth for 6 counts.",
+          "Repeat this cycle 5 times.",
+        ],
+      },
+      {
+        title: "Mindfulness Practice",
+        descriptions: [
+          "Mindfulness means paying attention to the present moment without judgment.",
+        ],
+        tasks: [
+          "Take 3 minutes to focus completely on your surroundings.",
+          "Notice 5 things you can see, 4 things you can touch, 3 things you can hear, 2 things you can smell, and 1 thing you can taste.",
+          "When your mind wanders, gently bring it back to your senses.",
+        ],
+      },
+      {
+        title: "Gratitude Practice",
+        descriptions: [
+          "Practicing gratitude regularly can improve your mood and outlook on life.",
+        ],
+        tasks: [
+          "Write down 3 things you're grateful for right now.",
+          "Include one person, one opportunity, and one quality about yourself.",
+          "Take a moment to really feel the gratitude for each item.",
+        ],
+      },
+      {
+        title: "Self-Compassion Exercise",
+        descriptions: [
+          "Self-compassion means treating yourself with the same kindness you would show a good friend.",
+        ],
+        tasks: [
+          "Think of a recent mistake or setback.",
+          "Imagine what you would say to a friend in the same situation.",
+          "Now say those same supportive words to yourself.",
+          "Place a hand on your heart and take a deep breath.",
+        ],
+      },
+    ],
+    reflection: [
+      {
+        title: "Examining Self-Talk",
+        descriptions: [
+          "The way you talk to yourself affects how you feel and what you believe is possible.",
+        ],
+        questions: [
+          "What negative things do you often say to yourself?",
+          "How would you feel if someone else spoke to you this way?",
+          "How could you reframe these statements to be more supportive?",
+        ],
+      },
+      {
+        title: "Clarifying Values",
+        descriptions: [
+          "Values are the principles that guide your decisions and actions.",
+        ],
+        questions: [
+          "What matters most to you in life?",
+          "When do you feel most fulfilled?",
+          "What kind of person do you want to be?",
+        ],
+      },
+      {
+        title: "Setting Meaningful Goals",
+        descriptions: [
+          "Goals that align with your values give direction and purpose to your life.",
+        ],
+        questions: [
+          "What's one goal you'd like to accomplish in the next month?",
+          "How does this goal connect to your values?",
+          "What small steps could you take toward this goal?",
+        ],
+      },
+      {
+        title: "Recognizing Strengths",
+        descriptions: [
+          "Everyone has unique strengths and qualities that can help them overcome challenges.",
+        ],
+        questions: [
+          "What are three of your personal strengths?",
+          "When have you used these strengths successfully?",
+          "How could these strengths help you with current challenges?",
+        ],
+      },
+    ],
+    resource: [
+      {
+        title: "Coping Skills Toolkit",
+        descriptions: [
+          "Having multiple coping skills helps you handle different types of stress.",
+        ],
+        tips: [
+          "For physical tension: Progressive muscle relaxation or exercise",
+          "For racing thoughts: Journaling or talking to someone",
+          "For overwhelming emotions: Grounding techniques or creative expression",
+          "For social stress: Setting boundaries or practicing assertive communication",
+        ],
+      },
+      {
+        title: "Building a Support System",
+        descriptions: [
+          "A strong support system is essential for mental well-being.",
+        ],
+        tips: [
+          "Identify trusted adults you can talk to about serious concerns.",
+          "Nurture friendships with peers who accept and support you.",
+          "Know when and how to access professional help when needed.",
+          "Remember that reaching out for help is a sign of strength, not weakness.",
+        ],
+      },
+      {
+        title: "Developing Healthy Habits",
+        descriptions: [
+          "Daily habits have a powerful impact on your mental health.",
+        ],
+        tips: [
+          "Aim for 8-10 hours of sleep each night.",
+          "Stay hydrated and eat regular, balanced meals.",
+          "Get at least 30 minutes of physical activity daily.",
+          "Take breaks from social media and screens.",
+        ],
+      },
+      {
+        title: "Effective Communication Skills",
+        descriptions: [
+          "Good communication helps build stronger relationships and resolve conflicts.",
+        ],
+        tips: [
+          "Use \"I\" statements to express your feelings without blaming others.",
+          "Practice active listening without planning your response.",
+          "Be aware of your body language and tone of voice.",
+          "It's okay to take a break when emotions are running high.",
+        ],
+      },
+    ],
+    bonus: [
+      {
+        title: "Self-Care Superstar",
+        descriptions: [
+          "Taking care of yourself isn't selfish—it's necessary for your well-being.",
+        ],
+        rewards: [
+          "You've earned 15 resilience points!",
+          "Challenge: Create a personalized self-care menu with activities for different situations.",
+          "Remember that consistent small acts of self-care are more effective than occasional big ones.",
+        ],
+      },
+      {
+        title: "Resilience Champion",
+        descriptions: [
+          "Resilience is the ability to bounce back from difficulties and grow from challenges.",
+        ],
+        rewards: [
+          "You've earned 15 resilience points!",
+          "Challenge: Reflect on a past difficulty and identify how it helped you grow stronger.",
+          "Your resilience is like a muscle that gets stronger each time you use it.",
+        ],
+      },
+      {
+        title: "Confidence Builder",
+        descriptions: [
+          "Confidence comes from recognizing your worth and believing in your abilities.",
+        ],
+        rewards: [
+          "You've earned 15 resilience points!",
+          "Challenge: Do one thing outside your comfort zone this week.",
+          "Remember that confidence grows with practice and experience.",
+        ],
+      },
+    ],
   };
 
-  // Add a player to the game
-  const addPlayer = () => {
-    if (tempPlayerName.trim() === "") {
-      toast({
-        title: "Name Required",
-        description: "Please enter a player name",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (players.length >= 4) {
-      toast({
-        title: "Maximum Players Reached",
-        description: "The game can have a maximum of 4 players",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const newPlayer = {
-      id: players.length + 1,
-      name: tempPlayerName,
-      position: 0,
-      avatar: tempAvatarIndex,
-      resiliencePoints: 0,
-      cards: []
+  // Check auth status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user) {
+        setUserId(data.session.user.id);
+      }
     };
+    checkAuth();
+  }, []);
 
-    setPlayers([...players, newPlayer]);
-    setTempPlayerName("");
-    setTempAvatarIndex(Math.floor(Math.random() * AVATARS.length));
-    
-    toast({
-      title: "Player Added",
-      description: `${tempPlayerName} has joined the game!`,
+  // Roll the dice
+  const rollDice = () => {
+    if (isRolling) return;
+
+    setIsRolling(true);
+    setActionCompleted(false);
+
+    // Animate dice roll
+    let rollCount = 0;
+    const maxRolls = 10;
+    const rollInterval = setInterval(() => {
+      setDiceRoll(Math.floor(Math.random() * 6) + 1);
+      rollCount++;
+
+      if (rollCount >= maxRolls) {
+        clearInterval(rollInterval);
+        const finalRoll = Math.floor(Math.random() * 6) + 1;
+        setDiceRoll(finalRoll);
+        setIsRolling(false);
+
+        // Move player
+        movePlayer(finalRoll);
+      }
+    }, 100);
+  };
+
+  // Move player token
+  const movePlayer = (steps: number) => {
+    setPlayerTokens((prevTokens) => {
+      const updatedTokens = [...prevTokens];
+      const player = { ...updatedTokens[currentPlayerIndex] };
+      player.position = (player.position + steps) % spaces.length;
+      updatedTokens[currentPlayerIndex] = player;
+
+      // Get the space player landed on
+      const landedSpace = spaces[player.position];
+      setCurrentSpace(landedSpace);
+      setGameState("action");
+
+      return updatedTokens;
     });
   };
 
-  // Roll the dice and move player
-  const rollDice = () => {
-    if (isRolling) return;
-    
-    setIsRolling(true);
-    
-    // Visual rolling effect
-    const rollInterval = setInterval(() => {
-      setDiceValue(Math.floor(Math.random() * 6) + 1);
-    }, 100);
-    
-    // Stop rolling after 1 second
-    setTimeout(() => {
-      clearInterval(rollInterval);
-      const finalValue = Math.floor(Math.random() * 6) + 1;
-      setDiceValue(finalValue);
+  // Handle space action completion
+  const completeAction = () => {
+    if (!currentSpace) return;
+
+    // Award points based on space type
+    setPlayerTokens((prevTokens) => {
+      const updatedTokens = [...prevTokens];
+      const player = { ...updatedTokens[currentPlayerIndex] };
+
+      // Add points based on space type
+      if (currentSpace.points) {
+        player.points += currentSpace.points;
+      }
+
+      // Mark challenge as completed
+      if (!player.completedChallenges.includes(currentSpace.id)) {
+        player.completedChallenges = [...player.completedChallenges, currentSpace.id];
+      }
+
+      updatedTokens[currentPlayerIndex] = player;
+
+      // Save progress if logged in
+      if (userId) {
+        const saveGameProgress = async () => {
+          try {
+            const { error } = await supabase.from("user_progress").upsert({
+              user_id: userId,
+              game_type: "emotion_quest",
+              score: player.points,
+              completed_challenges: player.completedChallenges,
+              last_played_at: new Date().toISOString(),
+            });
+
+            if (error) {
+              console.error("Error saving progress:", error);
+            }
+          } catch (err) {
+            console.error("Failed to save progress:", err);
+          }
+        };
+
+        saveGameProgress();
+      }
+
+      return updatedTokens;
+    });
+
+    // Check if game should end (completed full circuit or reached point threshold)
+    const currentPlayer = playerTokens[currentPlayerIndex];
+    if (
+      currentPlayer.completedChallenges.length >= spaces.length / 2 ||
+      currentPlayer.points >= 100
+    ) {
+      setGameState("completed");
       
-      // Move player
-      const currentPlayer = { ...players[currentPlayerIndex] };
-      const newPosition = (currentPlayer.position + finalValue) % boardSpaces.length;
+      // Generate completion message
+      const points = currentPlayer.points;
+      let message = "";
       
-      const updatedPlayers = [...players];
-      updatedPlayers[currentPlayerIndex] = {
-        ...currentPlayer,
-        position: newPosition
-      };
-      
-      setPlayers(updatedPlayers);
-      
-      // Check if player landed on an emotion space
-      const landedSpace = boardSpaces[newPosition];
-      
-      if (landedSpace.type !== "neutral" && landedSpace.type !== "start" && landedSpace.type !== "bonus") {
-        // Draw a random card of the corresponding emotion
-        const matchingCards = emotionCards.filter(card => card.type === landedSpace.type);
-        const randomCard = matchingCards[Math.floor(Math.random() * matchingCards.length)];
-        setActiveCard(randomCard);
-        
-        setTimeout(() => {
-          setShowCardModal(true);
-        }, 1000);
-      } else if (landedSpace.type === "bonus") {
-        // Give bonus points
-        const bonusPoints = Math.floor(Math.random() * 3) + 1;
-        const playerWithBonus = { ...players[currentPlayerIndex] };
-        playerWithBonus.resiliencePoints += bonusPoints;
-        
-        const updatedPlayersWithBonus = [...players];
-        updatedPlayersWithBonus[currentPlayerIndex] = playerWithBonus;
-        
-        setPlayers(updatedPlayersWithBonus);
-        
-        toast({
-          title: "Bonus Points!",
-          description: `${playerWithBonus.name} received ${bonusPoints} bonus resilience points!`,
-        });
-        
-        // Move to next player after a delay
-        setTimeout(() => {
-          nextPlayer();
-        }, 2000);
+      if (points >= 100) {
+        message = "Outstanding achievement! You've mastered emotional resilience skills!";
+      } else if (points >= 75) {
+        message = "Great job! You're developing strong emotional intelligence!";
+      } else if (points >= 50) {
+        message = "Well done! You're building valuable resilience skills!";
       } else {
-        // If neutral space, just move to next player after a delay
-        setTimeout(() => {
-          nextPlayer();
-        }, 2000);
+        message = "Good start! Continue your journey to emotional resilience!";
       }
       
-      setIsRolling(false);
-    }, 1000);
-  };
-
-  // Complete a card activity
-  const completeActivity = () => {
-    if (!activeCard) return;
-    
-    // Add card to player's collection
-    const updatedPlayer = { ...players[currentPlayerIndex] };
-    updatedPlayer.cards.push(activeCard);
-    updatedPlayer.resiliencePoints += activeCard.points;
-    
-    const updatedPlayers = [...players];
-    updatedPlayers[currentPlayerIndex] = updatedPlayer;
-    
-    setPlayers(updatedPlayers);
-    setShowCardModal(false);
-    setActiveCard(null);
-    
-    // Check if player won
-    if (updatedPlayer.resiliencePoints >= 50) {
-      setGamePhase("finished");
-      toast({
-        title: "We Have a Winner!",
-        description: `${updatedPlayer.name} has reached 50 resilience points and won the game!`,
-      });
-    } else {
-      toast({
-        title: "Activity Completed",
-        description: `${updatedPlayer.name} earned ${activeCard.points} resilience points!`,
-      });
+      setGameCompletionMessage(message);
       
-      // Move to next player
-      nextPlayer();
-    }
-  };
-
-  // Move to next player's turn
-  const nextPlayer = () => {
-    setCurrentPlayerIndex((prevIndex) => (prevIndex + 1) % players.length);
-  };
-
-  // Render dice face based on value
-  const renderDiceFace = () => {
-    switch (diceValue) {
-      case 1: return <Dice1 className="w-10 h-10" />;
-      case 2: return <Dice2 className="w-10 h-10" />;
-      case 3: return <Dice3 className="w-10 h-10" />;
-      case 4: return <Dice4 className="w-10 h-10" />;
-      case 5: return <Dice5 className="w-10 h-10" />;
-      case 6: return <Dice6 className="w-10 h-10" />;
-      default: return <Dice1 className="w-10 h-10" />;
-    }
-  };
-
-  // Get emotion icon based on type
-  const getEmotionIcon = (type: string) => {
-    switch (type) {
-      case "joy": return <Smile className="w-5 h-5" style={{ color: "#F5DF4D" }} />;
-      case "sadness": return <Frown className="w-5 h-5" style={{ color: "#3DFDFF" }} />;
-      case "anger": return <Angry className="w-5 h-5" style={{ color: "#FC68B3" }} />;
-      case "fear": return <Meh className="w-5 h-5" style={{ color: "#D5D5F1" }} />;
-      case "surprise": return <Laugh className="w-5 h-5" style={{ color: "#FF8A48" }} />;
-      case "disgust": return <BookOpen className="w-5 h-5" style={{ color: "#2AC20E" }} />;
-      default: return <Info className="w-5 h-5" />;
-    }
-  };
-
-  // Save game progress if logged in
-  useEffect(() => {
-    if (userId && gamePhase === "finished") {
-      const saveGameResult = async () => {
-        try {
-          const { error } = await supabase
-            .from('game_results')
-            .insert({
+      // Save game completion if logged in
+      if (userId) {
+        const saveGameResult = async () => {
+          try {
+            await supabase.from("user_progress").upsert({
               user_id: userId,
-              game_type: 'emotion_quest',
-              score: players.find(p => p.id === 1)?.resiliencePoints || 0,
+              game_type: "emotion_quest",
+              score: currentPlayer.points,
+              completed_challenges: currentPlayer.completedChallenges,
               completed: true,
-              metadata: { 
-                players: players.map(p => ({ 
-                  name: p.name, 
-                  score: p.resiliencePoints,
-                  cards_collected: p.cards.length
-                }))
-              }
+              last_played_at: new Date().toISOString(),
             });
-            
-          if (error) throw error;
-        } catch (error) {
-          console.error('Error saving game result:', error);
-        }
-      };
-      
-      saveGameResult();
+          } catch (err) {
+            console.error("Failed to save game result:", err);
+          }
+        };
+        
+        saveGameResult();
+      }
+    } else {
+      setActionCompleted(true);
+      setGameState("rolling");
     }
-  }, [gamePhase, userId, players]);
 
-  return (
-    <div className="max-w-7xl mx-auto">
-      {/* Tutorial Dialog */}
-      <Dialog open={showTutorial} onOpenChange={setShowTutorial}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{tutorialSteps[tutorialStep].title}</DialogTitle>
-            <DialogDescription>
-              {tutorialSteps[tutorialStep].content}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex justify-between">
-            <Button
-              variant="outline"
-              onClick={() => setTutorialStep(Math.max(0, tutorialStep - 1))}
-              disabled={tutorialStep === 0}
-            >
-              Previous
-            </Button>
-            <Button
-              onClick={() => {
-                if (tutorialStep < tutorialSteps.length - 1) {
-                  setTutorialStep(tutorialStep + 1);
-                } else {
-                  setShowTutorial(false);
-                }
-              }}
-            >
-              {tutorialStep < tutorialSteps.length - 1 ? "Next" : "Start Playing"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+    toast({
+      title: "Action Completed!",
+      description: `You earned ${currentSpace.points || 0} resilience points!`,
+    });
+  };
 
-      {/* Player Setup Modal */}
-      <Dialog open={showPlayerModal} onOpenChange={setShowPlayerModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Setup Your Game</DialogTitle>
-            <DialogDescription>
-              Add players to get started with Emotion Quest.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4">
-            <div className="flex flex-col space-y-2">
-              <label htmlFor="playerName" className="text-sm font-medium">Player Name</label>
-              <div className="flex gap-2">
-                <input
-                  id="playerName"
-                  value={tempPlayerName}
-                  onChange={(e) => setTempPlayerName(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  placeholder="Enter player name"
-                />
-                
-                <Button onClick={() => setTempAvatarIndex((prev) => (prev + 1) % AVATARS.length)} variant="outline">
-                  <div className="text-xl">{AVATARS[tempAvatarIndex]}</div>
-                </Button>
-              </div>
-            </div>
-            
-            <Button onClick={addPlayer}>Add Player</Button>
-            
-            <div className="mt-4">
-              <h4 className="text-sm font-medium mb-2">Current Players:</h4>
-              <div className="space-y-2">
-                {players.map((player, index) => (
-                  <div key={player.id} className="flex items-center justify-between bg-gray-100 p-2 rounded-md">
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/20">
-                        <span className="text-lg">{AVATARS[player.avatar]}</span>
-                      </div>
-                      <span>{player.name}</span>
-                    </div>
-                    {index > 0 && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => setPlayers(players.filter(p => p.id !== player.id))}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
+  // Reset game
+  const resetGame = () => {
+    setGameState("setup");
+    setPlayerTokens([
+      {
+        id: 1,
+        position: 0,
+        color: "#3DFDFF",
+        points: 0,
+        name: playerName || "Player 1",
+        completedChallenges: [],
+      },
+    ]);
+    setCurrentPlayerIndex(0);
+    setDiceRoll(null);
+    setCurrentSpace(null);
+    setActionCompleted(false);
+  };
+
+  // Start game with player name
+  const startGame = () => {
+    if (playerName.trim() === "") {
+      setPlayerName("Player 1");
+    }
+    
+    setPlayerTokens([
+      {
+        id: 1,
+        position: 0,
+        color: "#3DFDFF",
+        points: 0,
+        name: playerName || "Player 1",
+        completedChallenges: [],
+      },
+    ]);
+    
+    setGameState("rolling");
+  };
+
+  // Render dice based on current roll
+  const renderDice = () => {
+    if (diceRoll === null) return null;
+
+    const DiceIcon = {
+      1: Dice1,
+      2: Dice2,
+      3: Dice3,
+      4: Dice4,
+      5: Dice5,
+      6: Dice6,
+    }[diceRoll];
+
+    return (
+      <div className="flex justify-center my-4">
+        <motion.div
+          animate={{ rotate: isRolling ? 360 : 0 }}
+          transition={{ duration: 0.5, repeat: isRolling ? Infinity : 0 }}
+          className="bg-white p-4 rounded-lg shadow-md"
+        >
+          <DiceIcon size={48} className="text-[#FF8A48]" />
+        </motion.div>
+      </div>
+    );
+  };
+
+  // Render content based on space type
+  const renderSpaceContent = () => {
+    if (!currentSpace) return null;
+
+    let content;
+    let contentIndex = 0;
+
+    // Determine which content to show based on space type and id
+    if (currentSpace.type !== "start") {
+      // Map space id to content index
+      const typeSpaces = spaces.filter((s) => s.type === currentSpace.type);
+      contentIndex = typeSpaces.findIndex((s) => s.id === currentSpace.id) % 4;
+      contentIndex = contentIndex >= 0 ? contentIndex : 0;
+    }
+
+    switch (currentSpace.type) {
+      case "start":
+        content = (
+          <div className="text-center p-4">
+            <h3 className="text-xl font-bold mb-4">Begin Your Journey!</h3>
+            <p>
+              Welcome to Emotion Quest! Roll the dice to move around the board and
+              explore different emotional intelligence and resilience activities.
+            </p>
+          </div>
+        );
+        break;
+      case "emotion":
+        const emotionContent = actionContent.emotion[contentIndex];
+        content = (
+          <div className="p-4">
+            <h3 className="text-xl font-bold mb-4 text-[#FC68B3]">
+              {emotionContent.title}
+            </h3>
+            {emotionContent.descriptions.map((desc, i) => (
+              <p key={i} className="mb-2">
+                {desc}
+              </p>
+            ))}
+            <div className="mt-4 bg-[#FC68B3]/10 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Reflection Questions:</h4>
+              <ul className="list-disc pl-5">
+                {emotionContent.reflections.map((reflection, i) => (
+                  <li key={i} className="mb-1">
+                    {reflection}
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           </div>
-          
-          <DialogFooter>
-            <Button 
-              onClick={() => {
-                setShowPlayerModal(false);
-                setGamePhase("playing");
-              }}
-              disabled={players.length === 0}
+        );
+        break;
+      case "challenge":
+        const challengeContent = actionContent.challenge[contentIndex];
+        content = (
+          <div className="p-4">
+            <h3 className="text-xl font-bold mb-4 text-[#FF8A48]">
+              {challengeContent.title}
+            </h3>
+            {challengeContent.descriptions.map((desc, i) => (
+              <p key={i} className="mb-2">
+                {desc}
+              </p>
+            ))}
+            <div className="mt-4 bg-[#FF8A48]/10 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Challenge Steps:</h4>
+              <ol className="list-decimal pl-5">
+                {challengeContent.tasks.map((task, i) => (
+                  <li key={i} className="mb-1">
+                    {task}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        );
+        break;
+      case "reflection":
+        const reflectionContent = actionContent.reflection[contentIndex];
+        content = (
+          <div className="p-4">
+            <h3 className="text-xl font-bold mb-4 text-[#3DFDFF]">
+              {reflectionContent.title}
+            </h3>
+            {reflectionContent.descriptions.map((desc, i) => (
+              <p key={i} className="mb-2">
+                {desc}
+              </p>
+            ))}
+            <div className="mt-4 bg-[#3DFDFF]/10 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Reflect on:</h4>
+              <ul className="list-disc pl-5">
+                {reflectionContent.questions.map((question, i) => (
+                  <li key={i} className="mb-1">
+                    {question}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        );
+        break;
+      case "resource":
+        const resourceContent = actionContent.resource[contentIndex];
+        content = (
+          <div className="p-4">
+            <h3 className="text-xl font-bold mb-4 text-[#F5DF4D]">
+              {resourceContent.title}
+            </h3>
+            {resourceContent.descriptions.map((desc, i) => (
+              <p key={i} className="mb-2">
+                {desc}
+              </p>
+            ))}
+            <div className="mt-4 bg-[#F5DF4D]/10 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Helpful Tips:</h4>
+              <ul className="list-disc pl-5">
+                {resourceContent.tips.map((tip, i) => (
+                  <li key={i} className="mb-1">
+                    {tip}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        );
+        break;
+      case "bonus":
+        const bonusContent = actionContent.bonus[contentIndex];
+        content = (
+          <div className="p-4">
+            <h3 className="text-xl font-bold mb-4 text-[#D5D5F1]">
+              {bonusContent.title}
+            </h3>
+            {bonusContent.descriptions.map((desc, i) => (
+              <p key={i} className="mb-2">
+                {desc}
+              </p>
+            ))}
+            <div className="mt-4 bg-[#D5D5F1]/10 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Bonus Reward:</h4>
+              <ul className="list-disc pl-5">
+                {bonusContent.rewards.map((reward, i) => (
+                  <li key={i} className="mb-1">
+                    {reward}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        );
+        break;
+      default:
+        content = <div>Unknown space type</div>;
+    }
+
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{currentSpace.label}</CardTitle>
+          <CardDescription>{currentSpace.description}</CardDescription>
+        </CardHeader>
+        <CardContent>{content}</CardContent>
+        <CardFooter className="flex justify-end">
+          <Button 
+            onClick={completeAction} 
+            className="bg-[#FF8A48] hover:bg-[#FF8A48]/80"
+          >
+            Complete Activity
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  };
+
+  // Game setup screen
+  if (gameState === "setup") {
+    return (
+      <div className="max-w-4xl mx-auto p-4">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-center text-2xl">Emotion Quest</CardTitle>
+            <CardDescription className="text-center">
+              A board game journey to emotional resilience
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p>
+                Emotion Quest is a board game designed to help build emotional
+                intelligence and resilience skills. Roll the dice, move around the board,
+                and complete activities to earn resilience points!
+              </p>
+              <div className="mt-4">
+                <label htmlFor="playerName" className="block text-sm font-medium mb-1">
+                  Your Name:
+                </label>
+                <input
+                  type="text"
+                  id="playerName"
+                  value={playerName}
+                  onChange={(e) => setPlayerName(e.target.value)}
+                  placeholder="Enter your name"
+                  className="w-full p-2 border rounded-md"
+                />
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <Button
+              onClick={startGame}
+              className="bg-[#FC68B3] hover:bg-[#FC68B3]/80"
             >
               Start Game
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
-      {/* Emotion Card Modal */}
-      <Dialog open={showCardModal} onOpenChange={setShowCardModal}>
-        <DialogContent className="sm:max-w-md">
-          {activeCard && (
-            <>
-              <DialogHeader>
-                <div className="flex items-center gap-2">
-                  {getEmotionIcon(activeCard.type)}
-                  <DialogTitle>{activeCard.title}</DialogTitle>
-                </div>
-                <DialogDescription>
-                  {activeCard.description}
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="p-4 bg-gray-100 rounded-md my-4">
-                <h4 className="font-medium mb-2">Activity:</h4>
-                <p>{activeCard.activity}</p>
-              </div>
-              
-              <div className="flex items-center gap-2 text-sm">
-                <Trophy className="h-4 w-4 text-yellow-500" />
-                <span>Completing this earns you {activeCard.points} resilience points</span>
-              </div>
-              
-              <DialogFooter>
-                <Button onClick={completeActivity}>
-                  I've Completed This Activity
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+  // Game completed screen
+  if (gameState === "completed") {
+    return (
+      <div className="max-w-4xl mx-auto p-4">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-center text-2xl flex items-center justify-center">
+              <Trophy className="mr-2 text-[#F5DF4D]" /> Game Completed!
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-xl mb-4">
+              Congratulations, {playerTokens[currentPlayerIndex].name}!
+            </p>
+            <p className="mb-4">{gameCompletionMessage}</p>
+            <div className="bg-[#3DFDFF]/10 p-4 rounded-lg mb-6">
+              <p className="font-bold text-lg">
+                Final Score: {playerTokens[currentPlayerIndex].points} Resilience Points
+              </p>
+              <p>
+                Challenges Completed: {playerTokens[currentPlayerIndex].completedChallenges.length}
+              </p>
+            </div>
+            <p>
+              Remember that emotional resilience is a skill that grows with practice.
+              Continue to use these strategies in your daily life!
+            </p>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <Button
+              onClick={resetGame}
+              className="bg-[#FF8A48] hover:bg-[#FF8A48]/80"
+            >
+              Play Again
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
-      {/* Game Setup Phase */}
-      {gamePhase === "setup" && (
-        <div className="text-center mb-8">
-          <Button 
-            onClick={setupGame} 
-            className="bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] hover:opacity-90 py-6 px-8 text-lg"
-          >
-            Set Up Game
-          </Button>
+  // Main game screen
+  return (
+    <div className="max-w-6xl mx-auto p-4">
+      {/* Game header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div>
+          <h2 className="text-2xl font-bold flex items-center">
+            Emotion Quest
+            <span className="ml-2 text-sm bg-[#3DFDFF]/20 px-2 py-1 rounded">
+              Building Resilience
+            </span>
+          </h2>
         </div>
-      )}
-
-      {/* Main Game Board and UI */}
-      {gamePhase === "playing" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Game Board */}
-          <div className="lg:col-span-2">
-            <Card className="overflow-hidden h-full">
-              <CardHeader className="bg-gradient-to-r from-[#3DFDFF]/20 to-[#FC68B3]/20">
-                <CardTitle className="flex justify-between items-center">
-                  <span>Emotion Quest Board</span>
-                  <Button variant="outline" size="sm" onClick={() => setShowTutorial(true)}>
-                    <HelpCircle className="h-4 w-4 mr-1" /> Help
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="relative p-4 flex items-center justify-center">
-                  <EmotionQuestBoard 
-                    spaces={boardSpaces} 
-                    players={players}
-                    currentPlayerIndex={currentPlayerIndex}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+        <div className="flex items-center mt-2 md:mt-0">
+          <div className="flex items-center mr-4">
+            <User className="mr-1 h-4 w-4" />
+            <span className="font-medium">
+              {playerTokens[currentPlayerIndex].name}
+            </span>
           </div>
-          
-          {/* Right Column - Player Info and Controls */}
-          <div>
-            <Card className="mb-6">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">
-                  Current Turn: 
-                  <span className="ml-2 font-bold" style={{ color: PLAYER_COLORS[currentPlayerIndex % PLAYER_COLORS.length] }}>
-                    {players[currentPlayerIndex].name}
-                  </span>
-                </CardTitle>
+          <div className="flex items-center bg-[#FC68B3]/10 px-3 py-1 rounded-full">
+            <Trophy className="mr-1 h-4 w-4 text-[#FC68B3]" />
+            <span className="font-medium">
+              {playerTokens[currentPlayerIndex].points} Points
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Game board */}
+        <div className="lg:col-span-2">
+          <EmotionQuestBoard
+            spaces={spaces}
+            playerTokens={playerTokens}
+            currentPlayerIndex={currentPlayerIndex}
+            onLandOnSpace={() => {}}
+            className="mb-4"
+          />
+        </div>
+
+        {/* Game controls and information */}
+        <div className="space-y-4">
+          {gameState === "rolling" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Turn</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-12 h-12 rounded-full flex items-center justify-center text-2xl"
-                      style={{ backgroundColor: PLAYER_COLORS[currentPlayerIndex % PLAYER_COLORS.length] + "30" }}
-                    >
-                      {AVATARS[players[currentPlayerIndex].avatar]}
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-500">Resilience Points:</div>
-                      <div className="font-bold text-xl">{players[currentPlayerIndex].resiliencePoints}/50</div>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    ref={diceRef} 
-                    className={`w-20 h-20 rounded-xl flex items-center justify-center bg-white shadow-md border-2 ${isRolling ? "animate-spin" : ""}`}
-                    style={{ borderColor: PLAYER_COLORS[currentPlayerIndex % PLAYER_COLORS.length] }}
-                  >
-                    {diceValue ? renderDiceFace() : <Dice1 className="w-10 h-10 text-gray-400" />}
-                  </div>
-                </div>
-                
-                <Button 
-                  onClick={rollDice} 
+                <p>Roll the dice to move around the board!</p>
+                {renderDice()}
+              </CardContent>
+              <CardFooter className="flex justify-center">
+                <Button
+                  onClick={rollDice}
                   disabled={isRolling}
-                  className="w-full py-6 text-lg"
-                  style={{ 
-                    backgroundColor: PLAYER_COLORS[currentPlayerIndex % PLAYER_COLORS.length],
-                    color: ["#F5DF4D", "#2AC20E"].includes(PLAYER_COLORS[currentPlayerIndex % PLAYER_COLORS.length]) ? "#1A1F2C" : "white"
-                  }}
+                  className="bg-[#3DFDFF] hover:bg-[#3DFDFF]/80 text-[#1A1F2C]"
                 >
                   Roll Dice
                 </Button>
-              </CardContent>
+              </CardFooter>
             </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle>Players' Progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="progress" className="w-full">
-                  <TabsList className="grid grid-cols-2 mb-4">
-                    <TabsTrigger value="progress">Progress</TabsTrigger>
-                    <TabsTrigger value="cards">Emotion Cards</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="progress" className="mt-0">
-                    <div className="space-y-4">
-                      {players.map((player, index) => (
-                        <div key={player.id} className="space-y-1">
-                          <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                              <div 
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-lg"
-                                style={{ backgroundColor: PLAYER_COLORS[index % PLAYER_COLORS.length] + "30" }}
-                              >
-                                {AVATARS[player.avatar]}
-                              </div>
-                              <span 
-                                className="font-medium"
-                                style={{ color: index === currentPlayerIndex ? PLAYER_COLORS[index % PLAYER_COLORS.length] : "inherit" }}
-                              >
-                                {player.name}
-                              </span>
-                            </div>
-                            <span className="text-sm">{player.resiliencePoints}/50</span>
-                          </div>
-                          <Progress value={(player.resiliencePoints / 50) * 100} className="h-2" />
-                        </div>
-                      ))}
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="cards" className="mt-0">
-                    <div className="space-y-4">
-                      {players.map((player) => (
-                        <div key={player.id} className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <div 
-                              className="w-6 h-6 rounded-full flex items-center justify-center text-sm"
-                              style={{ backgroundColor: PLAYER_COLORS[(player.id - 1) % PLAYER_COLORS.length] + "30" }}
-                            >
-                              {AVATARS[player.avatar]}
-                            </div>
-                            <span className="font-medium">{player.name}'s Cards</span>
-                          </div>
-                          
-                          <div className="flex flex-wrap gap-1">
-                            {player.cards.length === 0 ? (
-                              <p className="text-sm text-gray-500 italic">No cards collected yet</p>
-                            ) : (
-                              player.cards.map((card, cardIndex) => (
-                                <Badge
-                                  key={`${card.id}-${cardIndex}`}
-                                  className="cursor-pointer"
-                                  style={{ backgroundColor: card.color, color: ["#F5DF4D", "#2AC20E"].includes(card.color) ? "#1A1F2C" : "white" }}
-                                  onClick={() => {
-                                    setActiveCard(card);
-                                    setShowCardModal(true);
-                                  }}
-                                >
-                                  {getEmotionIcon(card.type)}
-                                  <span className="ml-1">{card.type}</span>
-                                </Badge>
-                              ))
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
+          )}
 
-      {/* Game Finished */}
-      {gamePhase === "finished" && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center py-8"
-        >
-          <h2 className="text-3xl font-bold mb-6">Game Completed!</h2>
-          
-          <Card className="max-w-2xl mx-auto bg-gradient-to-r from-[#3DFDFF]/20 to-[#FC68B3]/20">
+          {gameState === "action" && currentSpace && renderSpaceContent()}
+
+          {/* Player progress */}
+          <Card>
             <CardHeader>
-              <CardTitle>Final Results</CardTitle>
+              <CardTitle className="text-sm">Progress Tracker</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                {/* Winner */}
-                {players.sort((a, b) => b.resiliencePoints - a.resiliencePoints).map((player, index) => (
-                  <div 
-                    key={player.id}
-                    className={`flex items-center gap-4 p-4 rounded-lg ${index === 0 ? 'bg-yellow-100' : ''}`}
-                  >
-                    <div className="relative">
-                      <Avatar className="w-16 h-16 text-4xl border-2 border-[#FF8A48]">
-                        {AVATARS[player.avatar]}
-                      </Avatar>
-                      {index === 0 && (
-                        <div className="absolute -top-2 -right-2 bg-[#F5DF4D] text-black rounded-full w-8 h-8 flex items-center justify-center">
-                          <Trophy className="w-5 h-5" />
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-bold text-xl">{player.name}</h3>
-                          <p className="text-gray-600">{player.cards.length} emotion cards collected</p>
-                        </div>
-                        <div className="text-2xl font-bold">{player.resiliencePoints} pts</div>
-                      </div>
-                      <Progress value={(player.resiliencePoints / 50) * 100} className="h-2 mt-2" />
-                    </div>
-                  </div>
-                ))}
+              <div className="text-sm space-y-2">
+                <div>
+                  <span className="font-medium">Spaces Visited:</span>{" "}
+                  {playerTokens[currentPlayerIndex].completedChallenges.length}
+                </div>
+                <div>
+                  <span className="font-medium">Current Position:</span>{" "}
+                  {spaces[playerTokens[currentPlayerIndex].position].label}
+                </div>
+                <div>
+                  <span className="font-medium">Resilience Points:</span>{" "}
+                  {playerTokens[currentPlayerIndex].points}
+                </div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-center gap-4">
-              <Button 
-                onClick={() => window.location.href = '/resources'} 
-                variant="outline"
-              >
-                Return to Resources
-              </Button>
-              <Button 
-                onClick={() => {
-                  setPlayers([
-                    { id: 1, name: players[0].name, position: 0, avatar: players[0].avatar, resiliencePoints: 0, cards: [] }
-                  ]);
-                  setCurrentPlayerIndex(0);
-                  setDiceValue(null);
-                  setGamePhase("setup");
-                }} 
-                className="bg-[#FF8A48]"
-              >
-                Play Again
-              </Button>
-            </CardFooter>
           </Card>
-        </motion.div>
-      )}
+        </div>
+      </div>
     </div>
   );
 };
