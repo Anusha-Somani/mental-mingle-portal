@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +10,9 @@ import {
   FileText, 
   BookOpen, 
   Gamepad2,
-  ExternalLink
+  ExternalLink,
+  Download,
+  Eye
 } from "lucide-react";
 import GameModule from "./GameModule";
 import {
@@ -110,17 +113,20 @@ const CategoryContent: React.FC<CategoryContentProps> = ({ category, userId }) =
     {
       title: `${category} Self-Assessment`,
       pages: 2,
-      type: "PDF"
+      type: "PDF",
+      url: "#self-assessment"
     },
     {
       title: `${category} Action Plan`,
       pages: 4,
-      type: "Fillable PDF"
+      type: "Fillable PDF",
+      url: "#action-plan"
     },
     {
       title: `Weekly ${category} Tracker`,
       pages: 1,
-      type: "Printable"
+      type: "Printable",
+      url: "#weekly-tracker"
     }
   ];
   
@@ -128,17 +134,20 @@ const CategoryContent: React.FC<CategoryContentProps> = ({ category, userId }) =
     {
       title: `The Science Behind ${category}`,
       readTime: "5 min read",
-      author: "Dr. Emma Johnson"
+      author: "Dr. Emma Johnson",
+      url: "#science-article"
     },
     {
       title: `5 Ways to Handle ${category}`,
       readTime: "8 min read",
-      author: "Michael Stevens"
+      author: "Michael Stevens",
+      url: "#ways-article"
     },
     {
       title: `${category} in School Settings`,
       readTime: "6 min read",
-      author: "Prof. Sarah Williams"
+      author: "Prof. Sarah Williams",
+      url: "#school-article"
     }
   ];
 
@@ -184,7 +193,7 @@ const CategoryContent: React.FC<CategoryContentProps> = ({ category, userId }) =
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className="overflow-hidden h-full">
+                <Card className="overflow-hidden h-full cursor-pointer hover:shadow-lg transition-all">
                   <div className="relative aspect-video">
                     <img 
                       src={video.thumbnail} 
@@ -227,27 +236,30 @@ const CategoryContent: React.FC<CategoryContentProps> = ({ category, userId }) =
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
               >
-                <Card className="h-full">
-                  <CardContent className="p-6 flex flex-col h-full">
-                    <div className="mb-4 p-4 bg-gray-100 rounded-md flex items-center justify-center">
-                      <FileText className="h-12 w-12 text-gray-500" />
-                    </div>
-                    <h3 className="font-semibold text-[#1A1F2C] mb-2">{worksheet.title}</h3>
-                    <div className="flex gap-2 mb-4">
-                      <Badge variant="outline">{worksheet.pages} pages</Badge>
-                      <Badge variant="outline">{worksheet.type}</Badge>
-                    </div>
-                    <div className="mt-auto flex space-x-2">
-                      <Button variant="outline" size="sm" className="flex-1">
-                        Preview
-                      </Button>
-                      <Button size="sm" className="flex-1">
-                        Download
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                <a href={worksheet.url} className="block h-full">
+                  <Card className="h-full hover:shadow-lg transition-all">
+                    <CardContent className="p-6 flex flex-col h-full">
+                      <div className="mb-4 p-4 bg-gray-100 rounded-md flex items-center justify-center">
+                        <FileText className="h-12 w-12 text-gray-500" />
+                      </div>
+                      <h3 className="font-semibold text-[#1A1F2C] mb-2">{worksheet.title}</h3>
+                      <div className="flex gap-2 mb-4">
+                        <Badge variant="outline">{worksheet.pages} pages</Badge>
+                        <Badge variant="outline">{worksheet.type}</Badge>
+                      </div>
+                      <div className="mt-auto flex space-x-2">
+                        <Button variant="outline" size="sm" className="flex-1">
+                          <Eye className="mr-1 h-4 w-4" /> Preview
+                        </Button>
+                        <Button size="sm" className="flex-1">
+                          <Download className="mr-1 h-4 w-4" /> Download
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </a>
               </motion.div>
             ))}
           </div>
@@ -267,22 +279,24 @@ const CategoryContent: React.FC<CategoryContentProps> = ({ category, userId }) =
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold text-lg text-[#1A1F2C] mb-2">{article.title}</h3>
-                    <div className="flex items-center text-sm text-gray-500 mb-4">
-                      <span className="mr-3">By {article.author}</span>
-                      <span>{article.readTime}</span>
-                    </div>
-                    <p className="text-gray-600 mb-4">
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
-                    </p>
-                    <Button size="sm">
-                      Read Article
-                      <ExternalLink className="ml-2 h-4 w-4" />
-                    </Button>
-                  </CardContent>
-                </Card>
+                <a href={article.url} className="block">
+                  <Card className="hover:shadow-md transition-all">
+                    <CardContent className="p-6">
+                      <h3 className="font-semibold text-lg text-[#1A1F2C] mb-2">{article.title}</h3>
+                      <div className="flex items-center text-sm text-gray-500 mb-4">
+                        <span className="mr-3">By {article.author}</span>
+                        <span>{article.readTime}</span>
+                      </div>
+                      <p className="text-gray-600 mb-4">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+                      </p>
+                      <Button size="sm" className="group">
+                        Read Article
+                        <ExternalLink className="ml-2 h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </a>
               </motion.div>
             ))}
           </div>
