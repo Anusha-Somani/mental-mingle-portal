@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,11 +11,14 @@ import {
   Gamepad2,
   ExternalLink
 } from "lucide-react";
-import BullyingGameModule from "./BullyingGameModule";
-import AcademicPressureGame from "./AcademicPressureGame";
-import SelfAwarenessGame from "./SelfAwarenessGame";
-import ConfidenceBuildingGame from "./ConfidenceBuildingGame";
-import PeerPressureGame from "./PeerPressureGame";
+import GameModule from "./GameModule";
+import {
+  bullyingConfig,
+  academicPressureConfig,
+  selfAwarenessConfig,
+  confidenceBuildingConfig,
+  peerPressureConfig
+} from "./gameConfigs";
 
 interface CategoryContentProps {
   category: string;
@@ -29,21 +31,60 @@ const CategoryContent: React.FC<CategoryContentProps> = ({ category, userId }) =
   const renderGameComponent = () => {
     switch (category) {
       case "Bullying":
-        return <BullyingGameModule userId={userId} />;
+        return <GameModule 
+          userId={userId} 
+          title={bullyingConfig.title}
+          titleIcon={bullyingConfig.titleIcon}
+          titleColor={bullyingConfig.titleColor}
+          modules={bullyingConfig.modules}
+          badges={bullyingConfig.badges}
+          startingModuleId={bullyingConfig.startingModuleId}
+        />;
       case "Academic Pressure":
-        return <AcademicPressureGame userId={userId} />;
+        return <GameModule 
+          userId={userId} 
+          title={academicPressureConfig.title}
+          titleIcon={academicPressureConfig.titleIcon}
+          titleColor={academicPressureConfig.titleColor}
+          modules={academicPressureConfig.modules}
+          badges={academicPressureConfig.badges}
+          startingModuleId={academicPressureConfig.startingModuleId}
+        />;
       case "Self Awareness":
-        return <SelfAwarenessGame userId={userId} />;
+        return <GameModule 
+          userId={userId} 
+          title={selfAwarenessConfig.title}
+          titleIcon={selfAwarenessConfig.titleIcon}
+          titleColor={selfAwarenessConfig.titleColor}
+          modules={selfAwarenessConfig.modules}
+          badges={selfAwarenessConfig.badges}
+          startingModuleId={selfAwarenessConfig.startingModuleId}
+        />;
       case "Confidence Building":
-        return <ConfidenceBuildingGame userId={userId} />;
+        return <GameModule 
+          userId={userId} 
+          title={confidenceBuildingConfig.title}
+          titleIcon={confidenceBuildingConfig.titleIcon}
+          titleColor={confidenceBuildingConfig.titleColor}
+          modules={confidenceBuildingConfig.modules}
+          badges={confidenceBuildingConfig.badges}
+          startingModuleId={confidenceBuildingConfig.startingModuleId}
+        />;
       case "Peer Pressure":
-        return <PeerPressureGame userId={userId} />;
+        return <GameModule 
+          userId={userId} 
+          title={peerPressureConfig.title}
+          titleIcon={peerPressureConfig.titleIcon}
+          titleColor={peerPressureConfig.titleColor}
+          modules={peerPressureConfig.modules}
+          badges={peerPressureConfig.badges}
+          startingModuleId={peerPressureConfig.startingModuleId}
+        />;
       default:
         return null;
     }
   };
   
-  // Mock data for resources
   const videos = [
     {
       title: `Understanding ${category}`,
