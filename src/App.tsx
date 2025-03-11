@@ -10,6 +10,7 @@ import Resources from "@/pages/Resources";
 import Puzzle from "@/pages/Puzzle";
 import TetrisGame from "@/pages/TetrisGame";
 import EmotionQuest from "@/pages/EmotionQuest";
+import ResiliencyBingo from "@/pages/ResiliencyBingo";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -35,6 +36,7 @@ function App() {
             <Route path="/puzzle" element={<Puzzle />} />
             <Route path="/tetris" element={<TetrisGame />} />
             <Route path="/emotion-quest" element={<EmotionQuest />} />
+            <Route path="/resiliency-bingo" element={<ResiliencyBingo />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
