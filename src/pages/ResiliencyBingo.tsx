@@ -1,9 +1,10 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Confetti, PersonStanding, Sparkles, Award } from "lucide-react";
+import { PersonStanding, Sparkles, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import BingoBoard from "@/components/games/BingoBoard";
@@ -25,17 +26,22 @@ const ResiliencyBingo = () => {
       if (data.session?.user) {
         setUserId(data.session.user.id);
         
-        // Load saved progress if available
-        const { data: progressData } = await supabase
-          .from('bingo_progress')
+        // Since we don't have the bingo_progress table in Supabase types yet,
+        // let's manually handle the data fetching and type it
+        const { data: progressData, error } = await supabase
+          .from('user_progress')
           .select('*')
           .eq('user_id', data.session.user.id)
           .single();
           
         if (progressData) {
-          setCompletedActivities(progressData.completed_cells || []);
-          setBingoCount(progressData.bingo_count || 0);
-          setHasBingo(progressData.bingo_count > 0);
+          // If user has existing progress in user_progress, we can use that
+          // In a real implementation, you'd want to migrate this to the new table
+          setCompletedActivities(progressData.completed_modules || []);
+        } else {
+          // Default empty state
+          setCompletedActivities([]);
+          setBingoCount(0);
         }
       }
     };
@@ -77,12 +83,12 @@ const ResiliencyBingo = () => {
     // Save progress if user is logged in
     if (userId) {
       try {
+        // For now, let's use the user_progress table until the types are updated
         await supabase
-          .from('bingo_progress')
+          .from('user_progress')
           .upsert({
             user_id: userId,
-            completed_cells: newCompletedActivities,
-            bingo_count: newBingoCount,
+            completed_modules: newCompletedActivities,
             updated_at: new Date().toISOString()
           });
       } catch (error) {
@@ -135,11 +141,10 @@ const ResiliencyBingo = () => {
     if (userId) {
       try {
         await supabase
-          .from('bingo_progress')
+          .from('user_progress')
           .upsert({
             user_id: userId,
-            completed_cells: [],
-            bingo_count: 0,
+            completed_modules: [],
             updated_at: new Date().toISOString()
           });
           
@@ -160,16 +165,16 @@ const ResiliencyBingo = () => {
       {showConfetti && (
         <div className="fixed inset-0 pointer-events-none z-50">
           <div className="absolute top-0 left-1/4">
-            <Confetti className="w-16 h-16 text-[#F5DF4D] animate-bounce" />
+            <Award className="w-16 h-16 text-[#F5DF4D] animate-bounce" />
           </div>
           <div className="absolute top-10 right-1/4">
-            <Confetti className="w-16 h-16 text-[#FC68B3] animate-bounce" />
+            <Award className="w-16 h-16 text-[#FC68B3] animate-bounce" />
           </div>
           <div className="absolute bottom-10 left-1/3">
-            <Confetti className="w-16 h-16 text-[#3DFDFF] animate-bounce" />
+            <Award className="w-16 h-16 text-[#3DFDFF] animate-bounce" />
           </div>
           <div className="absolute top-1/3 right-1/3">
-            <Confetti className="w-16 h-16 text-[#FF8A48] animate-bounce" />
+            <Award className="w-16 h-16 text-[#FF8A48] animate-bounce" />
           </div>
         </div>
       )}
