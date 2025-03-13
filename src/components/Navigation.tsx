@@ -51,7 +51,7 @@ const Navigation = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center group">
-              <span className="font-bold transition-colors text-3xl text-sky-600">MindVincible</span>
+              <span className="font-bold transition-colors text-3xl text-sky-600">M(in)dvincible</span>
             </Link>
           </div>
 
