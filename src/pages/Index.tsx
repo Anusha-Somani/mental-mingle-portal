@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -98,7 +97,7 @@ const Index = () => {
           {/* Hero Section */}
           <div className="mb-16">
             <h1 className="text-5xl sm:text-7xl font-bold text-[#1A1F2C] mb-6 leading-tight drop-shadow-lg">
-              <span className="block mt-2 text-[#1A1F2C] font-bold">MindVincible</span>
+              <span className="block mt-2 text-[#1A1F2C] font-bold">M(in)dvincible</span>
             </h1>
             <p className="text-xl text-[#1A1F2C] max-w-2xl mx-auto leading-relaxed mb-8 drop-shadow-lg">
               We're creating connections and support systems for mental wellbeing with a platform that provides individualized support for teens, parents and educators.
