@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +8,6 @@ import { motion } from "framer-motion";
 import { format, startOfDay, endOfDay } from "date-fns";
 import MoodEntryCard from "@/components/dashboard/MoodEntryCard";
 import QuoteCard from "@/components/dashboard/QuoteCard";
-import ResourcesPreview from "@/components/dashboard/ResourcesPreview";
 import ChatButton from "@/components/dashboard/ChatButton";
 import JournalSection from "@/components/journal/JournalSection";
 import JournalButton from "@/components/journal/JournalButton";
@@ -190,7 +188,6 @@ const Dashboard = () => {
           <QuoteCard />
         </div>
 
-        <ResourcesPreview />
         <ChatButton />
         <JournalButton userId={userId} />
       </motion.main>
