@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,19 +35,14 @@ const Dashboard = () => {
       }
       setUserId(session.user.id);
       
-      // Get user's first name from email or metadata
       if (session.user) {
-        // Try to get name from metadata first
         const metadata = session.user.user_metadata;
         if (metadata && (metadata.full_name || metadata.name)) {
-          // Extract just the first name
           const fullName = metadata.full_name || metadata.name;
           const firstName = fullName.split(' ')[0];
           setUserName(firstName);
         } else if (session.user.email) {
-          // If no name in metadata, use the part before @ in email
           const emailName = session.user.email.split('@')[0];
-          // Capitalize first letter of email name
           setUserName(emailName.charAt(0).toUpperCase() + emailName.slice(1));
         }
       }
@@ -164,7 +158,7 @@ const Dashboard = () => {
           className="text-center mb-12"
         >
           <h1 className="text-4xl md:text-5xl font-bold text-[#1A1F2C] font-playfair drop-shadow-lg">
-            Hello, {userName ? `${userName}!` : "how are you feeling today?"}
+            Hello, {userName ? `${userName}` : "how are you feeling today?"}
           </h1>
           {userName && (
             <p className="mt-2 text-xl text-[#403E43] font-light">
