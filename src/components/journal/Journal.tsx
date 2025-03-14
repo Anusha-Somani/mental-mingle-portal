@@ -95,7 +95,7 @@ const Journal = ({ userId, onClose }: JournalProps) => {
         <CardHeader className="flex flex-row items-center justify-between" style={{ backgroundColor: areaColor, color: "white" }}>
           <CardTitle className="flex items-center">
             <BookOpen className="mr-2 h-5 w-5" />
-            {selectedAreaObj ? `Journal: ${selectedAreaObj.name}` : "Journal Your Thoughts"}
+            {selectedAreaObj ? `Journal: ${selectedAreaObj.name}` : "M(in)dvincible Journal"}
           </CardTitle>
           <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20">
             <X className="h-5 w-5" />

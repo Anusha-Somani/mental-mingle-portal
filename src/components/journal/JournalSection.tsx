@@ -1,116 +1,107 @@
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, PenLine } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { BookOpen, Mic, PenTool, Type, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-interface JournalPrompt {
-  id: string;
-  category: string;
-  prompt_text: string;
-}
+import { journalAreas } from "./JournalAreas";
 
 const JournalSection = () => {
-  const [prompts, setPrompts] = useState<JournalPrompt[]>([]);
-  const [selectedPrompt, setSelectedPrompt] = useState<JournalPrompt | null>(null);
-  const [journalEntry, setJournalEntry] = useState("");
-  const [userId, setUserId] = useState<string | null>(null);
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-      setUserId(session.user.id);
-    };
-
-    checkAuth();
-    loadPrompts();
-  }, [navigate]);
-
-  const loadPrompts = async () => {
-    const { data, error } = await supabase.from('journal_prompts').select('*');
-    if (error) {
-      toast({
-        title: "Error loading prompts",
-        description: error.message,
-        variant: "destructive"
-      });
-      return;
-    }
-    if (data) {
-      setPrompts(data);
-      // Randomly select a prompt
-      const randomPrompt = data[Math.floor(Math.random() * data.length)];
-      setSelectedPrompt(randomPrompt);
-    }
-  };
-
-  const saveJournalEntry = async () => {
-    if (!selectedPrompt || !journalEntry.trim() || !userId) return;
-    const { error } = await supabase.from('journal_entries').insert({
-      prompt_text: selectedPrompt.prompt_text,
-      entry_text: journalEntry,
-      user_id: userId
-    });
-    if (error) {
-      toast({
-        title: "Error saving journal entry",
-        description: error.message,
-        variant: "destructive"
-      });
-      return;
-    }
-    toast({
-      title: "Journal entry saved!",
-      description: "Your thoughts have been recorded successfully."
-    });
-    setJournalEntry("");
-    // Get a new random prompt
-    const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
-    setSelectedPrompt(randomPrompt);
+  const openJournal = () => {
+    // For now, we'll just show the floating journal button through Dashboard
+    setIsOpen(true);
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
       className="glass rounded-3xl shadow-lg p-6 space-y-6"
     >
-      <div className="flex items-center gap-3 justify-center">
-        <BookOpen className="w-6 h-6 text-[#1A1F2C]" />
-        <h2 className="text-2xl font-semibold text-[#1A1F2C]">Daily Reflection</h2>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-[#1A1F2C] flex items-center">
+            <BookOpen className="mr-2 h-6 w-6 text-[#FF8A48]" />
+            M(in)dvincible Journal
+          </h2>
+          <p className="text-[#403E43] mt-1">
+            Process your thoughts and feelings through different mediums
+          </p>
+        </div>
+        <Button
+          onClick={openJournal}
+          className="bg-[#FF8A48] hover:bg-[#FF8A48]/80 text-white"
+        >
+          Open Journal <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
       </div>
 
-      {selectedPrompt && (
-        <div className="space-y-4">
-          <div className="p-4 rounded-xl border border-[#FC68B3]/30 bg-pink-100">
-            <p className="text-[#1A1F2C] text-lg">{selectedPrompt.prompt_text}</p>
-          </div>
+      <div>
+        <h3 className="font-medium mb-3 text-[#403E43]">Journal Areas:</h3>
+        <div className="flex flex-wrap gap-2">
+          {journalAreas.map((area) => (
+            <Badge
+              key={area.id}
+              className="px-3 py-1 cursor-pointer flex items-center"
+              style={{
+                backgroundColor: `${area.color}20`,
+                color: area.color,
+                borderColor: `${area.color}40`,
+              }}
+              variant="outline"
+              onClick={openJournal}
+            >
+              {area.icon}
+              <span className="ml-1">{area.name}</span>
+            </Badge>
+          ))}
+        </div>
+      </div>
 
-          <Textarea
-            value={journalEntry}
-            onChange={(e) => setJournalEntry(e.target.value)}
-            placeholder="Start writing your thoughts here..."
-            className="min-h-[200px] bg-white/80 border-[#FF8A48]/30 text-[#1A1F2C] placeholder:text-[#403E43]/70"
-          />
-
-          <Button
-            onClick={saveJournalEntry}
-            disabled={!journalEntry.trim()}
-            className="w-full bg-[#FF8A48] hover:bg-[#FF8A48]/80 text-white"
+      <div>
+        <h3 className="font-medium mb-3 text-[#403E43]">Expression Mediums:</h3>
+        <div className="grid grid-cols-3 gap-3">
+          <Card
+            className="bg-[#FF8A48]/10 border-[#FF8A48]/20 cursor-pointer hover:bg-[#FF8A48]/20 transition-all"
+            onClick={openJournal}
           >
-            <PenLine className="w-4 h-4 mr-2" />
-            Save Journal Entry
-          </Button>
+            <CardContent className="flex flex-col items-center justify-center p-4">
+              <Type className="h-8 w-8 mb-2 text-[#FF8A48]" />
+              <p className="text-sm font-medium text-[#1A1F2C]">Text</p>
+            </CardContent>
+          </Card>
+          
+          <Card
+            className="bg-[#FC68B3]/10 border-[#FC68B3]/20 cursor-pointer hover:bg-[#FC68B3]/20 transition-all"
+            onClick={openJournal}
+          >
+            <CardContent className="flex flex-col items-center justify-center p-4">
+              <Mic className="h-8 w-8 mb-2 text-[#FC68B3]" />
+              <p className="text-sm font-medium text-[#1A1F2C]">Voice</p>
+            </CardContent>
+          </Card>
+          
+          <Card
+            className="bg-[#3DFDFF]/10 border-[#3DFDFF]/20 cursor-pointer hover:bg-[#3DFDFF]/20 transition-all"
+            onClick={openJournal}
+          >
+            <CardContent className="flex flex-col items-center justify-center p-4">
+              <PenTool className="h-8 w-8 mb-2 text-[#3DFDFF]" />
+              <p className="text-sm font-medium text-[#1A1F2C]">Drawing</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {isOpen && (
+        <div className="text-center text-sm text-[#403E43] mt-2">
+          Use the <BookOpen className="inline-block h-4 w-4 text-[#FF8A48]" /> journal button in the bottom right corner to start journaling
         </div>
       )}
     </motion.div>
