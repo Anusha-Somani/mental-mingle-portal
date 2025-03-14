@@ -12,6 +12,7 @@ import QuoteCard from "@/components/dashboard/QuoteCard";
 import ResourcesPreview from "@/components/dashboard/ResourcesPreview";
 import ChatButton from "@/components/dashboard/ChatButton";
 import JournalSection from "@/components/journal/JournalSection";
+import JournalButton from "@/components/journal/JournalButton";
 import StarryBackground from "@/components/StarryBackground";
 import Wave from "@/components/Wave";
 
@@ -173,6 +174,7 @@ const Dashboard = () => {
 
         <ResourcesPreview />
         <ChatButton />
+        <JournalButton userId={userId} />
       </motion.main>
     </div>
   );
