@@ -36,12 +36,15 @@ const Dashboard = () => {
       }
       setUserId(session.user.id);
       
-      // Get user's name from email or metadata
+      // Get user's first name from email or metadata
       if (session.user) {
         // Try to get name from metadata first
         const metadata = session.user.user_metadata;
         if (metadata && (metadata.full_name || metadata.name)) {
-          setUserName(metadata.full_name || metadata.name);
+          // Extract just the first name
+          const fullName = metadata.full_name || metadata.name;
+          const firstName = fullName.split(' ')[0];
+          setUserName(firstName);
         } else if (session.user.email) {
           // If no name in metadata, use the part before @ in email
           const emailName = session.user.email.split('@')[0];
