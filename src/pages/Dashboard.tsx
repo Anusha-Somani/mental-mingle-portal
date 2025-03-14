@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [userId, setUserId] = useState<string | null>(null);
   const [selectedFactors, setSelectedFactors] = useState<string[]>([]);
+  const [userName, setUserName] = useState<string>("");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -34,6 +35,20 @@ const Dashboard = () => {
         return;
       }
       setUserId(session.user.id);
+      
+      // Get user's name from email or metadata
+      if (session.user) {
+        // Try to get name from metadata first
+        const metadata = session.user.user_metadata;
+        if (metadata && (metadata.full_name || metadata.name)) {
+          setUserName(metadata.full_name || metadata.name);
+        } else if (session.user.email) {
+          // If no name in metadata, use the part before @ in email
+          const emailName = session.user.email.split('@')[0];
+          // Capitalize first letter of email name
+          setUserName(emailName.charAt(0).toUpperCase() + emailName.slice(1));
+        }
+      }
     };
 
     checkAuth();
@@ -146,8 +161,13 @@ const Dashboard = () => {
           className="text-center mb-12"
         >
           <h1 className="text-4xl md:text-5xl font-bold text-[#1A1F2C] font-playfair drop-shadow-lg">
-            Hello, how are you feeling today?
+            Hello, {userName ? `${userName}!` : "how are you feeling today?"}
           </h1>
+          {userName && (
+            <p className="mt-2 text-xl text-[#403E43] font-light">
+              How are you feeling today?
+            </p>
+          )}
         </motion.div>
 
         <div className="max-w-2xl mx-auto space-y-8">
