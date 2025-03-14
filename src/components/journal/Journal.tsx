@@ -54,24 +54,27 @@ const Journal = ({ userId, onClose }: JournalProps) => {
       return;
     }
 
-    const areaObj = journalAreas.find(area => area.id === selectedArea);
-    const areaName = areaObj ? areaObj.name : "Unknown";
-
     const { error } = await supabase.from("journal_entries").insert({
       user_id: userId,
-      area_id: selectedArea,
-      area_name: areaName,
-      prompt_id: selectedPrompt,
       prompt_text: promptText,
-      content,
-      media_type: mediaType,
+      entry_text: content,
       created_at: new Date().toISOString()
     });
 
     if (error) {
       console.error("Error saving journal entry:", error);
-      throw error;
+      toast({
+        title: "Error saving entry",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
     }
+
+    toast({
+      title: "Journal entry saved!",
+      description: "Your thoughts have been recorded successfully."
+    });
 
     // Reset after saving
     setSelectedPrompt(null);

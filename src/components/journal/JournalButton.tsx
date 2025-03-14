@@ -21,6 +21,7 @@ const JournalButton = ({ userId }: JournalButtonProps) => {
         <Button 
           onClick={() => setIsOpen(true)} 
           className="fixed bottom-24 right-8 rounded-full w-14 h-14 bg-[#FF8A48] hover:bg-[#FF8A48]/80 shadow-lg"
+          aria-label="Open Journal"
         >
           <BookOpen className="h-6 w-6 text-white" />
         </Button>
