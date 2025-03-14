@@ -48,26 +48,29 @@ const JournalAreas = ({ selectedArea, onSelectArea }: JournalAreasProps) => {
       <DropdownMenuTrigger asChild>
         <Button 
           variant="outline" 
-          className="w-full flex justify-between items-center border-[#8B5CF6]/30 bg-white/80"
-          style={{ color: selectedAreaObj?.color }}
+          className="w-full flex justify-between items-center border-[#8B5CF6]/30 bg-white/80 font-medium shadow-sm"
+          style={{ 
+            color: selectedAreaObj?.color || "#403E43",
+            borderColor: `${selectedAreaObj?.color || "#8B5CF6"}40` 
+          }}
         >
           <div className="flex items-center">
-            {selectedAreaObj?.icon}
-            <span className="ml-2">{selectedAreaObj?.name || "Select an area"}</span>
+            {selectedAreaObj?.icon || <BookOpen className="h-5 w-5" />}
+            <span className="ml-2 text-base">{selectedAreaObj?.name || "Select an area"}</span>
           </div>
           <BookOpen className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
+      <DropdownMenuContent className="w-56 shadow-md">
         {journalAreas.map((area) => (
           <DropdownMenuItem
             key={area.id}
             onClick={() => onSelectArea(area.id)}
-            className="cursor-pointer"
+            className="cursor-pointer p-3 hover:bg-gray-100"
           >
             <div className="flex items-center" style={{ color: area.color }}>
               {area.icon}
-              <span className="ml-2">{area.name}</span>
+              <span className="ml-2 font-medium">{area.name}</span>
             </div>
           </DropdownMenuItem>
         ))}
