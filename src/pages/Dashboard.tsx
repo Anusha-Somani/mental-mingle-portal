@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -158,7 +159,7 @@ const Dashboard = () => {
           className="text-center mb-12"
         >
           <h1 className="text-4xl md:text-5xl font-bold text-[#1A1F2C] font-playfair drop-shadow-lg">
-            Hello, {userName ? `${userName}` : "how are you feeling today?"}
+            Hi there, {userName ? `${userName}` : "how are you feeling today?"}
           </h1>
           {userName && (
             <p className="mt-2 text-xl text-[#403E43] font-light">
