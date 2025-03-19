@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,7 +64,11 @@ const Dashboard = () => {
         return;
       }
 
-      setUserFirstName(profileData?.first_name || "User");
+      if (profileData && 'first_name' in profileData) {
+        setUserFirstName(profileData.first_name || "User");
+      } else {
+        setUserFirstName("User");
+      }
     }
   };
 
@@ -103,7 +108,7 @@ const Dashboard = () => {
 
     if (userData?.user?.id) {
       const { data: journalData, error: journalError } = await supabase
-        .from("journals")
+        .from("journal_entries") // Changed from "journals" to "journal_entries"
         .select("*")
         .eq("user_id", userData.user.id)
         .order("created_at", { ascending: false });
@@ -130,7 +135,7 @@ const Dashboard = () => {
     if (userData?.user?.id) {
       const { data: moodData, error: moodError } = await supabase
         .from("mood_entries")
-        .select("date")
+        .select("created_at") // Changed from "date" to "created_at"
         .eq("user_id", userData.user.id);
 
       if (moodError) {
@@ -139,7 +144,7 @@ const Dashboard = () => {
       }
 
       const disabledDates = moodData
-        ? moodData.map((mood) => new Date(mood.date))
+        ? moodData.map((mood) => new Date(mood.created_at))
         : [];
       setDisabledDates(disabledDates);
     }
@@ -175,15 +180,14 @@ const Dashboard = () => {
     if (userData?.user?.id) {
       const { error } = await supabase
         .from("mood_entries")
-        .insert([
-          {
-            user_id: userData.user.id,
-            date: format(selectedDate, "yyyy-MM-dd"),
-            mood: selectedMood,
-            journal_entry: journalEntry,
-            factors: selectedFactors,
-          },
-        ]);
+        .insert({
+          user_id: userData.user.id,
+          created_at: format(selectedDate, "yyyy-MM-dd"),
+          emoji_type: selectedMood,
+          journal_entry: journalEntry,
+          contributing_factors: selectedFactors,
+          mood_score: 5 // Default value
+        });
 
       if (error) {
         console.error("Error saving mood:", error);
