@@ -206,52 +206,50 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-[#3DFDFF]/20 via-white to-[#FF8A48]/20 font-poppins">
-      <div className="relative z-20">
-        <motion.main
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="container max-w-screen-xl mx-auto px-4 pt-8 pb-28"
-        >
-          <div className="mb-6">
-            <h1 className="text-4xl font-bold text-primary mb-2">
-              Hi there, {userFirstName}
-            </h1>
-            <p className="text-secondary">
-              Track your mood, discover patterns, and gain insights.
-            </p>
-          </div>
+      <motion.main
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="container max-w-screen-xl mx-auto px-4 pt-8 pb-28 relative z-20"
+      >
+        <div className="mb-6">
+          <h1 className="text-4xl font-bold text-primary mb-2">
+            Hi there, {userFirstName}
+          </h1>
+          <p className="text-secondary">
+            Track your mood, discover patterns, and gain insights.
+          </p>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-            <div className="lg:col-span-2 glass-card p-6 rounded-xl shadow-sm">
-              <MoodEntryCard
-                selectedMood={selectedMood}
-                onMoodSelect={setSelectedMood}
-                journalEntry={journalEntry}
-                setJournalEntry={setJournalEntry}
-                isDateDisabled={isDateDisabled}
-                onSaveMood={saveMoodEntry}
-                selectedFactors={selectedFactors}
-                onFactorSelect={setSelectedFactors}
-              />
-            </div>
-
-            <CalendarCard
-              selectedDate={selectedDate}
-              onDateSelect={handleDateSelect}
-              disabledDates={disabledDates}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          <div className="lg:col-span-2 glass-card p-6 rounded-xl shadow-sm">
+            <MoodEntryCard
+              selectedMood={selectedMood}
+              onMoodSelect={setSelectedMood}
+              journalEntry={journalEntry}
+              setJournalEntry={setJournalEntry}
+              isDateDisabled={isDateDisabled}
+              onSaveMood={saveMoodEntry}
+              selectedFactors={selectedFactors}
+              onFactorSelect={setSelectedFactors}
             />
           </div>
 
-          <div className="mb-12">
-            <JournalSection journals={journals} isLoading={isLoadingJournals} />
-          </div>
-
-          <AchievementCard
-            achievements={achievements}
+          <CalendarCard
+            selectedDate={selectedDate}
+            onDateSelect={handleDateSelect}
+            disabledDates={disabledDates}
           />
-
-          <QuoteCard />
         </div>
+
+        <div className="mb-12">
+          <JournalSection journals={journals} isLoading={isLoadingJournals} />
+        </div>
+
+        <AchievementCard
+          achievements={achievements}
+        />
+
+        <QuoteCard />
 
         <ChatButton />
       </motion.main>
