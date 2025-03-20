@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Star, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -58,8 +58,6 @@ const GameModule: React.FC<GameModuleProps> = ({
   isCompleted,
   onComplete,
   
-  // We don't need to use these properties in this component yet,
-  // but they're included in the props to fix TypeScript errors
   titleIcon,
   titleColor,
   modules,
@@ -69,6 +67,26 @@ const GameModule: React.FC<GameModuleProps> = ({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
+  const [userCompletedModules, setUserCompletedModules] = useState<number[]>([]);
+  
+  useEffect(() => {
+    // Load user progress only when userId is available
+    if (userId) {
+      const fetchUserProgress = async () => {
+        const { data } = await supabase
+          .from('user_progress')
+          .select('completed_modules')
+          .eq('user_id', userId)
+          .single();
+          
+        if (data && data.completed_modules) {
+          setUserCompletedModules(data.completed_modules);
+        }
+      };
+      
+      fetchUserProgress();
+    }
+  }, [userId]);
   
   const handleClick = async () => {
     // For the Emotional Awareness module, open the activity dialog
@@ -124,6 +142,9 @@ const GameModule: React.FC<GameModuleProps> = ({
         });
         
         if (onComplete) onComplete();
+        
+        // Update local state
+        setUserCompletedModules(updatedModules);
       }
     } catch (error) {
       console.error("Error completing module:", error);
@@ -196,21 +217,127 @@ const GameModule: React.FC<GameModuleProps> = ({
   } 
   
   // If modules are provided, this is the full game view (multiple modules)
-  // This is where we'll add code later to render modules and badges
   return (
-    <div className="rounded-xl bg-white p-6 shadow-md">
-      <h2 className="mb-6 text-2xl font-bold" style={{ color: titleColor || "#FF8A48" }}>
+    <div className="bg-white rounded-xl p-6 shadow-md">
+      <h2 className="mb-6 text-2xl font-bold flex items-center" style={{ color: titleColor || "#FF8A48" }}>
         {titleIcon && React.createElement(titleIcon, { className: "mr-2 inline h-6 w-6" })}
         {title}
       </h2>
       
-      <div className="text-center text-gray-500">
-        {modules && modules.length > 0 ? (
-          <p>Game contains {modules.length} modules</p>
-        ) : (
+      {modules && modules.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {modules.map((module) => {
+            const isModuleCompleted = userCompletedModules.includes(module.id);
+            
+            return (
+              <Card 
+                key={module.id} 
+                className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${isModuleCompleted ? 'border-green-400' : ''}`}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center">
+                        <div 
+                          className="w-8 h-8 rounded-full flex items-center justify-center mr-2"
+                          style={{ backgroundColor: module.color || "#FC68B3", color: "#FFFFFF" }}
+                        >
+                          {React.createElement(module.icon, { className: "h-4 w-4" })}
+                        </div>
+                        <h3 className="text-base font-semibold flex items-center gap-1">
+                          {module.title}
+                          {isModuleCompleted && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                        </h3>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1 ml-10">{module.description}</p>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded">
+                      <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                      <span>{module.xp} XP</span>
+                    </div>
+                  </div>
+                  
+                  <div className="ml-10 mt-2">
+                    <Button 
+                      onClick={() => {
+                        // For module 201, we open the activity dialog
+                        if (module.id === 201) {
+                          setIsActivityOpen(true);
+                          return;
+                        }
+                        
+                        // For other modules, handle completion directly
+                        if (!isModuleCompleted) {
+                          // Temporarily set moduleId to handle completion
+                          const currentModuleId = moduleId;
+                          moduleId = module.id;
+                          xpReward = module.xp;
+                          handleClick();
+                          // Restore original moduleId
+                          moduleId = currentModuleId;
+                        }
+                      }}
+                      size="sm"
+                      variant={isModuleCompleted ? "outline" : "default"}
+                      className={`text-xs px-3 py-1 h-auto ${isModuleCompleted ? "text-green-600 border-green-600" : ""}`}
+                    >
+                      {isModuleCompleted ? "Completed" : "Start"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="text-center text-gray-500 py-8">
           <p>No modules found for this game</p>
-        )}
-      </div>
+        </div>
+      )}
+      
+      {badges && badges.length > 0 && (
+        <div>
+          <h3 className="text-xl font-semibold mb-4">Badges to Earn</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {badges.map((badge) => {
+              // Check if user has completed enough modules to earn this badge
+              const requiredModuleCount = badge.condition;
+              const completedCount = userCompletedModules.length;
+              const isBadgeEarned = completedCount >= requiredModuleCount;
+              
+              return (
+                <Card 
+                  key={badge.id} 
+                  className={`text-center p-4 ${isBadgeEarned ? 'border-green-400' : 'opacity-80'}`}
+                >
+                  <div 
+                    className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-2 ${isBadgeEarned ? '' : 'grayscale'}`}
+                    style={{ backgroundColor: badge.color || "#FC68B3", color: "#FFFFFF" }}
+                  >
+                    {React.createElement(badge.icon, { className: "h-6 w-6" })}
+                  </div>
+                  <h4 className="font-semibold text-sm">{badge.title}</h4>
+                  <p className="text-xs text-gray-600 mt-1">{badge.description}</p>
+                  
+                  {!isBadgeEarned && (
+                    <div className="text-xs text-gray-500 mt-2">
+                      Complete {requiredModuleCount - completedCount} more modules
+                    </div>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      
+      {moduleId === 201 && (
+        <EmotionalAwarenessActivity 
+          isOpen={isActivityOpen} 
+          onClose={handleActivityClose} 
+          userId={userId} 
+        />
+      )}
     </div>
   );
 };
