@@ -27,7 +27,7 @@ const emotionColors: EmotionColor[] = [
   { name: "Disgusted", color: "#2AC20E" }, // Green from app colors
 ];
 
-// Base64 encoding of a jar SVG for the outline
+// Actual jar SVG path for better visualization
 const jarSvgPath = "M320,120 C280,120 280,80 240,80 L160,80 C120,80 120,120 80,120 L80,400 C80,420 100,440 120,440 L280,440 C300,440 320,420 320,400 L320,120 Z";
 
 interface FeelingsJarActivityProps {
@@ -71,10 +71,8 @@ const FeelingsJarActivity = ({ isOpen, onClose }: FeelingsJarActivityProps) => {
   // Initialize canvas when step changes to drawing
   useEffect(() => {
     if (step === "drawing" && canvasRef.current && !fabricCanvas) {
-      // We're using fabric.js directly here
-      import("fabric").then((fabric) => {
-        const { Canvas, Path } = fabric;
-        
+      // Dynamically import fabric.js to avoid module resolution issues
+      import("fabric").then(({ Canvas, Path }) => {
         const canvas = new Canvas(canvasRef.current, {
           width: 400,
           height: 500,
@@ -117,6 +115,13 @@ const FeelingsJarActivity = ({ isOpen, onClose }: FeelingsJarActivityProps) => {
           description: "Select a feeling and use your cursor to color inside the jar.",
           className: "bg-gradient-to-r from-[#3DFDFF] to-[#FF8A48]/80 text-black",
         });
+      }).catch(err => {
+        console.error("Error loading Fabric.js:", err);
+        toast({
+          title: "Oops! Something went wrong",
+          description: "We couldn't load the drawing tool. Please try again later.",
+          variant: "destructive",
+        });
       });
     }
   }, [step, fabricCanvas, toast]);
@@ -151,7 +156,6 @@ const FeelingsJarActivity = ({ isOpen, onClose }: FeelingsJarActivityProps) => {
   };
 
   const handleFinish = () => {
-    // Here you could save the canvas image or do something with it
     toast({
       title: "Great job! 🎉",
       description: "Your feelings have been captured in the jar.",
