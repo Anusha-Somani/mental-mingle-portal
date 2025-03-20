@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Smile, Heart, Sun, Cloud, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,7 +8,6 @@ interface MoodOption {
   value: string;
   color: string;
   description: string;
-  showJarActivity?: boolean;
 }
 
 const moodOptions: MoodOption[] = [
@@ -32,24 +30,21 @@ const moodOptions: MoodOption[] = [
     label: "Neutral", 
     value: "neutral",
     color: "bg-[#FFC107] text-white",
-    description: "Just okay",
-    showJarActivity: true
+    description: "Just okay"
   },
   { 
     emoji: <Cloud className="w-8 h-8" />, 
     label: "Angry", 
     value: "angry",
     color: "bg-[#F44336] text-white",
-    description: "Feeling frustrated",
-    showJarActivity: true
+    description: "Feeling frustrated"
   },
   { 
     emoji: <Moon className="w-8 h-8" />, 
     label: "Sad", 
     value: "sad",
     color: "bg-[#2196F3] text-white",
-    description: "Not feeling great",
-    showJarActivity: true
+    description: "Not feeling great"
   }
 ];
 
@@ -60,11 +55,6 @@ interface MoodSelectorProps {
 }
 
 const MoodSelector = ({ selectedMood, onMoodSelect, disabled = false }: MoodSelectorProps) => {
-  const handleMoodSelect = (mood: MoodOption) => {
-    if (disabled) return;
-    onMoodSelect(mood.value);
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -87,7 +77,7 @@ const MoodSelector = ({ selectedMood, onMoodSelect, disabled = false }: MoodSele
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => handleMoodSelect(mood)}
+              onClick={() => !disabled && onMoodSelect(mood.value)}
               disabled={disabled}
               className={cn(
                 "w-16 h-16 rounded-full flex items-center justify-center transition-all mb-2",

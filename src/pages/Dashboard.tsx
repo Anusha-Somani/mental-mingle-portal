@@ -1,267 +1,197 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import Navigation from "@/components/Navigation";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import CalendarCard from "@/components/dashboard/CalendarCard";
-import DateDisplay from "@/components/dashboard/DateDisplay";
-import AchievementCard from "@/components/dashboard/AchievementCard";
 import { format, startOfDay, endOfDay } from "date-fns";
 import MoodEntryCard from "@/components/dashboard/MoodEntryCard";
 import QuoteCard from "@/components/dashboard/QuoteCard";
 import ChatButton from "@/components/dashboard/ChatButton";
 import JournalSection from "@/components/journal/JournalSection";
-import { useToast } from "@/hooks/use-toast";
-import Navigation from "@/components/Navigation";
-import "@/styles/glass.css";
+import JournalButton from "@/components/journal/JournalButton";
+import StarryBackground from "@/components/StarryBackground";
+import Wave from "@/components/Wave";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [selectedMood, setSelectedMood] = useState<string>("");
-  const [journalEntry, setJournalEntry] = useState<string>("");
-  const [userFirstName, setUserFirstName] = useState<string>("");
-  const [disabledDates, setDisabledDates] = useState<Date[]>([]);
-  const [isDateDisabled, setIsDateDisabled] = useState<boolean>(false);
-  const [achievements, setAchievements] = useState<any[]>([]);
-  const [journals, setJournals] = useState<any[]>([]);
-  const [isLoadingJournals, setIsLoadingJournals] = useState<boolean>(false);
+  const queryClient = useQueryClient();
+  const [selectedMood, setSelectedMood] = useState("");
+  const [journalEntry, setJournalEntry] = useState("");
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [userId, setUserId] = useState<string | null>(null);
   const [selectedFactors, setSelectedFactors] = useState<string[]>([]);
+  const [userName, setUserName] = useState<string>("");
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      await fetchUserName();
-      await fetchAchievements();
-      await fetchJournals();
-      await fetchDisabledDates();
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUserId(session.user.id);
+      
+      if (session.user) {
+        const metadata = session.user.user_metadata;
+        if (metadata && (metadata.full_name || metadata.name)) {
+          const fullName = metadata.full_name || metadata.name;
+          const firstName = fullName.split(' ')[0];
+          setUserName(firstName);
+        } else if (session.user.email) {
+          const emailName = session.user.email.split('@')[0];
+          setUserName(emailName.charAt(0).toUpperCase() + emailName.slice(1));
+        }
+      }
     };
 
-    fetchInitialData();
-  }, []);
+    checkAuth();
+  }, [navigate]);
 
-  useEffect(() => {
-    checkIfDateIsDisabled();
-  }, [selectedDate]);
+  const { data: moodEntries = [] } = useQuery({
+    queryKey: ['moodEntries', userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      const { data, error } = await supabase
+        .from('mood_entries')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userId,
+  });
 
-  const fetchUserName = async () => {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
+  const saveMoodMutation = useMutation({
+    mutationFn: async () => {
+      if (!userId) throw new Error("User not authenticated");
+      if (!selectedMood) throw new Error("Please select a mood");
+      
+      const startDate = format(startOfDay(selectedDate), 'yyyy-MM-dd');
+      const endDate = format(endOfDay(selectedDate), 'yyyy-MM-dd');
+      
+      const { data: existingEntry, error: checkError } = await supabase
+        .from('mood_entries')
+        .select('id')
+        .eq('user_id', userId)
+        .gte('created_at', startDate)
+        .lt('created_at', endDate)
+        .maybeSingle();
 
-    if (userError) {
-      console.error("Error fetching user:", userError);
-      return;
-    }
-
-    if (userData?.user?.id) {
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("first_name")
-        .eq("id", userData.user.id)
-        .single();
-
-      if (profileError) {
-        console.error("Error fetching profile:", profileError);
-        return;
+      if (checkError) throw checkError;
+      
+      if (existingEntry) {
+        throw new Error("You've already logged your mood for this date");
       }
 
-      if (profileData && 'first_name' in profileData) {
-        setUserFirstName(String(profileData.first_name) || "User");
-      } else {
-        setUserFirstName("User");
-      }
-    }
-  };
-
-  const fetchAchievements = async () => {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-
-    if (userError) {
-      console.error("Error fetching user:", userError);
-      return;
-    }
-
-    if (userData?.user?.id) {
-      const { data: achievementData, error: achievementError } = await supabase
-        .from("achievements")
-        .select("*")
-        .eq("user_id", userData.user.id)
-        .order("achieved_at", { ascending: false });
-
-      if (achievementError) {
-        console.error("Error fetching achievements:", achievementError);
-        return;
-      }
-
-      setAchievements(achievementData || []);
-    }
-  };
-
-  const fetchJournals = async () => {
-    setIsLoadingJournals(true);
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-
-    if (userError) {
-      console.error("Error fetching user:", userError);
-      setIsLoadingJournals(false);
-      return;
-    }
-
-    if (userData?.user?.id) {
-      const { data: journalData, error: journalError } = await supabase
-        .from("journal_entries") // Changed from "journals" to "journal_entries"
-        .select("*")
-        .eq("user_id", userData.user.id)
-        .order("created_at", { ascending: false });
-
-      if (journalError) {
-        console.error("Error fetching journals:", journalError);
-        setIsLoadingJournals(false);
-        return;
-      }
-
-      setJournals(journalData || []);
-    }
-    setIsLoadingJournals(false);
-  };
-
-  const fetchDisabledDates = async () => {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-
-    if (userError) {
-      console.error("Error fetching user:", userError);
-      return;
-    }
-
-    if (userData?.user?.id) {
-      const { data: moodData, error: moodError } = await supabase
-        .from("mood_entries")
-        .select("created_at") // Changed from "date" to "created_at"
-        .eq("user_id", userData.user.id);
-
-      if (moodError) {
-        console.error("Error fetching moods:", moodError);
-        return;
-      }
-
-      const disabledDates = moodData
-        ? moodData.map((mood) => new Date(mood.created_at))
-        : [];
-      setDisabledDates(disabledDates);
-    }
-  };
-
-  const handleDateSelect = (date: Date) => {
-    setSelectedDate(date);
-    checkIfDateIsDisabled();
-  };
-
-  const checkIfDateIsDisabled = () => {
-    const isDateLogged = disabledDates.some(
-      (disabledDate) =>
-        format(disabledDate, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
-    );
-    setIsDateDisabled(isDateLogged);
-
-    if (isDateLogged) {
-      setSelectedMood("");
+      const { error: insertError } = await supabase
+        .from('mood_entries')
+        .insert([
+          {
+            user_id: userId,
+            emoji_type: selectedMood,
+            mood_score: getMoodScore(selectedMood),
+            journal_entry: journalEntry,
+            contributing_factors: selectedFactors,
+            created_at: selectedDate.toISOString(),
+          }
+        ]);
+      
+      if (insertError) throw insertError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['moodEntries'] });
+      toast({
+        title: "Mood saved!",
+        description: "Your mood has been logged successfully.",
+      });
       setJournalEntry("");
+      setSelectedMood("");
       setSelectedFactors([]);
-    }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const getMoodScore = (mood: string): number => {
+    const moodScores: Record<string, number> = {
+      happy: 100,
+      excited: 90,
+      neutral: 50,
+      angry: 20,
+      sad: 10,
+    };
+    return moodScores[mood] || 50;
   };
 
-  const saveMoodEntry = async () => {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-
-    if (userError) {
-      console.error("Error fetching user:", userError);
-      return;
-    }
-
-    if (userData?.user?.id) {
-      const { error } = await supabase
-        .from("mood_entries")
-        .insert({
-          user_id: userData.user.id,
-          created_at: format(selectedDate, "yyyy-MM-dd"),
-          emoji_type: selectedMood,
-          journal_entry: journalEntry,
-          contributing_factors: selectedFactors,
-          mood_score: 5 // Default value
-        });
-
-      if (error) {
-        console.error("Error saving mood:", error);
-        toast({
-          title: "Uh oh! Something went wrong.",
-          description: "There was an error saving your mood. Please try again.",
-        });
-      } else {
-        toast({
-          title: "Success!",
-          description: "Your mood has been saved.",
-        });
-        await fetchDisabledDates();
-        setIsDateDisabled(true);
-        await fetchAchievements();
-        await fetchJournals();
-      }
-    }
-  };
+  const disabledDates = moodEntries.map(entry => new Date(entry.created_at));
+  const today = endOfDay(new Date());
+  const isDateDisabled = disabledDates.some(
+    date => format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
+  );
 
   return (
-    <>
+    <div className="min-h-screen relative overflow-hidden galaxy-bg">
+      <StarryBackground />
+      <Wave />
       <Navigation />
-      <div className="min-h-screen bg-gradient-to-tr from-[#3DFDFF]/20 via-white to-[#FF8A48]/20 font-poppins">
-        <motion.main
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="container max-w-screen-xl mx-auto px-4 pt-8 pb-28 relative z-20"
+      
+      <motion.main
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+      >
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
         >
-          <div className="mb-6">
-            <h1 className="text-4xl font-bold text-primary mb-2">
-              Hi there, {userFirstName}
-            </h1>
-            <p className="text-secondary">
-              Track your mood, discover patterns, and gain insights.
+          <h1 className="text-4xl md:text-5xl font-bold text-[#1A1F2C] font-playfair drop-shadow-lg">
+            Hi there, {userName ? `${userName}` : "how are you feeling today?"}
+          </h1>
+          {userName && (
+            <p className="mt-2 text-xl text-[#403E43] font-light">
+              How are you feeling today?
             </p>
-          </div>
+          )}
+        </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-            <div className="lg:col-span-2 glass-card p-6 rounded-xl shadow-sm">
-              <MoodEntryCard
-                selectedMood={selectedMood}
-                onMoodSelect={setSelectedMood}
-                journalEntry={journalEntry}
-                setJournalEntry={setJournalEntry}
-                isDateDisabled={isDateDisabled}
-                onSaveMood={saveMoodEntry}
-                selectedFactors={selectedFactors}
-                onFactorSelect={setSelectedFactors}
-              />
-            </div>
-
-            <CalendarCard
-              selectedDate={selectedDate}
-              onDateSelect={handleDateSelect}
-              disabledDates={disabledDates}
+        <div className="max-w-2xl mx-auto space-y-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass rounded-3xl shadow-lg p-6 mb-6"
+          >
+            <MoodEntryCard
+              selectedMood={selectedMood}
+              onMoodSelect={setSelectedMood}
+              journalEntry={journalEntry}
+              setJournalEntry={setJournalEntry}
+              isDateDisabled={isDateDisabled}
+              onSaveMood={() => saveMoodMutation.mutate()}
+              selectedFactors={selectedFactors}
+              onFactorSelect={setSelectedFactors}
             />
-          </div>
-
-          <div className="mb-12">
-            <JournalSection journals={journals} isLoading={isLoadingJournals} />
-          </div>
-
-          <AchievementCard
-            achievements={achievements}
-          />
-
+          </motion.div>
+          
+          <JournalSection />
           <QuoteCard />
+        </div>
 
-          <ChatButton />
-        </motion.main>
-      </div>
-    </>
+        <ChatButton />
+        <JournalButton userId={userId} />
+      </motion.main>
+    </div>
   );
 };
 

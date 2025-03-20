@@ -1,12 +1,10 @@
 
 import { motion } from "framer-motion";
-import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import MoodSelector from "@/components/mood/MoodSelector";
 import ContributingFactors from "@/components/mood/ContributingFactors";
-import FeelingsJarActivity from "@/components/mood/FeelingsJarActivity";
 
 interface MoodEntryCardProps {
   selectedMood: string;
@@ -29,27 +27,6 @@ const MoodEntryCard = ({
   selectedFactors,
   onFactorSelect,
 }: MoodEntryCardProps) => {
-  const [isJarActivityOpen, setIsJarActivityOpen] = useState(false);
-  
-  const handleSaveMood = () => {
-    // Check if mood requires jar activity
-    const needsJarActivity = ["neutral", "angry", "sad"].includes(selectedMood);
-    
-    if (needsJarActivity) {
-      setIsJarActivityOpen(true);
-      // The actual save will happen after the activity
-    } else {
-      // For happy and excited moods, save directly
-      onSaveMood();
-    }
-  };
-  
-  const handleJarActivityClose = () => {
-    setIsJarActivityOpen(false);
-    // Save the mood after the jar activity is completed
-    onSaveMood();
-  };
-
   return (
     <div className="space-y-6 font-poppins">
       <MoodSelector
@@ -84,7 +61,7 @@ const MoodEntryCard = ({
           disabled={isDateDisabled}
         />
         <Button 
-          onClick={handleSaveMood}
+          onClick={onSaveMood}
           className="w-full bg-[#FF8A48] hover:bg-[#FF8A48]/80 text-white font-medium rounded-xl py-3"
           disabled={isDateDisabled || !selectedMood}
         >
@@ -96,11 +73,6 @@ const MoodEntryCard = ({
           </motion.span>
         </Button>
       </motion.div>
-      
-      <FeelingsJarActivity 
-        isOpen={isJarActivityOpen} 
-        onClose={handleJarActivityClose} 
-      />
     </div>
   );
 };
