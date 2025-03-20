@@ -13,6 +13,7 @@ import JournalSection from "@/components/journal/JournalSection";
 import JournalButton from "@/components/journal/JournalButton";
 import StarryBackground from "@/components/StarryBackground";
 import Wave from "@/components/Wave";
+import ColorfulPopup from "@/components/mood/ColorfulPopup";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const Dashboard = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [selectedFactors, setSelectedFactors] = useState<string[]>([]);
   const [userName, setUserName] = useState<string>("");
+  const [showSupportPopup, setShowSupportPopup] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -102,22 +104,31 @@ const Dashboard = () => {
         ]);
       
       if (insertError) throw insertError;
+      
+      if (['neutral', 'angry', 'sad'].includes(selectedMood)) {
+        setShowSupportPopup(true);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['moodEntries'] });
       toast({
         title: "Mood saved!",
         description: "Your mood has been logged successfully.",
+        duration: 5000,
       });
-      setJournalEntry("");
-      setSelectedMood("");
-      setSelectedFactors([]);
+      
+      if (!['neutral', 'angry', 'sad'].includes(selectedMood)) {
+        setJournalEntry("");
+        setSelectedMood("");
+        setSelectedFactors([]);
+      }
     },
     onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
+        duration: 5000,
       });
     },
   });
@@ -131,6 +142,13 @@ const Dashboard = () => {
       sad: 10,
     };
     return moodScores[mood] || 50;
+  };
+
+  const handlePopupClose = () => {
+    setShowSupportPopup(false);
+    setJournalEntry("");
+    setSelectedMood("");
+    setSelectedFactors([]);
   };
 
   const disabledDates = moodEntries.map(entry => new Date(entry.created_at));
@@ -191,6 +209,11 @@ const Dashboard = () => {
         <ChatButton />
         <JournalButton userId={userId} />
       </motion.main>
+      
+      <ColorfulPopup 
+        isOpen={showSupportPopup} 
+        onClose={handlePopupClose} 
+      />
     </div>
   );
 };
