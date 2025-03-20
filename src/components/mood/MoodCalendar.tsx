@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -19,7 +20,6 @@ const MoodCalendar = ({ selectedDate, onDateSelect, disabledDates = [] }: MoodCa
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white rounded-xl shadow-lg p-6"
     >
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold text-primary">

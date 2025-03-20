@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import MoodCalendar from "@/components/mood/MoodCalendar";
 
@@ -10,7 +11,7 @@ interface CalendarCardProps {
 const CalendarCard = ({ selectedDate, onDateSelect, disabledDates }: CalendarCardProps) => {
   return (
     <Card className="lg:col-span-1">
-      <CardContent className="pt-6">
+      <CardContent className="pt-6 bg-white rounded-xl shadow-sm">
         <MoodCalendar
           selectedDate={selectedDate}
           onDateSelect={onDateSelect}
