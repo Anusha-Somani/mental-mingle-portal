@@ -1,4 +1,3 @@
-
 import { 
   Award, 
   BookOpen, 
@@ -14,7 +13,14 @@ import {
   Sparkles,
   Star,
   Trophy,
-  Users
+  Users,
+  LightbulbIcon,
+  Lightbulb,
+  Footprints,
+  Eye,
+  Glasses,
+  Scale,
+  Cloud
 } from "lucide-react";
 
 // Bullying game configuration
@@ -188,9 +194,41 @@ export const selfAwarenessConfig = {
       id: 204,
       title: "Self-Reflection",
       description: "Techniques for understanding your behavior",
-      icon: Award,
+      icon: Eye,
       color: "#F5DF4D",
       xp: 250
+    },
+    {
+      id: 205,
+      title: "Values Exploration",
+      description: "Discover what matters most to you",
+      icon: Lightbulb,
+      color: "#2AC20E",
+      xp: 300
+    },
+    {
+      id: 206,
+      title: "Personal Growth Plan",
+      description: "Create roadmaps for emotional development",
+      icon: Footprints,
+      color: "#D5D5F1",
+      xp: 350
+    },
+    {
+      id: 207,
+      title: "Perspective Taking",
+      description: "Understanding different viewpoints",
+      icon: Glasses,
+      color: "#FF8A48",
+      xp: 400
+    },
+    {
+      id: 208,
+      title: "Emotional Regulation",
+      description: "Strategies to manage strong emotions",
+      icon: Scale,
+      color: "#FC68B3",
+      xp: 450
     }
   ],
   badges: [
@@ -205,10 +243,26 @@ export const selfAwarenessConfig = {
     {
       id: 202,
       title: "Mindfulness Guru",
-      description: "Complete all self-awareness modules",
+      description: "Complete 4 self-awareness modules",
       icon: Sparkles,
       color: "#FF8A48",
       condition: 4
+    },
+    {
+      id: 203,
+      title: "Self-Awareness Master",
+      description: "Complete all self-awareness modules",
+      icon: Award,
+      color: "#3DFDFF",
+      condition: 8
+    },
+    {
+      id: 204,
+      title: "Growth Champion",
+      description: "Earn 1000+ XP in self-awareness",
+      icon: Trophy,
+      color: "#2AC20E",
+      condition: 6
     }
   ]
 };
@@ -332,3 +386,53 @@ export const peerPressureConfig = {
     }
   ]
 };
+
+// Customizable game configuration template that can be used to create new games
+export const createCustomGame = (config) => {
+  const defaultConfig = {
+    title: "Custom Game",
+    titleIcon: Star,
+    titleColor: "#FC68B3",
+    startingModuleId: 1001,
+    modules: [],
+    badges: []
+  };
+  
+  return { ...defaultConfig, ...config };
+};
+
+// Example of creating a new game with the template
+export const emotionalResilienceConfig = createCustomGame({
+  title: "Emotional Resilience Training",
+  titleIcon: Cloud,
+  titleColor: "#3DFDFF",
+  startingModuleId: 501,
+  modules: [
+    {
+      id: 501,
+      title: "Stress Management",
+      description: "Techniques to handle stress effectively",
+      icon: Brain,
+      color: "#3DFDFF",
+      xp: 100
+    },
+    {
+      id: 502,
+      title: "Coping Strategies",
+      description: "Healthy ways to deal with difficulties",
+      icon: Shield,
+      color: "#FC68B3",
+      xp: 150
+    }
+  ],
+  badges: [
+    {
+      id: 501,
+      title: "Resilience Starter",
+      description: "Complete your first resilience module",
+      icon: Shield,
+      color: "#3DFDFF",
+      condition: 1
+    }
+  ]
+});
