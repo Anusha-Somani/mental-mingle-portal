@@ -1,6 +1,6 @@
 
 import GameModule from "./GameModule";
-import { bullyingConfig } from "./gameConfigs";
+import { bullyingConfig } from "./configs";
 
 interface BullyingGameModuleProps {
   userId: string | null;

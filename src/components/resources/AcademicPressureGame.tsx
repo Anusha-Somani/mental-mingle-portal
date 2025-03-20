@@ -1,6 +1,6 @@
 
 import GameModule from "./GameModule";
-import { academicPressureConfig } from "./gameConfigs";
+import { academicPressureConfig } from "./configs";
 
 interface AcademicPressureGameProps {
   userId: string | null;

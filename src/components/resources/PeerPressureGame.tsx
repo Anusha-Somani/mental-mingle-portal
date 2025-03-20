@@ -1,6 +1,6 @@
 
 import GameModule from "./GameModule";
-import { peerPressureConfig } from "./gameConfigs";
+import { peerPressureConfig } from "./configs";
 
 interface PeerPressureGameProps {
   userId: string | null;

@@ -1,11 +1,12 @@
 
-import React, { useState } from "react";
+import React from "react";
 import GameModule from "./GameModule";
-import { selfAwarenessConfig } from "./gameConfigs";
+import { selfAwarenessConfig } from "./configs";
+import { GameConfig } from "./types/gameTypes";
 
 interface SelfAwarenessGameProps {
   userId: string | null;
-  customConfig?: typeof selfAwarenessConfig;
+  customConfig?: GameConfig;
 }
 
 const SelfAwarenessGame: React.FC<SelfAwarenessGameProps> = ({ 

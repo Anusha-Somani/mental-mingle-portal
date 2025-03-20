@@ -1,6 +1,6 @@
 
 import GameModule from "./GameModule";
-import { confidenceBuildingConfig } from "./gameConfigs";
+import { confidenceBuildingConfig } from "./configs";
 
 interface ConfidenceBuildingGameProps {
   userId: string | null;
