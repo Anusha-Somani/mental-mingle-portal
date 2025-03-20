@@ -91,6 +91,11 @@ const EmotionalAwarenessActivity: React.FC<EmotionalAwarenessActivityProps> = ({
             message: entry.message || "",
             drawing: entry.drawing || ""
           });
+          
+          // Set active tab based on whether they have a drawing
+          if (entry.drawing) {
+            setActiveTab("draw");
+          }
         }
       } catch (error) {
         console.error("Failed to load existing data:", error);

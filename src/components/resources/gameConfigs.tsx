@@ -29,6 +29,9 @@ const createIconElement = (IconComponent: any, color: string = "currentColor") =
   return <IconComponent color={color} />;
 };
 
+// Type definition for module
+type ModuleType = "video" | "activity" | "article";
+
 // Bullying game configuration
 export const bullyingConfig = {
   title: "Bullying Response Training",
@@ -43,7 +46,7 @@ export const bullyingConfig = {
       icon: createIconElement(BookOpen),
       color: "#3DFDFF",
       xp: 100,
-      type: "article",
+      type: "article" as ModuleType,
       content: "Content about understanding bullying goes here..."
     },
     {
@@ -53,7 +56,7 @@ export const bullyingConfig = {
       icon: createIconElement(Users),
       color: "#FC68B3",
       xp: 150,
-      type: "video",
+      type: "video" as ModuleType,
       content: "https://www.youtube.com/embed/CFbp9NcQF6U"
     },
     {
@@ -63,7 +66,7 @@ export const bullyingConfig = {
       icon: createIconElement(Shield),
       color: "#FF8A48",
       xp: 200,
-      type: "activity",
+      type: "activity" as ModuleType,
       content: "Interactive self-defense strategies activity"
     },
     {
@@ -73,7 +76,7 @@ export const bullyingConfig = {
       icon: createIconElement(MessageCircle),
       color: "#F5DF4D",
       xp: 250,
-      type: "article",
+      type: "article" as ModuleType,
       content: "Content about communication skills goes here..."
     },
     {
@@ -83,7 +86,7 @@ export const bullyingConfig = {
       icon: createIconElement(Heart),
       color: "#2AC20E",
       xp: 300,
-      type: "video",
+      type: "video" as ModuleType,
       content: "https://www.youtube.com/embed/ynTuA_tlZDE"
     }
   ],
@@ -129,7 +132,7 @@ export const academicPressureConfig = {
       icon: createIconElement(Clock),
       color: "#FF8A48",
       xp: 100,
-      type: "article",
+      type: "article" as ModuleType,
       content: "Content about study planning goes here..."
     },
     {
@@ -139,7 +142,7 @@ export const academicPressureConfig = {
       icon: createIconElement(Brain),
       color: "#FC68B3",
       xp: 150,
-      type: "activity",
+      type: "activity" as ModuleType,
       content: "Interactive test anxiety management activity"
     },
     {
@@ -149,7 +152,7 @@ export const academicPressureConfig = {
       icon: createIconElement(BookOpen),
       color: "#3DFDFF",
       xp: 200,
-      type: "video",
+      type: "video" as ModuleType,
       content: "https://www.youtube.com/embed/FhG-VoRtkKY"
     },
     {
@@ -159,7 +162,7 @@ export const academicPressureConfig = {
       icon: createIconElement(Award),
       color: "#F5DF4D",
       xp: 250,
-      type: "article",
+      type: "article" as ModuleType,
       content: "Content about goal setting goes here..."
     }
   ],
@@ -197,7 +200,7 @@ export const selfAwarenessConfig = {
       icon: createIconElement(Heart),
       color: "#FC68B3",
       xp: 100,
-      type: "activity",
+      type: "activity" as ModuleType,
       content: "Interactive emotion awareness activity"
     },
     {
@@ -207,7 +210,7 @@ export const selfAwarenessConfig = {
       icon: createIconElement(MessageCircle),
       color: "#3DFDFF",
       xp: 150,
-      type: "article",
+      type: "article" as ModuleType,
       content: "Content about communication skills goes here..."
     },
     {
@@ -217,7 +220,7 @@ export const selfAwarenessConfig = {
       icon: createIconElement(Sparkles),
       color: "#FF8A48",
       xp: 200,
-      type: "video",
+      type: "video" as ModuleType,
       content: "https://www.youtube.com/embed/tGdsOXZpyWE"
     },
     {
@@ -227,7 +230,7 @@ export const selfAwarenessConfig = {
       icon: createIconElement(Eye),
       color: "#F5DF4D",
       xp: 250,
-      type: "activity",
+      type: "activity" as ModuleType,
       content: "Interactive self-reflection activity"
     },
     {
@@ -237,7 +240,7 @@ export const selfAwarenessConfig = {
       icon: createIconElement(Lightbulb),
       color: "#2AC20E",
       xp: 300,
-      type: "article",
+      type: "article" as ModuleType,
       content: "Content about values exploration goes here..."
     },
     {
@@ -247,7 +250,7 @@ export const selfAwarenessConfig = {
       icon: createIconElement(Footprints),
       color: "#D5D5F1",
       xp: 350,
-      type: "activity",
+      type: "activity" as ModuleType,
       content: "Interactive personal growth planning activity"
     },
     {
@@ -257,7 +260,7 @@ export const selfAwarenessConfig = {
       icon: createIconElement(Glasses),
       color: "#FF8A48",
       xp: 400,
-      type: "video",
+      type: "video" as ModuleType,
       content: "https://www.youtube.com/embed/OsWlVsDYYmw"
     },
     {
@@ -267,7 +270,7 @@ export const selfAwarenessConfig = {
       icon: createIconElement(Scale),
       color: "#FC68B3",
       xp: 450,
-      type: "article",
+      type: "article" as ModuleType,
       content: "Content about emotional regulation goes here..."
     }
   ],
@@ -321,7 +324,7 @@ export const confidenceBuildingConfig = {
       icon: createIconElement(Star),
       color: "#F5DF4D",
       xp: 100,
-      type: "article",
+      type: "article" as ModuleType,
       content: "Content about positive self-talk goes here..."
     },
     {
@@ -331,7 +334,7 @@ export const confidenceBuildingConfig = {
       icon: createIconElement(Medal),
       color: "#3DFDFF",
       xp: 150,
-      type: "activity",
+      type: "activity" as ModuleType,
       content: "Interactive strengths discovery activity"
     },
     {
@@ -341,7 +344,7 @@ export const confidenceBuildingConfig = {
       icon: createIconElement(Sparkles),
       color: "#FC68B3",
       xp: 200,
-      type: "video",
+      type: "video" as ModuleType,
       content: "https://www.youtube.com/embed/l_NYrWqUR40"
     },
     {
@@ -351,7 +354,7 @@ export const confidenceBuildingConfig = {
       icon: createIconElement(Award),
       color: "#FF8A48",
       xp: 250,
-      type: "article",
+      type: "article" as ModuleType,
       content: "Content about handling criticism goes here..."
     }
   ],
@@ -389,7 +392,7 @@ export const peerPressureConfig = {
       icon: createIconElement(Users),
       color: "#2AC20E",
       xp: 100,
-      type: "article",
+      type: "article" as ModuleType,
       content: "Content about recognizing pressure goes here..."
     },
     {
@@ -399,7 +402,7 @@ export const peerPressureConfig = {
       icon: createIconElement(ShieldCheck),
       color: "#3DFDFF",
       xp: 150,
-      type: "video",
+      type: "video" as ModuleType,
       content: "https://www.youtube.com/embed/MUTn3psCH-8"
     },
     {
@@ -409,7 +412,7 @@ export const peerPressureConfig = {
       icon: createIconElement(PersonStanding),
       color: "#FC68B3",
       xp: 200,
-      type: "activity",
+      type: "activity" as ModuleType,
       content: "Interactive boundary-setting activity"
     },
     {
@@ -419,7 +422,7 @@ export const peerPressureConfig = {
       icon: createIconElement(Award),
       color: "#F5DF4D",
       xp: 250,
-      type: "article",
+      type: "article" as ModuleType,
       content: "Content about being a positive influence goes here..."
     }
   ],
@@ -471,7 +474,7 @@ export const emotionalResilienceConfig = createCustomGame({
       icon: createIconElement(Brain),
       color: "#3DFDFF",
       xp: 100,
-      type: "article",
+      type: "article" as ModuleType,
       content: "Content about stress management goes here..."
     },
     {
@@ -481,7 +484,7 @@ export const emotionalResilienceConfig = createCustomGame({
       icon: createIconElement(Shield),
       color: "#FC68B3",
       xp: 150,
-      type: "activity",
+      type: "activity" as ModuleType,
       content: "Interactive coping strategies activity"
     }
   ],
