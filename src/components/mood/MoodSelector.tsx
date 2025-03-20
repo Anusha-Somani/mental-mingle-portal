@@ -1,6 +1,9 @@
+
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Smile, Heart, Sun, Cloud, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import FeelingsJarActivity from "./FeelingsJarActivity";
 
 interface MoodOption {
   emoji: React.ReactNode;
@@ -8,6 +11,7 @@ interface MoodOption {
   value: string;
   color: string;
   description: string;
+  showJarActivity?: boolean;
 }
 
 const moodOptions: MoodOption[] = [
@@ -30,21 +34,24 @@ const moodOptions: MoodOption[] = [
     label: "Neutral", 
     value: "neutral",
     color: "bg-[#FFC107] text-white",
-    description: "Just okay"
+    description: "Just okay",
+    showJarActivity: true
   },
   { 
     emoji: <Cloud className="w-8 h-8" />, 
     label: "Angry", 
     value: "angry",
     color: "bg-[#F44336] text-white",
-    description: "Feeling frustrated"
+    description: "Feeling frustrated",
+    showJarActivity: true
   },
   { 
     emoji: <Moon className="w-8 h-8" />, 
     label: "Sad", 
     value: "sad",
     color: "bg-[#2196F3] text-white",
-    description: "Not feeling great"
+    description: "Not feeling great",
+    showJarActivity: true
   }
 ];
 
@@ -55,46 +62,85 @@ interface MoodSelectorProps {
 }
 
 const MoodSelector = ({ selectedMood, onMoodSelect, disabled = false }: MoodSelectorProps) => {
+  const [isJarActivityOpen, setIsJarActivityOpen] = useState(false);
+  const [selectedMoodOption, setSelectedMoodOption] = useState<MoodOption | null>(null);
+
+  useEffect(() => {
+    // If there's a selected mood, find its option
+    if (selectedMood) {
+      const option = moodOptions.find(mood => mood.value === selectedMood);
+      if (option) {
+        setSelectedMoodOption(option);
+      }
+    } else {
+      setSelectedMoodOption(null);
+    }
+  }, [selectedMood]);
+
+  const handleMoodSelect = (mood: MoodOption) => {
+    if (disabled) return;
+    
+    onMoodSelect(mood.value);
+    
+    // If the mood should trigger the jar activity, open it
+    if (mood.showJarActivity) {
+      setIsJarActivityOpen(true);
+    }
+  };
+
+  const handleJarActivityClose = () => {
+    setIsJarActivityOpen(false);
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-      className="w-full"
-    >
-      <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">
-        Select your mood
-      </h2>
-      <div className="flex flex-wrap gap-6 justify-center">
-        {moodOptions.map((mood, index) => (
-          <motion.div
-            key={mood.value}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
-            className="flex flex-col items-center"
-          >
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => !disabled && onMoodSelect(mood.value)}
-              disabled={disabled}
-              className={cn(
-                "w-16 h-16 rounded-full flex items-center justify-center transition-all mb-2",
-                mood.color,
-                selectedMood === mood.value && "ring-4 ring-gray-200",
-                disabled && "opacity-50 cursor-not-allowed",
-                "shadow-lg hover:shadow-xl"
-              )}
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="w-full"
+      >
+        <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">
+          Select your mood
+        </h2>
+        <div className="flex flex-wrap gap-6 justify-center">
+          {moodOptions.map((mood, index) => (
+            <motion.div
+              key={mood.value}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+              className="flex flex-col items-center"
             >
-              {mood.emoji}
-            </motion.button>
-            <span className="text-sm font-medium text-gray-700">{mood.label}</span>
-            <span className="text-xs text-gray-500">{mood.description}</span>
-          </motion.div>
-        ))}
-      </div>
-    </motion.div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleMoodSelect(mood)}
+                disabled={disabled}
+                className={cn(
+                  "w-16 h-16 rounded-full flex items-center justify-center transition-all mb-2",
+                  mood.color,
+                  selectedMood === mood.value && "ring-4 ring-gray-200",
+                  disabled && "opacity-50 cursor-not-allowed",
+                  "shadow-lg hover:shadow-xl"
+                )}
+              >
+                {mood.emoji}
+              </motion.button>
+              <span className="text-sm font-medium text-gray-700">{mood.label}</span>
+              <span className="text-xs text-gray-500">{mood.description}</span>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
+      {selectedMoodOption && (
+        <FeelingsJarActivity 
+          isOpen={isJarActivityOpen} 
+          onClose={handleJarActivityClose} 
+        />
+      )}
+    </>
   );
 };
 
