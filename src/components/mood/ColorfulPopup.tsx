@@ -9,9 +9,10 @@ import NextStepsPopup from "./NextStepsPopup";
 interface ColorfulPopupProps {
   isOpen: boolean;
   onClose: () => void;
+  onComplete?: () => void;
 }
 
-const ColorfulPopup: React.FC<ColorfulPopupProps> = ({ isOpen, onClose }) => {
+const ColorfulPopup: React.FC<ColorfulPopupProps> = ({ isOpen, onClose, onComplete }) => {
   const [showActivity, setShowActivity] = useState(false);
   const [showNextSteps, setShowNextSteps] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
@@ -41,6 +42,11 @@ const ColorfulPopup: React.FC<ColorfulPopupProps> = ({ isOpen, onClose }) => {
   const handleCompleteActivity = () => {
     setShowActivity(false);
     setShowNextSteps(true);
+    
+    // If onComplete callback is provided, call it to update jar preview on dashboard
+    if (onComplete) {
+      onComplete();
+    }
   };
   
   const handleCloseAll = () => {

@@ -14,6 +14,7 @@ import JournalButton from "@/components/journal/JournalButton";
 import StarryBackground from "@/components/StarryBackground";
 import Wave from "@/components/Wave";
 import ColorfulPopup from "@/components/mood/ColorfulPopup";
+import FeelingsJarPreview from "@/components/mood/FeelingsJarPreview";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -26,6 +27,8 @@ const Dashboard = () => {
   const [selectedFactors, setSelectedFactors] = useState<string[]>([]);
   const [userName, setUserName] = useState<string>("");
   const [showSupportPopup, setShowSupportPopup] = useState(false);
+  const [showJarPreview, setShowJarPreview] = useState(false);
+  const [showJarFullscreen, setShowJarFullscreen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -63,6 +66,16 @@ const Dashboard = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
+      
+      const recentEntries = data.filter(entry => {
+        const entryDate = new Date(entry.created_at);
+        const threeDaysAgo = new Date();
+        threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+        return entryDate > threeDaysAgo && ['neutral', 'angry', 'sad'].includes(entry.emoji_type);
+      });
+      
+      setShowJarPreview(recentEntries.length > 0);
+      
       return data;
     },
     enabled: !!userId,
@@ -107,6 +120,7 @@ const Dashboard = () => {
       
       if (['neutral', 'angry', 'sad'].includes(selectedMood)) {
         setShowSupportPopup(true);
+        setShowJarPreview(true);
       }
     },
     onSuccess: () => {
@@ -151,6 +165,14 @@ const Dashboard = () => {
     setSelectedFactors([]);
   };
 
+  const handleJarActivityCompleted = () => {
+    setShowJarPreview(true);
+  };
+
+  const handleShowFullJar = () => {
+    setShowJarFullscreen(true);
+  };
+
   const disabledDates = moodEntries.map(entry => new Date(entry.created_at));
   const today = endOfDay(new Date());
   const isDateDisabled = disabledDates.some(
@@ -184,7 +206,19 @@ const Dashboard = () => {
           )}
         </motion.div>
 
-        <div className="max-w-2xl mx-auto space-y-8">
+        <div className="max-w-2xl mx-auto space-y-8 relative">
+          {showJarPreview && (
+            <>
+              <div className="hidden md:block fixed right-8 top-32 z-10">
+                <FeelingsJarPreview onShowFullJar={handleShowFullJar} />
+              </div>
+              
+              <div className="md:hidden mx-auto w-32">
+                <FeelingsJarPreview onShowFullJar={handleShowFullJar} />
+              </div>
+            </>
+          )}
+          
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -212,7 +246,13 @@ const Dashboard = () => {
       
       <ColorfulPopup 
         isOpen={showSupportPopup} 
-        onClose={handlePopupClose} 
+        onClose={handlePopupClose}
+        onComplete={handleJarActivityCompleted}
+      />
+      
+      <ColorfulPopup 
+        isOpen={showJarFullscreen} 
+        onClose={() => setShowJarFullscreen(false)}
       />
     </div>
   );
