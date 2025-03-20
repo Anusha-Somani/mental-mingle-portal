@@ -29,6 +29,7 @@ const Dashboard = () => {
   const [showSupportPopup, setShowSupportPopup] = useState(false);
   const [showJarPreview, setShowJarPreview] = useState(false);
   const [showJarFullscreen, setShowJarFullscreen] = useState(false);
+  const [hasJarActivities, setHasJarActivities] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -50,6 +51,16 @@ const Dashboard = () => {
           setUserName(emailName.charAt(0).toUpperCase() + emailName.slice(1));
         }
       }
+      
+      const { data: jarActivities } = await supabase
+        .from('journal_entries')
+        .select('entry_text')
+        .eq('user_id', session.user.id)
+        .eq('prompt_text', 'Feelings Jar Activity')
+        .limit(1);
+      
+      setHasJarActivities(!!jarActivities && jarActivities.length > 0);
+      setShowJarPreview(!!jarActivities && jarActivities.length > 0);
     };
 
     checkAuth();
@@ -74,7 +85,9 @@ const Dashboard = () => {
         return entryDate > threeDaysAgo && ['neutral', 'angry', 'sad'].includes(entry.emoji_type);
       });
       
-      setShowJarPreview(recentEntries.length > 0);
+      if (recentEntries.length > 0 && !hasJarActivities) {
+        setShowJarPreview(true);
+      }
       
       return data;
     },
@@ -167,6 +180,11 @@ const Dashboard = () => {
 
   const handleJarActivityCompleted = () => {
     setShowJarPreview(true);
+    setHasJarActivities(true);
+    
+    if (userId) {
+      queryClient.invalidateQueries({ queryKey: ['jarActivities', userId] });
+    }
   };
 
   const handleShowFullJar = () => {
@@ -253,6 +271,7 @@ const Dashboard = () => {
       <ColorfulPopup 
         isOpen={showJarFullscreen} 
         onClose={() => setShowJarFullscreen(false)}
+        showJarActivity={true}
       />
     </div>
   );

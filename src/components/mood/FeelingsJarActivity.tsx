@@ -5,6 +5,7 @@ import { Smile, Heart, Cloud, Moon, Zap, X, Eye, Flame } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EmotionColor {
   name: string;
@@ -33,6 +34,7 @@ const FeelingsJarActivity: React.FC<FeelingsJarActivityProps> = ({ onClose }) =>
   const [isDrawing, setIsDrawing] = useState(false);
   const [canvasContext, setCanvasContext] = useState<CanvasRenderingContext2D | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 300, height: 400 });
+  const [emotionCounts, setEmotionCounts] = useState<Record<string, number>>({});
   
   // Jar path coordinates
   const jarPath = [
@@ -70,7 +72,6 @@ const FeelingsJarActivity: React.FC<FeelingsJarActivityProps> = ({ onClose }) =>
   }, []);
 
   const drawJarOutline = (ctx: CanvasRenderingContext2D) => {
-    console.log("Drawing jar outline");
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     
     // Draw jar path
@@ -86,6 +87,11 @@ const FeelingsJarActivity: React.FC<FeelingsJarActivityProps> = ({ onClose }) =>
 
   const handleEmotionSelect = (emotion: EmotionColor) => {
     setSelectedEmotion(emotion);
+    setEmotionCounts(prev => ({
+      ...prev,
+      [emotion.name.toLowerCase()]: (prev[emotion.name.toLowerCase()] || 0) + 1
+    }));
+    
     toast({
       title: `Selected: ${emotion.name}`,
       description: `Use the ${emotion.name.toLowerCase()} color to fill your jar.`,
@@ -145,6 +151,73 @@ const FeelingsJarActivity: React.FC<FeelingsJarActivityProps> = ({ onClose }) =>
     }
     
     return { x, y };
+  };
+  
+  const saveJarActivity = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.user) {
+        toast({
+          title: "Not logged in",
+          description: "You need to be logged in to save your feelings jar activity.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Save the emotions drawn in the jar
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const jarImage = canvas.toDataURL('image/png');
+        
+        // Create a mapping of emotions used
+        const emotionsUsed: Record<string, number> = {};
+        emotions.forEach(emotion => {
+          const name = emotion.name.toLowerCase();
+          if (emotionCounts[name]) {
+            emotionsUsed[name] = emotionCounts[name];
+          }
+        });
+        
+        // Save to journal_entries table
+        const { error } = await supabase
+          .from('journal_entries')
+          .insert({
+            user_id: session.user.id,
+            prompt_text: "Feelings Jar Activity",
+            entry_text: JSON.stringify({
+              type: "feelings_jar",
+              image: jarImage,
+              emotions: emotionsUsed
+            })
+          });
+          
+        if (error) {
+          console.error("Error saving jar activity:", error);
+          toast({
+            title: "Error saving activity",
+            description: "There was a problem saving your feelings jar activity.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        toast({
+          title: "Activity saved!",
+          description: "Your feelings jar activity has been saved to your journal.",
+        });
+      }
+    } catch (err) {
+      console.error("Error in save jar activity:", err);
+      toast({
+        title: "Error",
+        description: "Failed to save your activity. Please try again.",
+        variant: "destructive"
+      });
+    }
+    
+    onClose();
   };
 
   return (
@@ -213,7 +286,7 @@ const FeelingsJarActivity: React.FC<FeelingsJarActivityProps> = ({ onClose }) =>
           
           <div className="flex justify-center mt-6">
             <Button 
-              onClick={onClose}
+              onClick={saveJarActivity}
               className="bg-primary hover:bg-primary/80 text-[#1A1F2C] rounded-full font-medium"
             >
               Complete Activity

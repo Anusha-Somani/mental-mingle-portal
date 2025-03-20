@@ -15,8 +15,16 @@ const NextStepsPopup: React.FC<NextStepsPopupProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   
   const handleNavigateToJournal = () => {
-    navigate("/journal");
+    navigate("/dashboard");
     onClose();
+    // We'll use the dashboard for journal since there's no separate journal page yet
+    // The journal will open via the JournalButton component that's already on the dashboard
+    setTimeout(() => {
+      const journalButton = document.querySelector('[aria-label="Open Journal"]');
+      if (journalButton instanceof HTMLElement) {
+        journalButton.click();
+      }
+    }, 500);
   };
   
   const handleNavigateToResources = () => {

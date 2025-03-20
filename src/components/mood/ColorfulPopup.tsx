@@ -10,10 +10,16 @@ interface ColorfulPopupProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete?: () => void;
+  showJarActivity?: boolean;
 }
 
-const ColorfulPopup: React.FC<ColorfulPopupProps> = ({ isOpen, onClose, onComplete }) => {
-  const [showActivity, setShowActivity] = useState(false);
+const ColorfulPopup: React.FC<ColorfulPopupProps> = ({ 
+  isOpen, 
+  onClose, 
+  onComplete,
+  showJarActivity = false
+}) => {
+  const [showActivity, setShowActivity] = useState(showJarActivity);
   const [showNextSteps, setShowNextSteps] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
@@ -34,6 +40,10 @@ const ColorfulPopup: React.FC<ColorfulPopupProps> = ({ isOpen, onClose, onComple
       }
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    setShowActivity(showJarActivity);
+  }, [showJarActivity]);
 
   const handleStartActivity = () => {
     setShowActivity(true);
