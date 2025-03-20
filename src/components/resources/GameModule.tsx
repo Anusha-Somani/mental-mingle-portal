@@ -1,63 +1,41 @@
-
 import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Star, CheckCircle2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Award, ChevronLeft, ChevronRight, Play, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import EmotionalAwarenessActivity from "./activities/EmotionalAwarenessActivity";
-import { LucideIcon } from "lucide-react";
 
-// Define types for modules and badges
-interface ModuleType {
-  id: number;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  color: string;
-  xp: number;
-}
-
-interface BadgeType {
-  id: number;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  color: string;
-  condition: number;
-}
-
-// Update the GameModuleProps interface to include all properties used by game components
 interface GameModuleProps {
-  title: string;
-  description?: string;
-  moduleId?: number;
-  category?: string;
-  level?: number;
-  xpReward?: number;
   userId: string | null;
-  isCompleted?: boolean;
-  onComplete?: () => void;
-  
-  // Add the missing properties
-  titleIcon?: LucideIcon;
-  titleColor?: string;
-  modules?: ModuleType[];
-  badges?: BadgeType[];
+  title: string;
+  titleIcon: JSX.Element;
+  titleColor: string;
+  modules: {
+    id: number;
+    title: string;
+    description: string;
+    icon: JSX.Element;
+    type: "video" | "activity" | "article";
+    content?: string | JSX.Element;
+    linkTo?: string;
+  }[];
+  badges: {
+    id: number;
+    title: string;
+    description: string;
+    icon: JSX.Element;
+    requiredModules: number[];
+  }[];
   startingModuleId?: number;
 }
 
 const GameModule: React.FC<GameModuleProps> = ({
-  title,
-  description,
-  moduleId,
-  category,
-  level,
-  xpReward,
   userId,
-  isCompleted,
-  onComplete,
-  
+  title,
   titleIcon,
   titleColor,
   modules,
@@ -65,273 +43,202 @@ const GameModule: React.FC<GameModuleProps> = ({
   startingModuleId
 }) => {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const [view, setView] = useState<'grid' | 'module'>('grid');
+  const [moduleId, setModuleId] = useState<number | null>(startingModuleId || null);
+  const [completedModules, setCompletedModules] = useState<number[]>([]);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
-  const [userCompletedModules, setUserCompletedModules] = useState<number[]>([]);
   
   useEffect(() => {
-    // Load user progress only when userId is available
-    if (userId) {
-      const fetchUserProgress = async () => {
-        const { data } = await supabase
-          .from('user_progress')
-          .select('completed_modules')
-          .eq('user_id', userId)
-          .single();
+    const fetchCompletedModules = async () => {
+      if (userId) {
+        try {
+          const { data, error } = await supabase
+            .from('user_progress')
+            .select('completed_modules')
+            .eq('user_id', userId)
+            .single();
+            
+          if (error) {
+            console.error("Error fetching completed modules:", error);
+            return;
+          }
           
-        if (data && data.completed_modules) {
-          setUserCompletedModules(data.completed_modules);
+          if (data) {
+            setCompletedModules(data.completed_modules || []);
+          }
+        } catch (error) {
+          console.error("Error fetching completed modules:", error);
         }
-      };
-      
-      fetchUserProgress();
-    }
+      }
+    };
+    
+    fetchCompletedModules();
   }, [userId]);
   
-  const handleClick = async () => {
-    // For the Emotional Awareness module, open the activity dialog
-    if (moduleId === 201) {
+  useEffect(() => {
+    if (moduleId) {
+      setView('module');
+    } else {
+      setView('grid');
+    }
+  }, [moduleId]);
+  
+  const handleBackClick = () => {
+    setModuleId(null);
+    setView('grid');
+  };
+
+  const handleActivityClick = (moduleId: number) => {
+    if (moduleId === 201) { // Emotion Awareness activity
       setIsActivityOpen(true);
-      return;
-    }
-    
-    if (!userId) {
-      toast({
-        title: "Sign in required",
-        description: "Please sign in to complete this module",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (isCompleted) {
-      toast({
-        title: "Already completed",
-        description: "You have already completed this module"
-      });
-      return;
-    }
-    
-    setLoading(true);
-    
-    try {
-      // Get current progress
-      const { data: progressData } = await supabase
-        .from('user_progress')
-        .select('completed_modules, xp')
-        .eq('user_id', userId)
-        .single();
-      
-      if (progressData) {
-        const completedModules = progressData.completed_modules || [];
-        const updatedModules = [...completedModules, moduleId];
-        const updatedXP = (progressData.xp || 0) + (xpReward || 0);
-        
-        // Update user_progress
-        await supabase
-          .from('user_progress')
-          .upsert({
-            user_id: userId,
-            completed_modules: updatedModules,
-            xp: updatedXP
-          });
-        
-        toast({
-          title: "Module completed!",
-          description: `You earned ${xpReward} XP!`
-        });
-        
-        if (onComplete) onComplete();
-        
-        // Update local state
-        setUserCompletedModules(updatedModules);
+    } else {
+      // Handle other activity types
+      const module = modules.find(m => m.id === moduleId);
+      if (module?.linkTo) {
+        navigate(module.linkTo);
       }
-    } catch (error) {
-      console.error("Error completing module:", error);
-      toast({
-        title: "Error",
-        description: "Failed to complete the module",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
     }
   };
   
   const handleActivityClose = () => {
     setIsActivityOpen(false);
-    if (onComplete) onComplete(); // Refresh parent component
   };
   
-  // Handle the case when only module information is provided (single module view)
-  if (description && moduleId) {
-    return (
-      <>
-        <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${isCompleted ? 'border-green-400' : ''}`}>
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  {title}
-                  {isCompleted && <CheckCircle2 className="h-5 w-5 text-green-500" />}
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">{description}</p>
-              </div>
-              <div className="flex items-center gap-1 text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded-md">
-                <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
-                <span>{xpReward} XP</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex gap-2">
-                <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-md">
-                  {category}
-                </span>
-                <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-md">
-                  Level {level}
-                </span>
-              </div>
-              <Button 
-                onClick={handleClick}
-                disabled={loading}
-                size="sm"
-                variant={isCompleted ? "outline" : "default"}
-                className={isCompleted ? "text-green-600 border-green-600" : ""}
-              >
-                {loading ? "Loading..." : isCompleted ? "Completed" : "Start"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {moduleId === 201 && (
-          <EmotionalAwarenessActivity 
-            isOpen={isActivityOpen} 
-            onClose={handleActivityClose} 
-            userId={userId} 
-          />
-        )}
-      </>
-    );
-  } 
-  
-  // If modules are provided, this is the full game view (multiple modules)
+  const currentModule = modules.find(module => module.id === moduleId);
+  const hasAllRequiredModules = (badge: (typeof badges)[0]) => {
+    return badge.requiredModules.every(moduleId => completedModules.includes(moduleId));
+  };
+
   return (
-    <div className="bg-white rounded-xl p-6 shadow-md">
-      <h2 className="mb-6 text-2xl font-bold flex items-center" style={{ color: titleColor || "#FF8A48" }}>
-        {titleIcon && React.createElement(titleIcon, { className: "mr-2 inline h-6 w-6" })}
-        {title}
-      </h2>
-      
-      {modules && modules.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {modules.map((module) => {
-            const isModuleCompleted = userCompletedModules.includes(module.id);
-            
-            return (
-              <Card 
-                key={module.id} 
-                className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${isModuleCompleted ? 'border-green-400' : ''}`}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center">
-                        <div 
-                          className="w-8 h-8 rounded-full flex items-center justify-center mr-2"
-                          style={{ backgroundColor: module.color || "#FC68B3", color: "#FFFFFF" }}
-                        >
-                          {React.createElement(module.icon, { className: "h-4 w-4" })}
-                        </div>
-                        <h3 className="text-base font-semibold flex items-center gap-1">
-                          {module.title}
-                          {isModuleCompleted && <CheckCircle2 className="h-4 w-4 text-green-500" />}
-                        </h3>
-                      </div>
-                      <p className="text-xs text-gray-600 mt-1 ml-10">{module.description}</p>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded">
-                      <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                      <span>{module.xp} XP</span>
-                    </div>
-                  </div>
-                  
-                  <div className="ml-10 mt-2">
-                    <Button 
-                      onClick={() => {
-                        // For module 201, we open the activity dialog
-                        if (module.id === 201) {
-                          setIsActivityOpen(true);
-                          return;
-                        }
-                        
-                        // For other modules, handle completion directly
-                        if (!isModuleCompleted) {
-                          // Temporarily set moduleId to handle completion
-                          const currentModuleId = moduleId;
-                          moduleId = module.id;
-                          xpReward = module.xp;
-                          handleClick();
-                          // Restore original moduleId
-                          moduleId = currentModuleId;
-                        }
-                      }}
-                      size="sm"
-                      variant={isModuleCompleted ? "outline" : "default"}
-                      className={`text-xs px-3 py-1 h-auto ${isModuleCompleted ? "text-green-600 border-green-600" : ""}`}
-                    >
-                      {isModuleCompleted ? "Completed" : "Start"}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="text-center text-gray-500 py-8">
-          <p>No modules found for this game</p>
+    <div className="max-w-5xl mx-auto p-4">
+      {view === 'module' && currentModule && (
+        <div className="mb-6">
+          <Button onClick={handleBackClick} variant="ghost" className="mb-4">
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back to All Modules
+          </Button>
+          
+          <h2 className="text-3xl font-bold text-center text-[#1A1F2C]">{currentModule.title}</h2>
+          <p className="text-center text-gray-600 mt-2">{currentModule.description}</p>
         </div>
       )}
       
-      {badges && badges.length > 0 && (
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Badges to Earn</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {badges.map((badge) => {
-              // Check if user has completed enough modules to earn this badge
-              const requiredModuleCount = badge.condition;
-              const completedCount = userCompletedModules.length;
-              const isBadgeEarned = completedCount >= requiredModuleCount;
-              
-              return (
-                <Card 
-                  key={badge.id} 
-                  className={`text-center p-4 ${isBadgeEarned ? 'border-green-400' : 'opacity-80'}`}
-                >
-                  <div 
-                    className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-2 ${isBadgeEarned ? '' : 'grayscale'}`}
-                    style={{ backgroundColor: badge.color || "#FC68B3", color: "#FFFFFF" }}
-                  >
-                    {React.createElement(badge.icon, { className: "h-6 w-6" })}
-                  </div>
-                  <h4 className="font-semibold text-sm">{badge.title}</h4>
-                  <p className="text-xs text-gray-600 mt-1">{badge.description}</p>
-                  
-                  {!isBadgeEarned && (
-                    <div className="text-xs text-gray-500 mt-2">
-                      Complete {requiredModuleCount - completedCount} more modules
-                    </div>
-                  )}
-                </Card>
-              );
-            })}
+      {view === 'grid' && (
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-full" style={{ backgroundColor: titleColor + '/10' }}>
+              {titleIcon}
+            </div>
+            <h1 className="text-3xl font-bold text-[#1A1F2C]">{title}</h1>
+          </div>
+          
+          <div>
+            {/* Add any additional top-level actions here */}
           </div>
         </div>
       )}
       
-      {/* The EmotionalAwarenessActivity component should be rendered regardless of the view type */}
+      {view === 'grid' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+          {modules.map((module) => (
+            <Card 
+              key={module.id}
+              className="relative overflow-hidden transform hover:scale-105 transition-transform duration-200"
+            >
+              {completedModules.includes(module.id) && (
+                <div className="absolute top-2 right-2 z-10">
+                  <CheckCircle2 className="h-6 w-6 text-green-500" />
+                </div>
+              )}
+              <CardContent className="p-6">
+                <div className="mb-4 flex justify-center">
+                  <div className="p-3 rounded-full bg-[#FC68B3]/10">{module.icon}</div>
+                </div>
+                <h3 className="text-xl font-bold mb-2 text-center">{module.title}</h3>
+                <p className="text-sm text-gray-600 text-center mb-4">{module.description}</p>
+                
+                <div className="flex justify-center">
+                  <Badge className="mb-2" variant="outline">
+                    {module.type === 'video' ? '📹 Video' : 
+                     module.type === 'activity' ? '🎮 Activity' : '📄 Article'}
+                  </Badge>
+                </div>
+                
+                <div className="flex justify-center mt-4">
+                  <Button 
+                    onClick={() => module.type === 'activity' 
+                      ? handleActivityClick(module.id)
+                      : setModuleId(module.id)}
+                    className="rounded-full px-6 bg-[#FC68B3] hover:bg-[#FC68B3]/80"
+                  >
+                    {module.type === 'video' ? (
+                      <>
+                        <Play className="mr-2 h-4 w-4" />
+                        Watch
+                      </>
+                    ) : module.type === 'activity' ? (
+                      'Start Activity'
+                    ) : (
+                      'Read Article'
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+      
+      {view === 'module' && currentModule && (
+        <div className="mt-8">
+          {currentModule.type === 'video' && typeof currentModule.content === 'string' && (
+            <div className="aspect-w-16 aspect-h-9">
+              <iframe
+                src={currentModule.content}
+                title="Module Video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          )}
+          
+          {currentModule.type === 'article' && typeof currentModule.content === 'string' && (
+            <Card className="bg-white/80 backdrop-blur-sm">
+              <CardContent className="prose max-w-none" dangerouslySetInnerHTML={{ __html: currentModule.content }} />
+            </Card>
+          )}
+        </div>
+      )}
+      
+      <div className="mt-12">
+        <h2 className="text-2xl font-bold text-[#1A1F2C] mb-4">Badges</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {badges.map((badge) => (
+            <Card key={badge.id} className="bg-white/80 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="p-2 rounded-full bg-[#F5DF4D]/20">{badge.icon}</div>
+                  <h3 className="text-lg font-semibold">{badge.title}</h3>
+                </div>
+                <p className="text-sm text-gray-600 mb-4">{badge.description}</p>
+                
+                {hasAllRequiredModules(badge) ? (
+                  <Badge variant="outline" className="bg-green-500 text-white border-green-500">
+                    <Award className="mr-2 h-4 w-4" />
+                    Earned
+                  </Badge>
+                ) : (
+                  <div className="text-sm text-gray-500">
+                    Complete the required modules to earn this badge.
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+      
       <EmotionalAwarenessActivity 
         isOpen={isActivityOpen} 
         onClose={handleActivityClose} 
