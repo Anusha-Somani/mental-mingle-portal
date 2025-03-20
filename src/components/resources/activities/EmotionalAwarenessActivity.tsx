@@ -169,12 +169,8 @@ const EmotionalAwarenessActivity: React.FC<EmotionalAwarenessActivityProps> = ({
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-lg" style={{ 
-        backgroundImage: "url('public/lovable-uploads/3140e869-4f86-4639-94f4-a23cf423fbdb.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center"
-      }}>
-        <div className="p-6 backdrop-blur-sm bg-white/75 rounded-lg">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-lg">
+        <div className="p-6 bg-gradient-to-br from-[#D5D5F1]/30 to-[#FC68B3]/10 rounded-lg">
           <DialogHeader>
             <DialogTitle className="text-center font-bold text-3xl">
               <span className="text-purple-700">Your Body:</span> <span className="text-[#F5DF4D]">The Ultimate Emotional Airbnb</span>

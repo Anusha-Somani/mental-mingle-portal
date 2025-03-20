@@ -331,13 +331,12 @@ const GameModule: React.FC<GameModuleProps> = ({
         </div>
       )}
       
-      {moduleId === 201 && (
-        <EmotionalAwarenessActivity 
-          isOpen={isActivityOpen} 
-          onClose={handleActivityClose} 
-          userId={userId} 
-        />
-      )}
+      {/* The EmotionalAwarenessActivity component should be rendered regardless of the view type */}
+      <EmotionalAwarenessActivity 
+        isOpen={isActivityOpen} 
+        onClose={handleActivityClose} 
+        userId={userId} 
+      />
     </div>
   );
 };
