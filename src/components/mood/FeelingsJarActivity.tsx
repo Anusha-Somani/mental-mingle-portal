@@ -18,17 +18,33 @@ interface EmotionColor {
 }
 
 const emotionColors: EmotionColor[] = [
-  { name: "Angry", color: "#FF8A48" }, // Orange from app colors
-  { name: "Happy", color: "#F5DF4D" }, // Yellow from app colors
-  { name: "Sad", color: "#D5D5F1" },   // Light purple from app colors
-  { name: "Surprised", color: "#3DFDFF" }, // Cyan from app colors
-  { name: "Bad", color: "#FC68B3" },   // Pink from app colors
-  { name: "Fearful", color: "#8E9196" }, // Neutral gray
-  { name: "Disgusted", color: "#2AC20E" }, // Green from app colors
+  { name: "Angry", color: "#FF8A48" },
+  { name: "Happy", color: "#F5DF4D" },
+  { name: "Sad", color: "#D5D5F1" },
+  { name: "Surprised", color: "#3DFDFF" },
+  { name: "Bad", color: "#FC68B3" },
+  { name: "Fearful", color: "#8E9196" },
+  { name: "Disgusted", color: "#2AC20E" },
 ];
 
-// Actual jar SVG path for better visualization
-const jarSvgPath = "M320,120 C280,120 280,80 240,80 L160,80 C120,80 120,120 80,120 L80,400 C80,420 100,440 120,440 L280,440 C300,440 320,420 320,400 L320,120 Z";
+// Mason jar SVG path - more accurate representation of a jar with threads at the top
+const jarSvgPath = `
+  M 150,100
+  C 150,100 130,100 130,120
+  L 130,140
+  C 130,150 120,150 120,160
+  L 120,170
+  C 120,180 130,180 130,190
+  L 130,400
+  C 130,450 270,450 270,400
+  L 270,190
+  C 270,180 280,180 280,170
+  L 280,160
+  C 280,150 270,150 270,140
+  L 270,120
+  C 270,100 250,100 250,100
+  Z
+`;
 
 interface FeelingsJarActivityProps {
   isOpen: boolean;
@@ -71,45 +87,52 @@ const FeelingsJarActivity = ({ isOpen, onClose }: FeelingsJarActivityProps) => {
   // Initialize canvas when step changes to drawing
   useEffect(() => {
     if (step === "drawing" && canvasRef.current && !fabricCanvas) {
-      // Dynamically import fabric.js to avoid module resolution issues
-      import("fabric").then(({ Canvas, Path }) => {
-        const canvas = new Canvas(canvasRef.current, {
+      console.log("Initializing canvas for drawing");
+      
+      // Dynamically import fabric.js
+      import("fabric").then((fabric) => {
+        console.log("Fabric.js loaded successfully");
+        
+        // Create a new fabric canvas
+        const canvas = new fabric.Canvas(canvasRef.current, {
           width: 400,
           height: 500,
           backgroundColor: "#ffffff",
           isDrawingMode: true,
         });
         
-        // Set drawing brush
+        console.log("Canvas created:", canvas);
+        
+        // Set drawing brush properties
         if (canvas.freeDrawingBrush) {
-          canvas.freeDrawingBrush.width = 15;
-          canvas.freeDrawingBrush.color = "#FF8A48"; // Default to app orange
+          canvas.freeDrawingBrush.width = 18;
+          canvas.freeDrawingBrush.color = emotionColors[0].color;
+          console.log("Free drawing brush configured");
         }
         
-        // Add jar outline as background
-        const jar = new Path(jarSvgPath, {
+        // Add jar outline
+        const jar = new fabric.Path(jarSvgPath, {
           fill: 'rgba(255, 255, 255, 0.01)',
-          stroke: '#333',
+          stroke: '#000000',
           strokeWidth: 3,
           strokeLineCap: 'round',
           strokeLineJoin: 'round',
-          originX: 'center',
-          originY: 'center',
           left: canvas.width / 2,
           top: canvas.height / 2,
-          scaleX: 1,
-          scaleY: 1,
+          originX: 'center',
+          originY: 'center',
           selectable: false,
           evented: false,
-          opacity: 0.8
+          opacity: 1
         });
         
+        console.log("Jar path created:", jar);
         canvas.add(jar);
         canvas.renderAll();
+        
         setJarPath(jar);
         setFabricCanvas(canvas);
         
-        // Notification toast when jar is ready
         toast({
           title: "Your feeling jar is ready!",
           description: "Select a feeling and use your cursor to color inside the jar.",
@@ -129,10 +152,10 @@ const FeelingsJarActivity = ({ isOpen, onClose }: FeelingsJarActivityProps) => {
   // Update brush color when emotion changes
   useEffect(() => {
     if (fabricCanvas && fabricCanvas.freeDrawingBrush && selectedEmotion) {
+      console.log("Updating brush color for emotion:", selectedEmotion);
       const emotionColor = emotionColors.find(e => e.name === selectedEmotion)?.color || "#FF8A48";
       fabricCanvas.freeDrawingBrush.color = emotionColor;
       
-      // Toast notification for user feedback
       toast({
         title: `${selectedEmotion} selected!`,
         description: `Now color inside the jar with this feeling using your cursor.`,
@@ -142,6 +165,7 @@ const FeelingsJarActivity = ({ isOpen, onClose }: FeelingsJarActivityProps) => {
   }, [selectedEmotion, fabricCanvas, toast]);
 
   const handleEmotionSelect = (emotion: string) => {
+    console.log("Emotion selected:", emotion);
     setSelectedEmotion(emotion);
     
     // Play a bubble sound when changing emotions
@@ -152,10 +176,12 @@ const FeelingsJarActivity = ({ isOpen, onClose }: FeelingsJarActivityProps) => {
   };
 
   const handleStartDrawing = () => {
+    console.log("Starting drawing activity");
     setStep("drawing");
   };
 
   const handleFinish = () => {
+    console.log("Finishing activity");
     toast({
       title: "Great job! 🎉",
       description: "Your feelings have been captured in the jar.",
