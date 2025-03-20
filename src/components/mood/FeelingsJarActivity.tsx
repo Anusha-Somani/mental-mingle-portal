@@ -27,6 +27,9 @@ const emotionColors: EmotionColor[] = [
   { name: "Disgusted", color: "#2AC20E" }, // Green from app colors
 ];
 
+// Base64 encoding of a jar SVG for the outline
+const jarSvgPath = "M320,120 C280,120 280,80 240,80 L160,80 C120,80 120,120 80,120 L80,400 C80,420 100,440 120,440 L280,440 C300,440 320,420 320,400 L320,120 Z";
+
 interface FeelingsJarActivityProps {
   isOpen: boolean;
   onClose: () => void;
@@ -38,13 +41,13 @@ const FeelingsJarActivity = ({ isOpen, onClose }: FeelingsJarActivityProps) => {
   const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<any>(null);
-  const jarImageRef = useRef<HTMLImageElement | null>(null);
+  const [jarPath, setJarPath] = useState<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Create bubble sound effect
   useEffect(() => {
     const audio = new Audio();
-    audio.src = "data:audio/wav;base64,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";
+    audio.src = "data:audio/wav;base64,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";
     audioRef.current = audio;
   }, []);
 
@@ -56,20 +59,22 @@ const FeelingsJarActivity = ({ isOpen, onClose }: FeelingsJarActivityProps) => {
     }
   }, [isOpen]);
 
-  // Load jar image on component mount
   useEffect(() => {
-    const jarImg = new Image();
-    jarImg.src = "/lovable-uploads/1975e958-a25c-4716-a2a6-0351febe3277.png";
-    jarImg.onload = () => {
-      jarImageRef.current = jarImg;
-    };
-  }, []);
+    if (isOpen) {
+      // Reset the states when dialog opens
+      setStep("intro");
+      setSelectedEmotion(null);
+      setFabricCanvas(null);
+    }
+  }, [isOpen]);
 
   // Initialize canvas when step changes to drawing
   useEffect(() => {
     if (step === "drawing" && canvasRef.current && !fabricCanvas) {
-      // We're using fabric.js directly here instead of fabric/react to avoid compatibility issues
-      import("fabric").then(({ Canvas, Image, Path }) => {
+      // We're using fabric.js directly here
+      import("fabric").then((fabric) => {
+        const { Canvas, Path } = fabric;
+        
         const canvas = new Canvas(canvasRef.current, {
           width: 400,
           height: 500,
@@ -80,49 +85,65 @@ const FeelingsJarActivity = ({ isOpen, onClose }: FeelingsJarActivityProps) => {
         // Set drawing brush
         if (canvas.freeDrawingBrush) {
           canvas.freeDrawingBrush.width = 15;
-          canvas.freeDrawingBrush.color = selectedEmotion ? 
-            emotionColors.find(e => e.name === selectedEmotion)?.color || "#000000" : 
-            "#FF8A48"; // Default to app orange
+          canvas.freeDrawingBrush.color = "#FF8A48"; // Default to app orange
         }
         
         // Add jar outline as background
-        if (jarImageRef.current) {
-          Image.fromURL(jarImageRef.current.src, (img) => {
-            img.scaleToWidth(canvas.width * 0.8);
-            img.set({
-              left: canvas.width / 2 - (img.width || 0) * (img.scaleX || 1) / 2,
-              top: canvas.height / 2 - (img.height || 0) * (img.scaleY || 1) / 2,
-              selectable: false,
-              evented: false,
-            });
-            canvas.add(img);
-            canvas.sendToBack(img);
-            canvas.renderAll();
-            
-            // Notification toast when jar is ready
-            toast({
-              title: "Your feeling jar is ready!",
-              description: "Use different colors to express how much of each feeling you have.",
-              className: "bg-gradient-to-r from-[#3DFDFF] to-[#FF8A48]/80 text-black",
-            });
-          });
-        }
+        const jar = new Path(jarSvgPath, {
+          fill: 'rgba(255, 255, 255, 0.01)',
+          stroke: '#333',
+          strokeWidth: 3,
+          strokeLineCap: 'round',
+          strokeLineJoin: 'round',
+          originX: 'center',
+          originY: 'center',
+          left: canvas.width / 2,
+          top: canvas.height / 2,
+          scaleX: 1,
+          scaleY: 1,
+          selectable: false,
+          evented: false,
+          opacity: 0.8
+        });
         
+        canvas.add(jar);
+        canvas.renderAll();
+        setJarPath(jar);
         setFabricCanvas(canvas);
+        
+        // Notification toast when jar is ready
+        toast({
+          title: "Your feeling jar is ready!",
+          description: "Select a feeling and use your cursor to color inside the jar.",
+          className: "bg-gradient-to-r from-[#3DFDFF] to-[#FF8A48]/80 text-black",
+        });
       });
     }
-  }, [step, fabricCanvas, selectedEmotion, toast]);
+  }, [step, fabricCanvas, toast]);
 
   // Update brush color when emotion changes
   useEffect(() => {
     if (fabricCanvas && fabricCanvas.freeDrawingBrush && selectedEmotion) {
       const emotionColor = emotionColors.find(e => e.name === selectedEmotion)?.color || "#FF8A48";
       fabricCanvas.freeDrawingBrush.color = emotionColor;
+      
+      // Toast notification for user feedback
+      toast({
+        title: `${selectedEmotion} selected!`,
+        description: `Now color inside the jar with this feeling using your cursor.`,
+        className: `bg-gradient-to-r from-white to-[${emotionColor}] text-black`,
+      });
     }
-  }, [selectedEmotion, fabricCanvas]);
+  }, [selectedEmotion, fabricCanvas, toast]);
 
   const handleEmotionSelect = (emotion: string) => {
     setSelectedEmotion(emotion);
+    
+    // Play a bubble sound when changing emotions
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(err => console.error("Audio play error:", err));
+    }
   };
 
   const handleStartDrawing = () => {
@@ -224,7 +245,10 @@ const FeelingsJarActivity = ({ isOpen, onClose }: FeelingsJarActivityProps) => {
                   transition={{ duration: 0.5 }}
                   className="relative"
                 >
-                  <canvas ref={canvasRef} className="border-2 border-[#3DFDFF]/30 rounded-lg shadow-[0_5px_15px_rgba(61,253,255,0.2)]" />
+                  <canvas 
+                    ref={canvasRef} 
+                    className="border-2 border-[#3DFDFF]/30 rounded-lg shadow-[0_5px_15px_rgba(61,253,255,0.2)]" 
+                  />
                   <motion.div
                     className="absolute -z-10 inset-0 bg-white/50 rounded-lg blur-xl"
                     animate={{ opacity: [0.5, 0.7, 0.5] }}
@@ -247,7 +271,7 @@ const FeelingsJarActivity = ({ isOpen, onClose }: FeelingsJarActivityProps) => {
                     </h3>
                   </div>
                   <div className="p-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       {emotionColors.map((emotion) => (
                         <motion.button
                           key={emotion.name}
