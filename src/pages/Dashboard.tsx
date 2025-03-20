@@ -12,6 +12,7 @@ import QuoteCard from "@/components/dashboard/QuoteCard";
 import ChatButton from "@/components/dashboard/ChatButton";
 import JournalSection from "@/components/journal/JournalSection";
 import { useToast } from "@/hooks/use-toast";
+import Navigation from "@/components/Navigation";
 import "@/styles/glass.css";
 
 const Dashboard = () => {
@@ -65,7 +66,7 @@ const Dashboard = () => {
       }
 
       if (profileData && 'first_name' in profileData) {
-        setUserFirstName(profileData.first_name || "User");
+        setUserFirstName(String(profileData.first_name) || "User");
       } else {
         setUserFirstName("User");
       }
@@ -209,55 +210,58 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-[#3DFDFF]/20 via-white to-[#FF8A48]/20 font-poppins">
-      <motion.main
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="container max-w-screen-xl mx-auto px-4 pt-8 pb-28 relative z-20"
-      >
-        <div className="mb-6">
-          <h1 className="text-4xl font-bold text-primary mb-2">
-            Hi there, {userFirstName}
-          </h1>
-          <p className="text-secondary">
-            Track your mood, discover patterns, and gain insights.
-          </p>
-        </div>
+    <>
+      <Navigation />
+      <div className="min-h-screen bg-gradient-to-tr from-[#3DFDFF]/20 via-white to-[#FF8A48]/20 font-poppins">
+        <motion.main
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="container max-w-screen-xl mx-auto px-4 pt-8 pb-28 relative z-20"
+        >
+          <div className="mb-6">
+            <h1 className="text-4xl font-bold text-primary mb-2">
+              Hi there, {userFirstName}
+            </h1>
+            <p className="text-secondary">
+              Track your mood, discover patterns, and gain insights.
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          <div className="lg:col-span-2 glass-card p-6 rounded-xl shadow-sm">
-            <MoodEntryCard
-              selectedMood={selectedMood}
-              onMoodSelect={setSelectedMood}
-              journalEntry={journalEntry}
-              setJournalEntry={setJournalEntry}
-              isDateDisabled={isDateDisabled}
-              onSaveMood={saveMoodEntry}
-              selectedFactors={selectedFactors}
-              onFactorSelect={setSelectedFactors}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <div className="lg:col-span-2 glass-card p-6 rounded-xl shadow-sm">
+              <MoodEntryCard
+                selectedMood={selectedMood}
+                onMoodSelect={setSelectedMood}
+                journalEntry={journalEntry}
+                setJournalEntry={setJournalEntry}
+                isDateDisabled={isDateDisabled}
+                onSaveMood={saveMoodEntry}
+                selectedFactors={selectedFactors}
+                onFactorSelect={setSelectedFactors}
+              />
+            </div>
+
+            <CalendarCard
+              selectedDate={selectedDate}
+              onDateSelect={handleDateSelect}
+              disabledDates={disabledDates}
             />
           </div>
 
-          <CalendarCard
-            selectedDate={selectedDate}
-            onDateSelect={handleDateSelect}
-            disabledDates={disabledDates}
+          <div className="mb-12">
+            <JournalSection journals={journals} isLoading={isLoadingJournals} />
+          </div>
+
+          <AchievementCard
+            achievements={achievements}
           />
-        </div>
 
-        <div className="mb-12">
-          <JournalSection journals={journals} isLoading={isLoadingJournals} />
-        </div>
+          <QuoteCard />
 
-        <AchievementCard
-          achievements={achievements}
-        />
-
-        <QuoteCard />
-
-        <ChatButton />
-      </motion.main>
-    </div>
+          <ChatButton />
+        </motion.main>
+      </div>
+    </>
   );
 };
 
