@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import EmotionalAwarenessActivity from "./activities/EmotionalAwarenessActivity";
 
 interface BadgeType {
   id: number;
@@ -64,6 +65,7 @@ const GameModule: React.FC<GameModuleProps> = ({
   });
 
   const [activeTab, setActiveTab] = useState<'journey' | 'badges'>('journey');
+  const [emotionalAwarenessOpen, setEmotionalAwarenessOpen] = useState(false);
   const { toast } = useToast();
 
   // Calculate XP needed for next level
@@ -130,6 +132,27 @@ const GameModule: React.FC<GameModuleProps> = ({
       ...badge,
       earned: moduleCount >= badge.condition
     }));
+  };
+
+  // Handle module start
+  const handleStartModule = (moduleId: number) => {
+    if (!userId) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to track your progress",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Check if the module is the Emotional Awareness module
+    if (moduleId === 201) {
+      setEmotionalAwarenessOpen(true);
+      return;
+    }
+    
+    // Handle other modules or default completion
+    completeModule(moduleId);
   };
 
   // Handle module completion
@@ -306,7 +329,7 @@ const GameModule: React.FC<GameModuleProps> = ({
                         size="sm" 
                         className="mt-2"
                         disabled={module.locked || module.completed}
-                        onClick={() => completeModule(module.id)}
+                        onClick={() => handleStartModule(module.id)}
                         style={{ backgroundColor: module.color }}
                       >
                         {module.completed ? "Completed" : "Start"}
@@ -372,6 +395,13 @@ const GameModule: React.FC<GameModuleProps> = ({
           </Button>
         </div>
       )}
+
+      {/* Emotional Awareness Activity Dialog */}
+      <EmotionalAwarenessActivity 
+        isOpen={emotionalAwarenessOpen} 
+        onClose={() => setEmotionalAwarenessOpen(false)}
+        userId={userId}
+      />
     </div>
   );
 };
