@@ -21,7 +21,11 @@ import {
   Eye,
   Glasses,
   Scale,
-  Cloud
+  Cloud,
+  Music,
+  Cog,
+  Notebook,
+  Search
 } from "lucide-react";
 
 // Helper function to create JSX elements from Lucide icons
@@ -205,6 +209,16 @@ export const selfAwarenessConfig = {
     },
     {
       id: 202,
+      title: "Emotional Hacking",
+      description: "Practical exercises to regulate your emotions",
+      icon: createIconElement(Cog),
+      color: "#3DFDFF",
+      xp: 150,
+      type: "activity" as ModuleType,
+      content: "Interactive emotional regulation exercises"
+    },
+    {
+      id: 203,
       title: "Communication Skills",
       description: "Express your feelings effectively to others",
       icon: createIconElement(MessageCircle),
@@ -214,7 +228,7 @@ export const selfAwarenessConfig = {
       content: "Content about communication skills goes here..."
     },
     {
-      id: 203,
+      id: 204,
       title: "Mindfulness Practice",
       description: "Stay present and aware of your thoughts",
       icon: createIconElement(Sparkles),
@@ -224,7 +238,7 @@ export const selfAwarenessConfig = {
       content: "https://www.youtube.com/embed/tGdsOXZpyWE"
     },
     {
-      id: 204,
+      id: 205,
       title: "Self-Reflection",
       description: "Techniques for understanding your behavior",
       icon: createIconElement(Eye),
@@ -234,7 +248,7 @@ export const selfAwarenessConfig = {
       content: "Interactive self-reflection activity"
     },
     {
-      id: 205,
+      id: 206,
       title: "Values Exploration",
       description: "Discover what matters most to you",
       icon: createIconElement(Lightbulb),
@@ -244,7 +258,7 @@ export const selfAwarenessConfig = {
       content: "Content about values exploration goes here..."
     },
     {
-      id: 206,
+      id: 207,
       title: "Personal Growth Plan",
       description: "Create roadmaps for emotional development",
       icon: createIconElement(Footprints),
@@ -254,7 +268,7 @@ export const selfAwarenessConfig = {
       content: "Interactive personal growth planning activity"
     },
     {
-      id: 207,
+      id: 208,
       title: "Perspective Taking",
       description: "Understanding different viewpoints",
       icon: createIconElement(Glasses),
@@ -264,7 +278,7 @@ export const selfAwarenessConfig = {
       content: "https://www.youtube.com/embed/OsWlVsDYYmw"
     },
     {
-      id: 208,
+      id: 209,
       title: "Emotional Regulation",
       description: "Strategies to manage strong emotions",
       icon: createIconElement(Scale),
@@ -285,6 +299,14 @@ export const selfAwarenessConfig = {
     },
     {
       id: 202,
+      title: "Emotional Hacker",
+      description: "Complete Emotion Awareness and Emotional Hacking modules",
+      icon: createIconElement(Cog),
+      color: "#3DFDFF",
+      requiredModules: [201, 202]
+    },
+    {
+      id: 203,
       title: "Mindfulness Guru",
       description: "Complete 4 self-awareness modules",
       icon: createIconElement(Sparkles),
@@ -292,15 +314,15 @@ export const selfAwarenessConfig = {
       requiredModules: [201, 202, 203, 204]
     },
     {
-      id: 203,
+      id: 204,
       title: "Self-Awareness Master",
       description: "Complete all self-awareness modules",
       icon: createIconElement(Award),
       color: "#3DFDFF",
-      requiredModules: [201, 202, 203, 204, 205, 206, 207, 208]
+      requiredModules: [201, 202, 203, 204, 205, 206, 207, 208, 209]
     },
     {
-      id: 204,
+      id: 205,
       title: "Growth Champion",
       description: "Earn 1000+ XP in self-awareness",
       icon: createIconElement(Trophy),

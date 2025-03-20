@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import EmotionalAwarenessActivity from "./activities/EmotionalAwarenessActivity";
+import EmotionalHackingActivity from "./activities/EmotionalHackingActivity";
 
 interface GameModuleProps {
   userId: string | null;
@@ -52,6 +53,7 @@ const GameModule: React.FC<GameModuleProps> = ({
   const [moduleId, setModuleId] = useState<number | null>(startingModuleId || null);
   const [completedModules, setCompletedModules] = useState<number[]>([]);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
+  const [isEmotionalHackingOpen, setIsEmotionalHackingOpen] = useState(false);
   
   useEffect(() => {
     const fetchCompletedModules = async () => {
@@ -96,6 +98,8 @@ const GameModule: React.FC<GameModuleProps> = ({
   const handleActivityClick = (moduleId: number) => {
     if (moduleId === 201) { // Emotion Awareness activity
       setIsActivityOpen(true);
+    } else if (moduleId === 202) { // Emotional Hacking activity
+      setIsEmotionalHackingOpen(true);
     } else {
       // Handle other activity types
       const module = modules.find(m => m.id === moduleId);
@@ -107,6 +111,23 @@ const GameModule: React.FC<GameModuleProps> = ({
   
   const handleActivityClose = () => {
     setIsActivityOpen(false);
+  };
+  
+  const handleEmotionalHackingClose = () => {
+    setIsEmotionalHackingOpen(false);
+    // Refresh completed modules after activity is closed
+    if (userId) {
+      supabase
+        .from('user_progress')
+        .select('completed_modules')
+        .eq('user_id', userId)
+        .single()
+        .then(({ data, error }) => {
+          if (!error && data) {
+            setCompletedModules(data.completed_modules || []);
+          }
+        });
+    }
   };
   
   const currentModule = modules.find(module => module.id === moduleId);
@@ -247,6 +268,12 @@ const GameModule: React.FC<GameModuleProps> = ({
         isOpen={isActivityOpen} 
         onClose={handleActivityClose} 
         userId={userId} 
+      />
+      
+      <EmotionalHackingActivity
+        isOpen={isEmotionalHackingOpen}
+        onClose={handleEmotionalHackingClose}
+        userId={userId}
       />
     </div>
   );
