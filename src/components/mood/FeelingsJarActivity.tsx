@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Canvas } from "fabric/react";
+// Remove incorrect import and use fabric directly in the component
 
 interface EmotionColor {
   name: string;
