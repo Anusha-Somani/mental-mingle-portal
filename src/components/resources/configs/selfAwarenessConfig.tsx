@@ -9,7 +9,8 @@ import {
   Footprints,
   Glasses,
   Scale,
-  Cog
+  Cog,
+  Trophy
 } from "lucide-react";
 import { createIconElement } from "../utils/iconUtils";
 import { GameConfig } from "../types/gameTypes";
