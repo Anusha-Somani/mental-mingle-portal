@@ -169,144 +169,152 @@ const EmotionalAwarenessActivity: React.FC<EmotionalAwarenessActivityProps> = ({
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-center text-2xl">
-            <span className="text-[#FF8A48]">Your Body:</span> <span className="text-[#F5DF4D]">The Ultimate Emotional Airbnb</span>
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-4 mt-4">
-          <p className="text-center">
-            Think of your body as a house, and emotions as visitors who keep showing up—
-            sometimes uninvited! Some crash on your couch for ages, while others pop in and
-            vanish before you even realise they were there. And let's be real, not all visitors are
-            the fun kind. But do we slam the door in their faces? Nope! We hand them a snack, let
-            them chill, and wait for them to either leave or at least stop being so annoying.
-          </p>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-lg" style={{ 
+        backgroundImage: "url('public/lovable-uploads/3140e869-4f86-4639-94f4-a23cf423fbdb.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center"
+      }}>
+        <div className="p-6 backdrop-blur-sm bg-white/75 rounded-lg">
+          <DialogHeader>
+            <DialogTitle className="text-center font-bold text-3xl">
+              <span className="text-purple-700">Your Body:</span> <span className="text-[#F5DF4D]">The Ultimate Emotional Airbnb</span>
+            </DialogTitle>
+          </DialogHeader>
           
-          <p className="text-center">
-            Every emotion that knocks on your door wants a little attention—even the ones you'd
-            rather ghost. Lock the door on them, and guess what? The good vibes might get stuck outside too!
-          </p>
-          
-          <div className="flex justify-center mt-6 mb-4">
-            <p className="font-medium text-lg text-center">
-              Draw or write about the emotion which is uncomfortable
+          <div className="space-y-8 mt-6">
+            <p className="text-center text-lg">
+              Think of your body as a house, and emotions as visitors who keep showing up—
+              sometimes uninvited! Some crash on your couch for ages, while others pop in and
+              vanish before you even realise they were there. And let's be real, not all visitors are
+              the fun kind. But do we slam the door in their faces? Nope! We hand them a snack, let
+              them chill, and wait for them to either leave or at least stop being so annoying.
             </p>
+            
+            <p className="text-center text-lg">
+              Every emotion that knocks on your door wants a little attention—even the ones you'd
+              rather ghost. Lock the door on them, and guess what? The good vibes might get stuck outside too!
+            </p>
+            
+            <div className="flex justify-center my-8">
+              <h3 className="font-bold text-xl text-center">
+                Draw or write about the emotion which is uncomfortable
+              </h3>
+            </div>
+            
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-bold block text-center mb-2">
+                          Where is the emotion located in the body? Is it one or many parts or the entire body
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Write your answer here..." 
+                            className="min-h-[120px] border-2 border-black"
+                            {...field} 
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="appearance"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-bold block text-center mb-2">
+                          If this emotion could look like something, what would it look like? How big/small, how would the texture be?
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Write your answer here..." 
+                            className="min-h-[120px] border-2 border-black"
+                            {...field} 
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="intensity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-bold block text-center mb-2">
+                          How big/small is this emotion? Is it heavy/intense?
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Write your answer here..." 
+                            className="min-h-[120px] border-2 border-black"
+                            {...field} 
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="volume"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-bold block text-center mb-2">
+                          How loud or quiet is this emotion?
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Write your answer here..." 
+                            className="min-h-[120px] border-2 border-black"
+                            {...field} 
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="message"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel className="text-base font-bold block text-center mb-2">
+                          What message this emotion has for you? What is it saying to you right now? Does it want you do something?
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Write your answer here..." 
+                            className="min-h-[120px] border-2 border-black"
+                            {...field} 
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="flex justify-end space-x-2">
+                  <Button type="button" variant="outline" onClick={onClose} className="border-[#FC68B3] text-[#FC68B3]">
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    style={{ backgroundColor: "#FC68B3" }}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Saving..." : "Save Responses"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </div>
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-medium block text-center mb-2">
-                      Where is the emotion located in the body? Is it one or many parts or the entire body
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Write your answer here..." 
-                        className="min-h-[100px] border-2 border-black"
-                        {...field} 
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="appearance"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-medium block text-center mb-2">
-                      If this emotion could look like something, what would it look like? How big/small, how would the texture be?
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Write your answer here..." 
-                        className="min-h-[100px] border-2 border-black"
-                        {...field} 
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="intensity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-medium block text-center mb-2">
-                      How big/small is this emotion? Is it heavy/intense?
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Write your answer here..." 
-                        className="min-h-[100px] border-2 border-black"
-                        {...field} 
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="volume"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-medium block text-center mb-2">
-                      How loud or quiet is this emotion?
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Write your answer here..." 
-                        className="min-h-[100px] border-2 border-black"
-                        {...field} 
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="message"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-medium block text-center mb-2">
-                      What message this emotion has for you? What is it saying to you right now? Does it want you do something?
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Write your answer here..." 
-                        className="min-h-[100px] border-2 border-black"
-                        {...field} 
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  style={{ backgroundColor: "#FC68B3" }}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Saving..." : "Save Responses"}
-                </Button>
-              </div>
-            </form>
-          </Form>
         </div>
       </DialogContent>
     </Dialog>
