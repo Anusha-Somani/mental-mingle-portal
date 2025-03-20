@@ -22,6 +22,21 @@ interface EmotionalAwarenessFormValues {
   message: string;
 }
 
+// Define a type for our database response
+interface EmotionalAwarenessEntry {
+  id: string;
+  user_id: string;
+  module_id: number;
+  location: string;
+  appearance: string;
+  intensity: string;
+  volume: string;
+  message: string;
+  completed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 const EmotionalAwarenessActivity: React.FC<EmotionalAwarenessActivityProps> = ({
   isOpen,
   onClose,
@@ -46,6 +61,7 @@ const EmotionalAwarenessActivity: React.FC<EmotionalAwarenessActivityProps> = ({
       if (!userId || !isOpen) return;
       
       try {
+        // Use a generic type parameter with the custom interface
         const { data, error } = await supabase
           .from('emotional_awareness_entries')
           .select('*')
@@ -59,12 +75,14 @@ const EmotionalAwarenessActivity: React.FC<EmotionalAwarenessActivityProps> = ({
         }
         
         if (data) {
+          // Cast data to our custom type
+          const entry = data as EmotionalAwarenessEntry;
           form.reset({
-            location: data.location || "",
-            appearance: data.appearance || "",
-            intensity: data.intensity || "",
-            volume: data.volume || "",
-            message: data.message || ""
+            location: entry.location || "",
+            appearance: entry.appearance || "",
+            intensity: entry.intensity || "",
+            volume: entry.volume || "",
+            message: entry.message || ""
           });
         }
       } catch (error) {
@@ -88,7 +106,7 @@ const EmotionalAwarenessActivity: React.FC<EmotionalAwarenessActivityProps> = ({
     setIsSubmitting(true);
     
     try {
-      // Save responses to Supabase
+      // Save responses to Supabase using a generic type
       const { error } = await supabase
         .from('emotional_awareness_entries')
         .upsert({

@@ -180,6 +180,48 @@ export type Database = {
         }
         Relationships: []
       }
+      emotional_awareness_entries: {
+        Row: {
+          appearance: string | null
+          completed: boolean | null
+          created_at: string | null
+          id: string
+          intensity: string | null
+          location: string | null
+          message: string | null
+          module_id: number
+          updated_at: string | null
+          user_id: string
+          volume: string | null
+        }
+        Insert: {
+          appearance?: string | null
+          completed?: boolean | null
+          created_at?: string | null
+          id?: string
+          intensity?: string | null
+          location?: string | null
+          message?: string | null
+          module_id: number
+          updated_at?: string | null
+          user_id: string
+          volume?: string | null
+        }
+        Update: {
+          appearance?: string | null
+          completed?: boolean | null
+          created_at?: string | null
+          id?: string
+          intensity?: string | null
+          location?: string | null
+          message?: string | null
+          module_id?: number
+          updated_at?: string | null
+          user_id?: string
+          volume?: string | null
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           created_at: string
