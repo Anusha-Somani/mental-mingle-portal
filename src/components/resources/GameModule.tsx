@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -12,22 +13,25 @@ import EmotionalAwarenessActivity from "./activities/EmotionalAwarenessActivity"
 interface GameModuleProps {
   userId: string | null;
   title: string;
-  titleIcon: JSX.Element;
+  titleIcon: React.ReactNode;
   titleColor: string;
   modules: {
     id: number;
     title: string;
     description: string;
-    icon: JSX.Element;
+    icon: React.ReactNode;
+    color: string;
+    xp: number;
     type: "video" | "activity" | "article";
-    content?: string | JSX.Element;
+    content?: string | React.ReactNode;
     linkTo?: string;
   }[];
   badges: {
     id: number;
     title: string;
     description: string;
-    icon: JSX.Element;
+    icon: React.ReactNode;
+    color: string;
     requiredModules: number[];
   }[];
   startingModuleId?: number;
@@ -153,7 +157,7 @@ const GameModule: React.FC<GameModuleProps> = ({
               )}
               <CardContent className="p-6">
                 <div className="mb-4 flex justify-center">
-                  <div className="p-3 rounded-full bg-[#FC68B3]/10">{module.icon}</div>
+                  <div className="p-3 rounded-full" style={{ backgroundColor: module.color + '/10' }}>{module.icon}</div>
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-center">{module.title}</h3>
                 <p className="text-sm text-gray-600 text-center mb-4">{module.description}</p>
@@ -218,7 +222,7 @@ const GameModule: React.FC<GameModuleProps> = ({
             <Card key={badge.id} className="bg-white/80 backdrop-blur-sm">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4 mb-3">
-                  <div className="p-2 rounded-full bg-[#F5DF4D]/20">{badge.icon}</div>
+                  <div className="p-2 rounded-full" style={{ backgroundColor: badge.color + '/20' }}>{badge.icon}</div>
                   <h3 className="text-lg font-semibold">{badge.title}</h3>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">{badge.description}</p>

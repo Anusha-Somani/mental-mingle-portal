@@ -1,3 +1,5 @@
+
+import React from 'react';
 import { 
   Award, 
   BookOpen, 
@@ -14,7 +16,6 @@ import {
   Star,
   Trophy,
   Users,
-  LightbulbIcon,
   Lightbulb,
   Footprints,
   Eye,
@@ -23,10 +24,15 @@ import {
   Cloud
 } from "lucide-react";
 
+// Helper function to create JSX elements from Lucide icons
+const createIconElement = (IconComponent: any, color: string = "currentColor") => {
+  return <IconComponent color={color} />;
+};
+
 // Bullying game configuration
 export const bullyingConfig = {
   title: "Bullying Response Training",
-  titleIcon: Shield,
+  titleIcon: createIconElement(Shield),
   titleColor: "#3DFDFF",
   startingModuleId: 1,
   modules: [
@@ -34,41 +40,51 @@ export const bullyingConfig = {
       id: 1,
       title: "Understanding Bullying",
       description: "Learn to recognize different forms of bullying behavior",
-      icon: BookOpen,
+      icon: createIconElement(BookOpen),
       color: "#3DFDFF",
-      xp: 100
+      xp: 100,
+      type: "article",
+      content: "Content about understanding bullying goes here..."
     },
     {
       id: 2,
       title: "Bystander Training",
       description: "Develop skills to safely intervene or get help",
-      icon: Users,
+      icon: createIconElement(Users),
       color: "#FC68B3",
-      xp: 150
+      xp: 150,
+      type: "video",
+      content: "https://www.youtube.com/embed/CFbp9NcQF6U"
     },
     {
       id: 3,
       title: "Self-Defense Strategies",
       description: "Non-violent ways to protect yourself",
-      icon: Shield,
+      icon: createIconElement(Shield),
       color: "#FF8A48",
-      xp: 200
+      xp: 200,
+      type: "activity",
+      content: "Interactive self-defense strategies activity"
     },
     {
       id: 4,
       title: "Communication Skills",
       description: "Learn to express feelings and set boundaries",
-      icon: MessageCircle,
+      icon: createIconElement(MessageCircle),
       color: "#F5DF4D",
-      xp: 250
+      xp: 250,
+      type: "article",
+      content: "Content about communication skills goes here..."
     },
     {
       id: 5,
       title: "Building Resilience",
       description: "Develop emotional strength and confidence",
-      icon: Heart,
+      icon: createIconElement(Heart),
       color: "#2AC20E",
-      xp: 300
+      xp: 300,
+      type: "video",
+      content: "https://www.youtube.com/embed/ynTuA_tlZDE"
     }
   ],
   badges: [
@@ -76,25 +92,25 @@ export const bullyingConfig = {
       id: 1,
       title: "First Steps",
       description: "Complete your first module",
-      icon: Trophy,
+      icon: createIconElement(Trophy),
       color: "#3DFDFF",
-      condition: 1
+      requiredModules: [1]
     },
     {
       id: 2,
       title: "Halfway Hero",
       description: "Complete 3 modules",
-      icon: Shield,
+      icon: createIconElement(Shield),
       color: "#FC68B3",
-      condition: 3
+      requiredModules: [1, 2, 3]
     },
     {
       id: 3,
       title: "Resilience Master",
       description: "Complete all modules",
-      icon: Award,
+      icon: createIconElement(Award),
       color: "#F5DF4D",
-      condition: 5
+      requiredModules: [1, 2, 3, 4, 5]
     }
   ]
 };
@@ -102,7 +118,7 @@ export const bullyingConfig = {
 // Academic Pressure game configuration
 export const academicPressureConfig = {
   title: "Academic Pressure Management",
-  titleIcon: BookOpen,
+  titleIcon: createIconElement(BookOpen),
   titleColor: "#FF8A48",
   startingModuleId: 101,
   modules: [
@@ -110,33 +126,41 @@ export const academicPressureConfig = {
       id: 101,
       title: "Study Planning",
       description: "Learn effective time management and study planning",
-      icon: Clock,
+      icon: createIconElement(Clock),
       color: "#FF8A48",
-      xp: 100
+      xp: 100,
+      type: "article",
+      content: "Content about study planning goes here..."
     },
     {
       id: 102,
       title: "Test Anxiety",
       description: "Techniques to manage test anxiety and stress",
-      icon: Brain,
+      icon: createIconElement(Brain),
       color: "#FC68B3",
-      xp: 150
+      xp: 150,
+      type: "activity",
+      content: "Interactive test anxiety management activity"
     },
     {
       id: 103,
       title: "Focus Techniques",
       description: "Methods to improve concentration and focus",
-      icon: BookOpen,
+      icon: createIconElement(BookOpen),
       color: "#3DFDFF",
-      xp: 200
+      xp: 200,
+      type: "video",
+      content: "https://www.youtube.com/embed/FhG-VoRtkKY"
     },
     {
       id: 104,
       title: "Goal Setting",
       description: "Setting realistic academic goals",
-      icon: Award,
+      icon: createIconElement(Award),
       color: "#F5DF4D",
-      xp: 250
+      xp: 250,
+      type: "article",
+      content: "Content about goal setting goes here..."
     }
   ],
   badges: [
@@ -144,17 +168,17 @@ export const academicPressureConfig = {
       id: 101,
       title: "Organized Learner",
       description: "Complete your first academic module",
-      icon: BookOpen,
+      icon: createIconElement(BookOpen),
       color: "#FF8A48",
-      condition: 1
+      requiredModules: [101]
     },
     {
       id: 102,
       title: "Study Master",
       description: "Complete all academic modules",
-      icon: Award,
+      icon: createIconElement(Award),
       color: "#3DFDFF",
-      condition: 4
+      requiredModules: [101, 102, 103, 104]
     }
   ]
 };
@@ -162,7 +186,7 @@ export const academicPressureConfig = {
 // Self Awareness game configuration
 export const selfAwarenessConfig = {
   title: "Self-Awareness Journey",
-  titleIcon: Heart,
+  titleIcon: createIconElement(Heart),
   titleColor: "#FC68B3",
   startingModuleId: 201,
   modules: [
@@ -170,65 +194,81 @@ export const selfAwarenessConfig = {
       id: 201,
       title: "Emotion Awareness",
       description: "Learn to recognize and name your emotions",
-      icon: Heart,
+      icon: createIconElement(Heart),
       color: "#FC68B3",
-      xp: 100
+      xp: 100,
+      type: "activity",
+      content: "Interactive emotion awareness activity"
     },
     {
       id: 202,
       title: "Communication Skills",
       description: "Express your feelings effectively to others",
-      icon: MessageCircle,
+      icon: createIconElement(MessageCircle),
       color: "#3DFDFF",
-      xp: 150
+      xp: 150,
+      type: "article",
+      content: "Content about communication skills goes here..."
     },
     {
       id: 203,
       title: "Mindfulness Practice",
       description: "Stay present and aware of your thoughts",
-      icon: Sparkles,
+      icon: createIconElement(Sparkles),
       color: "#FF8A48",
-      xp: 200
+      xp: 200,
+      type: "video",
+      content: "https://www.youtube.com/embed/tGdsOXZpyWE"
     },
     {
       id: 204,
       title: "Self-Reflection",
       description: "Techniques for understanding your behavior",
-      icon: Eye,
+      icon: createIconElement(Eye),
       color: "#F5DF4D",
-      xp: 250
+      xp: 250,
+      type: "activity",
+      content: "Interactive self-reflection activity"
     },
     {
       id: 205,
       title: "Values Exploration",
       description: "Discover what matters most to you",
-      icon: Lightbulb,
+      icon: createIconElement(Lightbulb),
       color: "#2AC20E",
-      xp: 300
+      xp: 300,
+      type: "article",
+      content: "Content about values exploration goes here..."
     },
     {
       id: 206,
       title: "Personal Growth Plan",
       description: "Create roadmaps for emotional development",
-      icon: Footprints,
+      icon: createIconElement(Footprints),
       color: "#D5D5F1",
-      xp: 350
+      xp: 350,
+      type: "activity",
+      content: "Interactive personal growth planning activity"
     },
     {
       id: 207,
       title: "Perspective Taking",
       description: "Understanding different viewpoints",
-      icon: Glasses,
+      icon: createIconElement(Glasses),
       color: "#FF8A48",
-      xp: 400
+      xp: 400,
+      type: "video",
+      content: "https://www.youtube.com/embed/OsWlVsDYYmw"
     },
     {
       id: 208,
       title: "Emotional Regulation",
       description: "Strategies to manage strong emotions",
-      icon: Scale,
+      icon: createIconElement(Scale),
       color: "#FC68B3",
-      xp: 450
+      xp: 450,
+      type: "article",
+      content: "Content about emotional regulation goes here..."
     }
   ],
   badges: [
@@ -236,33 +276,33 @@ export const selfAwarenessConfig = {
       id: 201,
       title: "Emotional Explorer",
       description: "Complete your first self-awareness module",
-      icon: Heart,
+      icon: createIconElement(Heart),
       color: "#FC68B3",
-      condition: 1
+      requiredModules: [201]
     },
     {
       id: 202,
       title: "Mindfulness Guru",
       description: "Complete 4 self-awareness modules",
-      icon: Sparkles,
+      icon: createIconElement(Sparkles),
       color: "#FF8A48",
-      condition: 4
+      requiredModules: [201, 202, 203, 204]
     },
     {
       id: 203,
       title: "Self-Awareness Master",
       description: "Complete all self-awareness modules",
-      icon: Award,
+      icon: createIconElement(Award),
       color: "#3DFDFF",
-      condition: 8
+      requiredModules: [201, 202, 203, 204, 205, 206, 207, 208]
     },
     {
       id: 204,
       title: "Growth Champion",
       description: "Earn 1000+ XP in self-awareness",
-      icon: Trophy,
+      icon: createIconElement(Trophy),
       color: "#2AC20E",
-      condition: 6
+      requiredModules: [201, 202, 203, 204, 205, 206]
     }
   ]
 };
@@ -270,7 +310,7 @@ export const selfAwarenessConfig = {
 // Confidence Building game configuration
 export const confidenceBuildingConfig = {
   title: "Confidence Building Challenge",
-  titleIcon: Star,
+  titleIcon: createIconElement(Star),
   titleColor: "#F5DF4D",
   startingModuleId: 301,
   modules: [
@@ -278,33 +318,41 @@ export const confidenceBuildingConfig = {
       id: 301,
       title: "Positive Self-Talk",
       description: "Develop a positive internal dialogue",
-      icon: Star,
+      icon: createIconElement(Star),
       color: "#F5DF4D",
-      xp: 100
+      xp: 100,
+      type: "article",
+      content: "Content about positive self-talk goes here..."
     },
     {
       id: 302,
       title: "Strengths Discovery",
       description: "Identify and build on your key strengths",
-      icon: Medal,
+      icon: createIconElement(Medal),
       color: "#3DFDFF",
-      xp: 150
+      xp: 150,
+      type: "activity",
+      content: "Interactive strengths discovery activity"
     },
     {
       id: 303,
       title: "Goal Achievement",
       description: "Set and achieve confidence-building goals",
-      icon: Sparkles,
+      icon: createIconElement(Sparkles),
       color: "#FC68B3",
-      xp: 200
+      xp: 200,
+      type: "video",
+      content: "https://www.youtube.com/embed/l_NYrWqUR40"
     },
     {
       id: 304,
       title: "Handling Criticism",
       description: "Learn to handle feedback constructively",
-      icon: Award,
+      icon: createIconElement(Award),
       color: "#FF8A48",
-      xp: 250
+      xp: 250,
+      type: "article",
+      content: "Content about handling criticism goes here..."
     }
   ],
   badges: [
@@ -312,17 +360,17 @@ export const confidenceBuildingConfig = {
       id: 301,
       title: "Self-Believer",
       description: "Complete your first confidence module",
-      icon: Star,
+      icon: createIconElement(Star),
       color: "#F5DF4D",
-      condition: 1
+      requiredModules: [301]
     },
     {
       id: 302,
       title: "Confidence Champion",
       description: "Complete all confidence modules",
-      icon: Award,
+      icon: createIconElement(Award),
       color: "#FF8A48",
-      condition: 4
+      requiredModules: [301, 302, 303, 304]
     }
   ]
 };
@@ -330,7 +378,7 @@ export const confidenceBuildingConfig = {
 // Peer Pressure game configuration
 export const peerPressureConfig = {
   title: "Peer Pressure Defense",
-  titleIcon: Users,
+  titleIcon: createIconElement(Users),
   titleColor: "#2AC20E",
   startingModuleId: 401,
   modules: [
@@ -338,33 +386,41 @@ export const peerPressureConfig = {
       id: 401,
       title: "Recognizing Pressure",
       description: "Learn to identify peer pressure situations",
-      icon: Users,
+      icon: createIconElement(Users),
       color: "#2AC20E",
-      xp: 100
+      xp: 100,
+      type: "article",
+      content: "Content about recognizing pressure goes here..."
     },
     {
       id: 402,
       title: "Resistance Techniques",
       description: "Strategies to say no effectively",
-      icon: ShieldCheck,
+      icon: createIconElement(ShieldCheck),
       color: "#3DFDFF",
-      xp: 150
+      xp: 150,
+      type: "video",
+      content: "https://www.youtube.com/embed/MUTn3psCH-8"
     },
     {
       id: 403,
       title: "Building Boundaries",
       description: "Create healthy boundaries with friends",
-      icon: PersonStanding,
+      icon: createIconElement(PersonStanding),
       color: "#FC68B3",
-      xp: 200
+      xp: 200,
+      type: "activity",
+      content: "Interactive boundary-setting activity"
     },
     {
       id: 404,
       title: "Positive Influence",
       description: "Being a positive influence for others",
-      icon: Award,
+      icon: createIconElement(Award),
       color: "#F5DF4D",
-      xp: 250
+      xp: 250,
+      type: "article",
+      content: "Content about being a positive influence goes here..."
     }
   ],
   badges: [
@@ -372,26 +428,26 @@ export const peerPressureConfig = {
       id: 401,
       title: "Pressure Spotter",
       description: "Complete your first peer pressure module",
-      icon: Users,
+      icon: createIconElement(Users),
       color: "#2AC20E",
-      condition: 1
+      requiredModules: [401]
     },
     {
       id: 402,
       title: "Social Master",
       description: "Complete all peer pressure modules",
-      icon: Award,
+      icon: createIconElement(Award),
       color: "#F5DF4D",
-      condition: 4
+      requiredModules: [401, 402, 403, 404]
     }
   ]
 };
 
 // Customizable game configuration template that can be used to create new games
-export const createCustomGame = (config) => {
+export const createCustomGame = (config: any) => {
   const defaultConfig = {
     title: "Custom Game",
-    titleIcon: Star,
+    titleIcon: createIconElement(Star),
     titleColor: "#FC68B3",
     startingModuleId: 1001,
     modules: [],
@@ -404,7 +460,7 @@ export const createCustomGame = (config) => {
 // Example of creating a new game with the template
 export const emotionalResilienceConfig = createCustomGame({
   title: "Emotional Resilience Training",
-  titleIcon: Cloud,
+  titleIcon: createIconElement(Cloud),
   titleColor: "#3DFDFF",
   startingModuleId: 501,
   modules: [
@@ -412,17 +468,21 @@ export const emotionalResilienceConfig = createCustomGame({
       id: 501,
       title: "Stress Management",
       description: "Techniques to handle stress effectively",
-      icon: Brain,
+      icon: createIconElement(Brain),
       color: "#3DFDFF",
-      xp: 100
+      xp: 100,
+      type: "article",
+      content: "Content about stress management goes here..."
     },
     {
       id: 502,
       title: "Coping Strategies",
       description: "Healthy ways to deal with difficulties",
-      icon: Shield,
+      icon: createIconElement(Shield),
       color: "#FC68B3",
-      xp: 150
+      xp: 150,
+      type: "activity",
+      content: "Interactive coping strategies activity"
     }
   ],
   badges: [
@@ -430,9 +490,9 @@ export const emotionalResilienceConfig = createCustomGame({
       id: 501,
       title: "Resilience Starter",
       description: "Complete your first resilience module",
-      icon: Shield,
+      icon: createIconElement(Shield),
       color: "#3DFDFF",
-      condition: 1
+      requiredModules: [501]
     }
   ]
 });
