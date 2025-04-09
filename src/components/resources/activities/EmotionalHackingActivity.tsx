@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { exercises } from "./services/exercisesData";
-import { useEmotionalHackingData } from "./hooks/useEmotionalHackingData";
+import useEmotionalHackingData from "./hooks/useEmotionalHackingData";
 import ExercisesGrid from "./components/ExercisesGrid";
 import ExerciseDetails from "./components/ExerciseDetails";
 
