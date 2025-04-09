@@ -1,0 +1,109 @@
+
+/* Wave and Blob Styles - Add these to your CSS file */
+
+/* Gen Z Background */
+.galaxy-bg {
+  background: linear-gradient(135deg, #3DFDFF 0%, #FC68B3 50%, #FF8A48 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated Blobs */
+@keyframes float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-10px, 10px); }
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.4;
+  animation: float 8s infinite ease-in-out;
+}
+
+.blob-1 {
+  width: 300px;
+  height: 300px;
+  background: #3DFDFF;
+  top: -150px;
+  left: -150px;
+}
+
+.blob-2 {
+  width: 250px;
+  height: 250px;
+  background: #FC68B3;
+  bottom: -100px;
+  right: -100px;
+  animation-delay: -2s;
+}
+
+.blob-3 {
+  width: 200px;
+  height: 200px;
+  background: #FF8A48;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: -4s;
+}
+
+/* Wave Animations */
+@keyframes wave1 {
+  0% { transform: translate3d(-90px, 0, 0); }
+  100% { transform: translate3d(85px, 0, 0); }
+}
+
+@keyframes wave2 {
+  0% { transform: translate3d(-90px, 0, 0); }
+  100% { transform: translate3d(85px, 0, 0); }
+}
+
+@keyframes wave3 {
+  0% { transform: translate3d(-90px, 0, 0); }
+  100% { transform: translate3d(85px, 0, 0); }
+}
+
+@keyframes wave4 {
+  0% { transform: translate3d(-90px, 0, 0); }
+  100% { transform: translate3d(85px, 0, 0); }
+}
+
+.animate-wave1 {
+  animation: wave1 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+}
+
+.animate-wave2 {
+  animation: wave2 5s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+}
+
+.animate-wave3 {
+  animation: wave3 3s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+}
+
+.animate-wave4 {
+  animation: wave4 2s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+}
+
+.waves-container {
+  transform: rotate(180deg);
+}
+
+/* Animation for floating emojis */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Glass Effect */
+.glass {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(61, 253, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(61, 253, 255, 0.2);
+}
