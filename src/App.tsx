@@ -7,6 +7,7 @@ import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
 import Chat from "@/pages/Chat";
 import Resources from "@/pages/Resources";
+import ResourceHub from "@/pages/ResourceHub";
 import Puzzle from "@/pages/Puzzle";
 import TetrisGame from "@/pages/TetrisGame";
 import EmotionQuest from "@/pages/EmotionQuest";
@@ -33,6 +34,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/resources" element={<Resources />} />
+            <Route path="/resource-hub" element={<ResourceHub />} />
             <Route path="/puzzle" element={<Puzzle />} />
             <Route path="/tetris" element={<TetrisGame />} />
             <Route path="/emotion-quest" element={<EmotionQuest />} />
